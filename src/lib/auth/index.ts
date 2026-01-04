@@ -10,7 +10,7 @@ import type { D1Database } from "@cloudflare/workers-types";
 import { getProviders } from "./providers";
 
 /**
- * Extended session type to include user ID
+ * Extended session type to include user ID and approval status
  */
 declare module "next-auth" {
   interface Session {
@@ -19,7 +19,13 @@ declare module "next-auth" {
       name?: string | null;
       email?: string | null;
       image?: string | null;
+      approved?: boolean;
+      ageVerified?: boolean;
     };
+  }
+  interface User {
+    approved?: boolean;
+    ageVerified?: boolean;
   }
 }
 
@@ -130,16 +136,84 @@ function createRuntimeConfig(): NextAuthConfig {
         maxAge: 30 * 24 * 60 * 60,
         updateAge: 24 * 60 * 60,
       },
+      events: {
+        // When a new user is created, set initial values
+        createUser: async ({ user }) => {
+          if (user.id && user.email) {
+            try {
+              // Check if user is an admin
+              const adminEmails = (process.env.ADMIN_EMAILS || "")
+                .split(",")
+                .map((e) => e.trim().toLowerCase())
+                .filter((e) => e.length > 0);
+              const isAdmin = adminEmails.includes(user.email.toLowerCase());
+
+              // All users are auto-approved (no approval process)
+              // Only admins auto-accept TOS, others must accept on first login
+              const role = isAdmin ? "admin" : "user";
+              const tosAccepted = isAdmin ? 1 : 0;
+              const now = new Date().toISOString();
+
+              await db
+                .prepare(`
+                  UPDATE users 
+                  SET approved = 1,
+                      age_verified = 1,
+                      role = ?,
+                      tos_accepted = ?,
+                      tos_accepted_at = ${isAdmin ? "?" : "NULL"},
+                      tos_version = ${isAdmin ? "'1.0'" : "NULL"},
+                      updated_at = ? 
+                  WHERE id = ?
+                `)
+                .bind(
+                  role,
+                  tosAccepted,
+                  ...(isAdmin ? [now] : []),
+                  now,
+                  user.id
+                )
+                .run();
+
+              console.log(`[auth] New user created: ${user.email}, admin=${isAdmin}, tosAccepted=${tosAccepted}`);
+            } catch (e) {
+              console.error("[auth] Failed to set initial user status:", e);
+            }
+          }
+        },
+      },
       callbacks: {
         ...baseConfig.callbacks,
-        // Add user ID to session for database sessions
-        session: ({ session, user }) => ({
-          ...session,
-          user: {
-            ...session.user,
-            id: user.id,
-          },
-        }),
+        // Add user ID and approval status to session for database sessions
+        session: async ({ session, user }) => {
+          // Fetch approval status from users table
+          let approved = false;
+          let ageVerified = false;
+
+          try {
+            const userRecord = await db
+              .prepare(`SELECT approved, age_verified FROM users WHERE id = ?`)
+              .bind(user.id)
+              .first<{ approved: number; age_verified: number }>();
+
+            if (userRecord) {
+              approved = userRecord.approved === 1;
+              ageVerified = userRecord.age_verified === 1;
+            }
+          } catch (e) {
+            console.error("[auth] Failed to fetch user approval status:", e);
+          }
+
+          return {
+            ...session,
+            user: {
+              ...session.user,
+              id: user.id,
+              approved,
+              ageVerified,
+            },
+          };
+        },
       },
     };
   }
@@ -169,6 +243,9 @@ function createRuntimeConfig(): NextAuthConfig {
             name: user.name,
             email: user.email,
             picture: user.image,
+            // In JWT mode without D1, assume approved for development
+            approved: true,
+            ageVerified: true,
           };
         }
         return token;
@@ -182,6 +259,8 @@ function createRuntimeConfig(): NextAuthConfig {
           name: token.name,
           email: token.email,
           image: token.picture as string | undefined,
+          approved: token.approved as boolean ?? true,
+          ageVerified: token.ageVerified as boolean ?? true,
         },
       }),
     },

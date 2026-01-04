@@ -293,3 +293,14 @@
   }
 }
 
+/* Visualizer Panel */
+.visualizerPanel {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 600px;
+  margin-bottom: var(--space-2, 8px);
+  z-index: 1001;
+}

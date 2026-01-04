@@ -1,9 +1,12 @@
 /**
  * Focus Pause State API Route
  * Sync focus pause state across devices
+ *
+ * Optimized with createAPIHandler for timing instrumentation
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { createAPIHandler, type APIContext } from "@/lib/perf";
 import { auth } from "@/lib/auth";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { ensureUserExists } from "@/lib/db/repositories/users";
@@ -21,63 +24,40 @@ interface PauseState {
  * GET /api/focus/pause
  * Get the current pause state for the user
  */
-export async function GET() {
-  try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+export const GET = createAPIHandler(async (ctx: APIContext) => {
+  const result = await ctx.db
+    .prepare(`
+      SELECT mode, time_remaining, paused_at
+      FROM focus_pause_state
+      WHERE user_id = ?
+    `)
+    .bind(ctx.dbUser.id)
+    .first<PauseState>();
 
-    const ctx = await getCloudflareContext();
-    const db = (ctx.env as unknown as CloudflareEnv).DB;
-
-    if (!db) {
-      return NextResponse.json({ pauseState: null });
-    }
-
-    const dbUser = await ensureUserExists(db, session.user.id, {
-      name: session.user.name,
-      email: session.user.email,
-      image: session.user.image,
-    });
-
-    const result = await db
-      .prepare(`
-        SELECT mode, time_remaining, paused_at
-        FROM focus_pause_state
-        WHERE user_id = ?
-      `)
-      .bind(dbUser.id)
-      .first<PauseState>();
-
-    if (!result) {
-      return NextResponse.json({ pauseState: null });
-    }
-
-    // Check if pause state is still valid (less than 1 hour old)
-    const pausedAt = new Date(result.paused_at).getTime();
-    const hourAgo = Date.now() - 60 * 60 * 1000;
-    if (pausedAt < hourAgo) {
-      // Clean up expired pause state
-      await db
-        .prepare(`DELETE FROM focus_pause_state WHERE user_id = ?`)
-        .bind(dbUser.id)
-        .run();
-      return NextResponse.json({ pauseState: null });
-    }
-
-    return NextResponse.json({
-      pauseState: {
-        mode: result.mode,
-        timeRemaining: result.time_remaining,
-        pausedAt: result.paused_at,
-      },
-    });
-  } catch (error) {
-    console.error("GET /api/focus/pause error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  if (!result) {
+    return NextResponse.json({ pauseState: null });
   }
-}
+
+  // Check if pause state is still valid (less than 1 hour old)
+  const pausedAt = new Date(result.paused_at).getTime();
+  const hourAgo = Date.now() - 60 * 60 * 1000;
+  if (pausedAt < hourAgo) {
+    // Clean up expired pause state
+    await ctx.db
+      .prepare(`DELETE FROM focus_pause_state WHERE user_id = ?`)
+      .bind(ctx.dbUser.id)
+      .run();
+    return NextResponse.json({ pauseState: null });
+  }
+
+  return NextResponse.json({
+    pauseState: {
+      mode: result.mode,
+      timeRemaining: result.time_remaining,
+      pausedAt: result.paused_at,
+    },
+  });
+});
 
 /**
  * POST /api/focus/pause

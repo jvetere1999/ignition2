@@ -27,6 +27,10 @@
   gap: var(--space-6);
 }
 
+.planSection {
+  /* DailyPlan widget handles its own styling */
+}
+
 .section {
   background-color: var(--color-bg-secondary);
   border-radius: var(--radius-lg);

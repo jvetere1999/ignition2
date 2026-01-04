@@ -17,6 +17,7 @@
     "build:worker": "npx @opennextjs/cloudflare build",
     "preview": "npm run build && npm run build:worker && wrangler dev",
     "deploy": "npm run build && npm run build:worker && wrangler deploy",
+    "deploy:full": "./scripts/deploy-full.sh",
     "deploy:preview": "npm run deploy -- --env preview",
     "deploy:dry-run": "npm run build && npm run build:worker && wrangler deploy --dry-run",
     "typegen": "wrangler types",

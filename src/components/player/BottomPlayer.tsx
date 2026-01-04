@@ -30,6 +30,7 @@ import {
   formatTime,
 } from "@/lib/player";
 import { Waveform } from "./Waveform";
+import { AudioVisualizer } from "./AudioVisualizer";
 import styles from "./BottomPlayer.module.css";
 
 // Lazy import to avoid circular dependency
@@ -174,9 +175,24 @@ export function BottomPlayer() {
 
   // Analysis panel state
   const [showAnalysisPanel, setShowAnalysisPanel] = useState(false);
+  const [showVisualizer, setShowVisualizer] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Get audio element reference
+  useEffect(() => {
+    // Access audio element from the player store/controller
+    const audioController = (window as unknown as { __audioController?: { audio: HTMLAudioElement } }).__audioController;
+    if (audioController?.audio) {
+      audioRef.current = audioController.audio;
+    }
+  }, [isVisible]);
 
   const handleToggleAnalysis = useCallback(() => {
     setShowAnalysisPanel((prev) => !prev);
+  }, []);
+
+  const handleToggleVisualizer = useCallback(() => {
+    setShowVisualizer((prev) => !prev);
   }, []);
 
   const handleCloseAnalysis = useCallback(() => {
@@ -393,6 +409,19 @@ export function BottomPlayer() {
             </svg>
           </button>
 
+          {/* Visualizer button */}
+          <button
+            className={`${styles.analyzeButton} ${showVisualizer ? styles.active : ""}`}
+            onClick={handleToggleVisualizer}
+            aria-label="Toggle visualizer"
+            title="Audio Visualizer"
+            type="button"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+              <path d="M4 9v6h2V9H4zm4-3v12h2V6H8zm4-2v16h2V4h-2zm4 4v8h2v-8h-2zm4 2v4h2v-4h-2z" />
+            </svg>
+          </button>
+
           {/* Minimize button */}
           <button
             className={styles.minimizeButton}
@@ -429,6 +458,17 @@ export function BottomPlayer() {
           onSeek={handleSeek}
           onClose={handleCloseAnalysis}
         />
+      )}
+
+      {/* Audio Visualizer */}
+      {showVisualizer && (
+        <div className={styles.visualizerPanel}>
+          <AudioVisualizer
+            audioElement={audioRef.current}
+            isPlaying={isPlaying}
+            onClose={() => setShowVisualizer(false)}
+          />
+        </div>
       )}
     </div>
   );

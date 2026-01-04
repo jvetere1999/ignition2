@@ -5,7 +5,7 @@ import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "Sign In",
-  description: "Sign in to Passion OS with Google or Microsoft account.",
+  description: "Sign in to Passion OS with Google or Microsoft. Free productivity app for creators.",
 };
 
 export default function SignInPage() {
@@ -19,12 +19,26 @@ export default function SignInPage() {
         </div>
 
         <div className={styles.card}>
-          <h1 className={styles.title}>Welcome Back</h1>
+          <h1 className={styles.title}>Sign In to Passion OS</h1>
           <p className={styles.subtitle}>
-            Sign in to access your Passion OS account.
+            Use your Google or Microsoft account to sign in securely. No passwords required.
           </p>
 
           <SignInButtons />
+
+          <div className={styles.requirements}>
+            <h3>Before You Sign In</h3>
+            <ul>
+              <li>You must be 16 years or older</li>
+              <li>New accounts require admin approval</li>
+              <li>Your email is used only for authentication</li>
+            </ul>
+          </div>
+
+          <p className={styles.newUser}>
+            First time here?{" "}
+            <Link href="/age-verification">Verify your age first</Link>
+          </p>
 
           <p className={styles.terms}>
             By signing in, you agree to our{" "}

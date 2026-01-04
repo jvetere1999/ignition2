@@ -19,10 +19,11 @@ interface SidebarProps {
 // Client-side admin check using public env var
 function isAdminEmail(email: string | undefined): boolean {
   if (!email) return false;
-  const envEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS;
+  const envEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS || "";
   const adminEmails = envEmails
-    ? envEmails.split(",").map((e) => e.trim().toLowerCase())
-    : ["jvetere1999@gmail.com"];
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter((e) => e.length > 0);
   return adminEmails.includes(email.toLowerCase());
 }
 
@@ -129,6 +130,35 @@ const navSections: NavSection[] = [
             <path d="M10 5l4 4" />
             <path d="M21 3l-6 6" />
             <path d="M18 22V12l2-4-3-1" />
+          </svg>
+        ),
+      },
+      {
+        href: "/habits",
+        label: "Habits",
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2v4" />
+            <path d="m16.24 7.76 2.83-2.83" />
+            <path d="M18 12h4" />
+            <path d="m16.24 16.24 2.83 2.83" />
+            <path d="M12 18v4" />
+            <path d="m7.76 16.24-2.83 2.83" />
+            <path d="M6 12H2" />
+            <path d="m7.76 7.76-2.83-2.83" />
+            <circle cx="12" cy="12" r="4" />
+          </svg>
+        ),
+      },
+      {
+        href: "/books",
+        label: "Books",
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+            <path d="M8 7h8" />
+            <path d="M8 11h6" />
           </svg>
         ),
       },
