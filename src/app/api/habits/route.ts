@@ -1,9 +1,14 @@
 /**
  * Habits API Route
  * CRUD for habits and habit logging
+ *
+ * Optimized with:
+ * - createAPIHandler for timing instrumentation
+ * - Parallel DB queries for habits, logs, and streaks
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { createAPIHandler, type APIContext } from "@/lib/perf";
 import { auth } from "@/lib/auth";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { ensureUserExists } from "@/lib/db/repositories/users";
@@ -35,50 +40,36 @@ interface HabitLog {
 /**
  * GET /api/habits
  */
-export async function GET() {
-  try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+export const GET = createAPIHandler(async (ctx: APIContext) => {
+  const today = new Date().toISOString().split("T")[0];
 
-    const ctx = await getCloudflareContext();
-    const db = (ctx.env as unknown as CloudflareEnv).DB;
-
-    if (!db) {
-      return NextResponse.json({ habits: [], todayLogs: [], streaks: {} });
-    }
-
-    const dbUser = await ensureUserExists(db, session.user.id, {
-      name: session.user.name,
-      email: session.user.email,
-      image: session.user.image,
-    });
-
-    const habits = await db
+  // Run all three queries in parallel for better performance
+  const [habits, todayLogs, streaks] = await Promise.all([
+    ctx.db
       .prepare(`SELECT * FROM habits WHERE user_id = ? AND is_active = 1 ORDER BY created_at ASC`)
-      .bind(dbUser.id)
-      .all<Habit>();
-
-    const today = new Date().toISOString().split("T")[0];
-    const todayLogs = await db
+      .bind(ctx.dbUser.id)
+      .all<Habit>(),
+    ctx.db
       .prepare(`SELECT * FROM habit_logs WHERE user_id = ? AND completed_at >= ? AND completed_at < date(?, '+1 day')`)
-      .bind(dbUser.id, today, today)
-      .all<HabitLog>();
-
-    const streaks = await db
+      .bind(ctx.dbUser.id, today, today)
+      .all<HabitLog>(),
+    ctx.db
       .prepare(`SELECT streak_type, current_streak, longest_streak FROM user_streaks WHERE user_id = ?`)
-      .bind(dbUser.id)
-      .all<{ streak_type: string; current_streak: number; longest_streak: number }>();
+      .bind(ctx.dbUser.id)
+      .all<{ streak_type: string; current_streak: number; longest_streak: number }>(),
+  ]);
 
-    const streakMap: Record<string, { current: number; longest: number }> = {};
-    for (const s of streaks.results || []) {
-      streakMap[s.streak_type] = { current: s.current_streak, longest: s.longest_streak };
-    }
+  const streakMap: Record<string, { current: number; longest: number }> = {};
+  for (const s of streaks.results || []) {
+    streakMap[s.streak_type] = { current: s.current_streak, longest: s.longest_streak };
+  }
 
-    return NextResponse.json({ habits: habits.results || [], todayLogs: todayLogs.results || [], streaks: streakMap });
-  } catch (error) {
-    console.error("GET /api/habits error:", error);
+  return NextResponse.json({
+    habits: habits.results || [],
+    todayLogs: todayLogs.results || [],
+    streaks: streakMap
+  });
+});
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -1,9 +1,14 @@
 /**
  * Quests API Route
  * GET /api/quests - List universal quests for all users
+ *
+ * Optimized with:
+ * - createAPIHandler for timing instrumentation
+ * - Parallel DB queries for quests and user progress
  */
 
 import { NextResponse } from "next/server";
+import { createAPIHandler, type APIContext } from "@/lib/perf";
 import { auth } from "@/lib/auth";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { ensureUserExists } from "@/lib/db/repositories/users";
@@ -15,75 +20,10 @@ export const dynamic = "force-dynamic";
  * GET /api/quests
  * List active universal quests
  */
-export async function GET() {
-  try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const ctx = await getCloudflareContext();
-    const db = (ctx.env as unknown as CloudflareEnv).DB;
-
-    if (!db) {
-      // Return default quests for development
-      return NextResponse.json({
-        quests: [
-          {
-            id: "quest-daily-focus",
-            title: "Deep Focus",
-            description: "Complete 2 focus sessions",
-            type: "daily",
-            xpReward: 50,
-            coinReward: 25,
-            target: 2,
-            skillId: "knowledge",
-          },
-          {
-            id: "quest-daily-exercise",
-            title: "Stay Active",
-            description: "Log 1 exercise session",
-            type: "daily",
-            xpReward: 30,
-            coinReward: 15,
-            target: 1,
-            skillId: "guts",
-          },
-          {
-            id: "quest-daily-planner",
-            title: "Plan Ahead",
-            description: "Add 3 events to your planner",
-            type: "daily",
-            xpReward: 20,
-            coinReward: 10,
-            target: 3,
-            skillId: "proficiency",
-          },
-          {
-            id: "quest-weekly-focus",
-            title: "Focus Master",
-            description: "Complete 10 focus sessions this week",
-            type: "weekly",
-            xpReward: 200,
-            coinReward: 100,
-            target: 10,
-            skillId: "knowledge",
-          },
-          {
-            id: "quest-weekly-streak",
-            title: "Consistency",
-            description: "Maintain a 5-day streak",
-            type: "weekly",
-            xpReward: 150,
-            coinReward: 75,
-            target: 5,
-            skillId: "proficiency",
-          },
-        ],
-      });
-    }
-
-    const result = await db
+export const GET = createAPIHandler(async (ctx: APIContext) => {
+  // Run both queries in parallel for better performance
+  const [questsResult, progressResult] = await Promise.all([
+    ctx.db
       .prepare(`
         SELECT 
           id,
@@ -98,37 +38,24 @@ export async function GET() {
         WHERE is_active = 1
         ORDER BY type, created_at DESC
       `)
-      .all();
-
-    // Get the database user ID
-    const dbUser = await ensureUserExists(db, session.user.id, {
-      name: session.user.name,
-      email: session.user.email,
-      image: session.user.image,
-    });
-
-    // Also fetch user progress for these quests
-    const progressResult = await db
+      .all(),
+    ctx.db
       .prepare(`
         SELECT quest_id, progress, completed, completed_at
         FROM user_quest_progress 
         WHERE user_id = ?
       `)
-      .bind(dbUser.id)
-      .all<{ quest_id: string; progress: number; completed: number; completed_at: string | null }>();
+      .bind(ctx.dbUser.id)
+      .all<{ quest_id: string; progress: number; completed: number; completed_at: string | null }>(),
+  ]);
 
-    const progressMap: Record<string, { progress: number; completed: boolean }> = {};
-    (progressResult.results || []).forEach((p) => {
-      progressMap[p.quest_id] = { progress: p.progress, completed: p.completed === 1 };
-    });
+  const progressMap: Record<string, { progress: number; completed: boolean }> = {};
+  (progressResult.results || []).forEach((p) => {
+    progressMap[p.quest_id] = { progress: p.progress, completed: p.completed === 1 };
+  });
 
-    return NextResponse.json({ quests: result.results || [], userProgress: progressMap });
-  } catch (error) {
-    console.error("Quest GET error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+  return NextResponse.json({ quests: questsResult.results || [], userProgress: progressMap });
+});
   }
 }
 
