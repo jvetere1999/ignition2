@@ -60,6 +60,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ events: [] });
     }
 
+    // Get the database user ID (may differ from session ID if using different OAuth providers)
+    const dbUser = await ensureUserExists(db, session.user.id, {
+      name: session.user.name,
+      email: session.user.email,
+      image: session.user.image,
+    });
+
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
@@ -68,12 +75,12 @@ export async function GET(request: NextRequest) {
     if (startDate && endDate) {
       events = await getCalendarEventsInRange(
         db,
-        session.user.id,
+        dbUser.id,
         startDate,
         endDate
       );
     } else {
-      events = await getCalendarEvents(db, session.user.id);
+      events = await getCalendarEvents(db, dbUser.id);
     }
 
     console.log("[calendar] GET - found events:", events.length);
@@ -113,13 +120,14 @@ export async function POST(request: NextRequest) {
 
     // Ensure user exists in database (for JWT session users)
     console.log("[calendar] POST - ensuring user exists:", session.user.id);
+    let dbUser;
     try {
-      await ensureUserExists(db, session.user.id, {
+      dbUser = await ensureUserExists(db, session.user.id, {
         name: session.user.name,
         email: session.user.email,
         image: session.user.image,
       });
-      console.log("[calendar] POST - user ensured");
+      console.log("[calendar] POST - user ensured, using ID:", dbUser.id);
     } catch (userError) {
       console.error("[calendar] POST - failed to ensure user:", userError);
       return NextResponse.json(
@@ -158,7 +166,7 @@ export async function POST(request: NextRequest) {
 
     console.log("[calendar] POST - creating event...");
     const event = await createCalendarEvent(db, {
-      user_id: session.user.id,
+      user_id: dbUser.id, // Use the database user ID, not session ID
       title: body.title,
       description: body.description || null,
       event_type: body.event_type as "meeting" | "appointment" | "workout" | "other",
@@ -206,6 +214,13 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    // Get the database user ID
+    const dbUser = await ensureUserExists(db, session.user.id, {
+      name: session.user.name,
+      email: session.user.email,
+      image: session.user.image,
+    });
+
     const body = await request.json() as {
       id?: string;
       title?: string;
@@ -230,7 +245,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const event = await updateCalendarEvent(db, body.id, session.user.id, {
+    const event = await updateCalendarEvent(db, body.id, dbUser.id, {
       title: body.title,
       description: body.description,
       event_type: body.event_type as "meeting" | "appointment" | "workout" | "other" | undefined,
@@ -280,6 +295,13 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    // Get the database user ID
+    const dbUser = await ensureUserExists(db, session.user.id, {
+      name: session.user.name,
+      email: session.user.email,
+      image: session.user.image,
+    });
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
@@ -290,7 +312,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const deleted = await deleteCalendarEvent(db, id, session.user.id);
+    const deleted = await deleteCalendarEvent(db, id, dbUser.id);
 
     if (!deleted) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
