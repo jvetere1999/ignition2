@@ -112,11 +112,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Ensure user exists in database (for JWT session users)
-    await ensureUserExists(db, session.user.id, {
-      name: session.user.name,
-      email: session.user.email,
-      image: session.user.image,
-    });
+    console.log("[calendar] POST - ensuring user exists:", session.user.id);
+    try {
+      await ensureUserExists(db, session.user.id, {
+        name: session.user.name,
+        email: session.user.email,
+        image: session.user.image,
+      });
+      console.log("[calendar] POST - user ensured");
+    } catch (userError) {
+      console.error("[calendar] POST - failed to ensure user:", userError);
+      return NextResponse.json(
+        { error: `Failed to ensure user: ${userError instanceof Error ? userError.message : "Unknown"}` },
+        { status: 500 }
+      );
+    }
 
     const body = await request.json() as {
       title?: string;
@@ -135,14 +145,18 @@ export async function POST(request: NextRequest) {
       metadata?: string;
     };
 
+    console.log("[calendar] POST - body:", JSON.stringify(body));
+
     // Validate required fields
     if (!body.title || !body.event_type || !body.start_time || !body.end_time) {
+      console.log("[calendar] POST - missing required fields");
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: `Missing required fields: title=${!!body.title}, event_type=${!!body.event_type}, start_time=${!!body.start_time}, end_time=${!!body.end_time}` },
         { status: 400 }
       );
     }
 
+    console.log("[calendar] POST - creating event...");
     const event = await createCalendarEvent(db, {
       user_id: session.user.id,
       title: body.title,
@@ -161,11 +175,13 @@ export async function POST(request: NextRequest) {
       metadata: body.metadata || null,
     });
 
+    console.log("[calendar] POST - event created:", event.id);
     return NextResponse.json({ event }, { status: 201 });
   } catch (error) {
     console.error("POST /api/calendar error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Failed to create event" },
+      { error: `Failed to create event: ${errorMessage}` },
       { status: 500 }
     );
   }
@@ -237,8 +253,9 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ event });
   } catch (error) {
     console.error("PUT /api/calendar error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Failed to update event" },
+      { error: `Failed to update event: ${errorMessage}` },
       { status: 500 }
     );
   }
