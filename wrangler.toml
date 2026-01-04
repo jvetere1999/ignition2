@@ -1,0 +1,67 @@
+# Passion OS Next - Cloudflare Workers Configuration
+# See: https://developers.cloudflare.com/workers/
+# OpenNext: https://opennext.js.org/cloudflare
+
+name = "passion-os-next"
+compatibility_date = "2025-01-02"
+compatibility_flags = ["nodejs_compat"]
+
+# OpenNext output directory
+main = ".open-next/worker.js"
+
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "passion_os"
+database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# R2 Bucket binding
+[[r2_buckets]]
+binding = "BLOBS"
+bucket_name = "passion-os-blobs"
+
+# KV Namespace for caching (optional, uncomment if needed)
+# [[kv_namespaces]]
+# binding = "CACHE"
+# id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# Environment variables (non-sensitive)
+[vars]
+NODE_ENV = "production"
+NEXT_PUBLIC_APP_URL = "https://passion-os.pages.dev"
+AUTH_TRUST_HOST = "true"
+ADMIN_EMAILS = "jvetere1999@gmail.com"
+NEXT_PUBLIC_ADMIN_EMAILS = "jvetere1999@gmail.com"
+# Set your AdSense publisher ID here (without "ca-" prefix)
+# NEXT_PUBLIC_ADSENSE_PUBLISHER_ID = "pub-xxxxxxxxxxxxxxxx"
+
+# Preview environment
+[env.preview]
+name = "passion-os-next-preview"
+
+[env.preview.vars]
+NODE_ENV = "preview"
+NEXT_PUBLIC_APP_URL = "https://passion-os-preview.pages.dev"
+AUTH_TRUST_HOST = "true"
+ADMIN_EMAILS = "jvetere1999@gmail.com"
+NEXT_PUBLIC_ADMIN_EMAILS = "jvetere1999@gmail.com"
+
+# ============================================
+# SECRETS - Set via: wrangler secret put <NAME>
+# ============================================
+# Required:
+#   wrangler secret put AUTH_SECRET
+#   wrangler secret put GOOGLE_CLIENT_ID
+#   wrangler secret put GOOGLE_CLIENT_SECRET
+#   wrangler secret put AZURE_AD_CLIENT_ID
+#   wrangler secret put AZURE_AD_CLIENT_SECRET
+#   wrangler secret put AZURE_AD_TENANT_ID
+#
+# For preview env:
+#   wrangler secret put AUTH_SECRET --env preview
+#   ... (repeat for all secrets)
+

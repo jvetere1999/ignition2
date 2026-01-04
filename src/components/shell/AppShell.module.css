@@ -1,0 +1,37 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-bg-primary);
+}
+
+.main {
+  flex: 1;
+  padding-top: var(--header-height);
+}
+
+.content {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: var(--content-padding);
+}
+
+/* Responsive adjustments */
+@media (min-width: 1024px) {
+  .main {
+    padding-left: var(--sidebar-width);
+  }
+}
+
+@media (max-width: 1023px) {
+  .content {
+    padding: var(--space-3);
+  }
+}
+
+@media (max-width: 640px) {
+  .content {
+    padding: var(--space-2);
+  }
+}
+

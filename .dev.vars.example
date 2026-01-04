@@ -1,0 +1,53 @@
+# Local development secrets
+# Copy to .dev.vars and fill in values
+# DO NOT commit .dev.vars to git
+
+# ===========================================
+# Auth.js Configuration
+# ===========================================
+
+# Session encryption secret (REQUIRED)
+# Must be at least 32 characters, cryptographically random
+# Generate with: openssl rand -base64 32
+AUTH_SECRET=replace-with-cryptographically-random-32-chars
+
+# Auth.js URL (set automatically in Cloudflare, needed for local dev)
+AUTH_URL=http://localhost:3000
+
+# ===========================================
+# Google OAuth
+# ===========================================
+# Create at: https://console.cloud.google.com/apis/credentials
+# 1. Create OAuth 2.0 Client ID
+# 2. Add authorized redirect URI: http://localhost:3000/api/auth/callback/google
+# 3. Add production redirect URI: https://your-domain.com/api/auth/callback/google
+
+GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=xxx
+
+# ===========================================
+# Microsoft Entra ID (Azure AD) OAuth
+# ===========================================
+# Create at: https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps
+# 1. Register new application
+# 2. Add redirect URI: http://localhost:3000/api/auth/callback/microsoft-entra-id
+# 3. Add production redirect URI: https://your-domain.com/api/auth/callback/microsoft-entra-id
+# 4. Create client secret under Certificates & secrets
+
+AZURE_AD_CLIENT_ID=xxx
+AZURE_AD_CLIENT_SECRET=xxx
+AZURE_AD_TENANT_ID=xxx
+
+# ===========================================
+# Admin Configuration
+# ===========================================
+# Comma-separated list of admin email addresses
+ADMIN_EMAILS=your-email@example.com
+NEXT_PUBLIC_ADMIN_EMAILS=your-email@example.com
+
+# ===========================================
+# Google AdSense (Optional)
+# ===========================================
+# Publisher ID without "ca-" prefix
+# Leave empty to disable ads
+# NEXT_PUBLIC_ADSENSE_PUBLISHER_ID=pub-xxxxxxxxxxxxxxxx
