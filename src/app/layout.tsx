@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     apple: "/icon.svg",
   },
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://passion-os-next.jvetere1999.workers.dev"
+    process.env.NEXT_PUBLIC_APP_URL || "https://passion-os.ecent.online"
   ),
   alternates: {
     canonical: "/",

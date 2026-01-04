@@ -32,8 +32,8 @@ database_id = "40c2b3a5-7fa1-492f-bce9-3c30959b56a8"
 # Environment variables (non-sensitive)
 [vars]
 NODE_ENV = "production"
-NEXT_PUBLIC_APP_URL = "https://passion-os-next.jvetere1999.workers.dev"
-AUTH_URL = "https://passion-os-next.jvetere1999.workers.dev"
+NEXT_PUBLIC_APP_URL = "https://passion-os.ecent.online"
+AUTH_URL = "https://passion-os.ecent.online"
 AUTH_TRUST_HOST = "true"
 ADMIN_EMAILS = "jvetere1999@gmail.com"
 NEXT_PUBLIC_ADMIN_EMAILS = "jvetere1999@gmail.com"
