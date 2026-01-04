@@ -17,12 +17,12 @@ binding = "ASSETS"
 [[d1_databases]]
 binding = "DB"
 database_name = "passion_os"
-database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+database_id = "40c2b3a5-7fa1-492f-bce9-3c30959b56a8"
 
-# R2 Bucket binding
-[[r2_buckets]]
-binding = "BLOBS"
-bucket_name = "passion-os-blobs"
+# R2 Bucket binding (enable R2 in dashboard first, then uncomment)
+# [[r2_buckets]]
+# binding = "BLOBS"
+# bucket_name = "passion-os-blobs"
 
 # KV Namespace for caching (optional, uncomment if needed)
 # [[kv_namespaces]]
