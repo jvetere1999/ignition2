@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SignInButtons } from "./SignInButtons";
+import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "Sign In",
@@ -9,50 +10,30 @@ export const metadata: Metadata = {
 
 export default function SignInPage() {
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "var(--space-4)",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "400px",
-          width: "100%",
-          textAlign: "center",
-        }}
-      >
-        <h1
-          style={{
-            fontSize: "var(--font-size-2xl)",
-            fontWeight: "var(--font-weight-bold)",
-            marginBottom: "var(--space-2)",
-          }}
-        >
-          Sign In
-        </h1>
-        <p
-          style={{
-            color: "var(--color-text-secondary)",
-            marginBottom: "var(--space-8)",
-          }}
-        >
-          Sign in to access your Passion OS account.
-        </p>
+    <main className={styles.main}>
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <Link href="/" className={styles.logo}>
+            Passion OS
+          </Link>
+        </div>
 
-        <SignInButtons />
+        <div className={styles.card}>
+          <h1 className={styles.title}>Welcome Back</h1>
+          <p className={styles.subtitle}>
+            Sign in to access your Passion OS account.
+          </p>
 
-        <p
-          style={{
-            marginTop: "var(--space-8)",
-            fontSize: "var(--font-size-sm)",
-            color: "var(--color-text-muted)",
-          }}
-        >
+          <SignInButtons />
+
+          <p className={styles.terms}>
+            By signing in, you agree to our{" "}
+            <Link href="/terms">Terms of Service</Link> and{" "}
+            <Link href="/privacy">Privacy Policy</Link>.
+          </p>
+        </div>
+
+        <p className={styles.backLink}>
           <Link href="/">Back to Home</Link>
         </p>
       </div>

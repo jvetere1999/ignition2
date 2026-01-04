@@ -69,7 +69,7 @@ export const metadata: Metadata = {
     url: "/",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og-image.svg",
         width: 1200,
         height: 630,
         alt: "Passion OS - Your Creative Productivity Companion",
@@ -81,7 +81,7 @@ export const metadata: Metadata = {
     title: "Passion OS - Personal Productivity & Music Production Companion",
     description:
       "Plan your day, focus with Pomodoro timers, track quests, learn DAW shortcuts, and level up your creative skills.",
-    images: ["/og-image.png"],
+    images: ["/og-image.svg"],
   },
   verification: {
     // Add your verification codes here when available

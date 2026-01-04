@@ -2,6 +2,7 @@
 
 import { signIn } from "next-auth/react";
 import { useState } from "react";
+import styles from "./SignInButtons.module.css";
 
 /**
  * Sign in buttons component
@@ -13,7 +14,7 @@ export function SignInButtons() {
   const handleSignIn = async (provider: string) => {
     setIsLoading(provider);
     try {
-await signIn(provider, { callbackUrl: "/today" });
+      await signIn(provider, { callbackUrl: "/today" });
     } catch (error) {
       console.error("Sign in error:", error);
       setIsLoading(null);
@@ -21,28 +22,14 @@ await signIn(provider, { callbackUrl: "/today" });
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "var(--space-3)",
-      }}
-    >
+    <div className={styles.container}>
       <button
         onClick={() => handleSignIn("google")}
         disabled={isLoading !== null}
+        className={`${styles.button} ${styles.googleButton}`}
         style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "var(--space-3)",
-          padding: "var(--space-3) var(--space-4)",
-          backgroundColor: "var(--color-bg)",
-          border: "1px solid var(--color-border)",
-          borderRadius: "var(--radius-md)",
-          cursor: isLoading ? "wait" : "pointer",
           opacity: isLoading && isLoading !== "google" ? 0.6 : 1,
-          transition: "all var(--transition-fast)",
+          cursor: isLoading ? "wait" : "pointer",
         }}
       >
         <GoogleIcon />
@@ -54,18 +41,10 @@ await signIn(provider, { callbackUrl: "/today" });
       <button
         onClick={() => handleSignIn("microsoft-entra-id")}
         disabled={isLoading !== null}
+        className={`${styles.button} ${styles.microsoftButton}`}
         style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "var(--space-3)",
-          padding: "var(--space-3) var(--space-4)",
-          backgroundColor: "var(--color-bg)",
-          border: "1px solid var(--color-border)",
-          borderRadius: "var(--radius-md)",
-          cursor: isLoading ? "wait" : "pointer",
           opacity: isLoading && isLoading !== "microsoft-entra-id" ? 0.6 : 1,
-          transition: "all var(--transition-fast)",
+          cursor: isLoading ? "wait" : "pointer",
         }}
       >
         <MicrosoftIcon />

@@ -5,27 +5,28 @@ export default function HomePage() {
   return (
     <main className={styles.main}>
       <div className={styles.hero}>
-        <h1 className={styles.title}>Passion OS</h1>
-        <p className={styles.subtitle}>
-          Your personal productivity and music production companion.
-          <br />
-          Plan, focus, and create.
-        </p>
+        <div className={styles.heroContent}>
+          <div className={styles.badge}>Personal Productivity Suite</div>
+          <h1 className={styles.title}>Passion OS</h1>
+          <p className={styles.subtitle}>
+            Your personal productivity and music production companion.
+            Plan your day, focus deeply, track your quests, and level up your creative skills.
+          </p>
 
-        <div className={styles.actions}>
-          <Link href="/auth/signin" className={styles.primaryButton}>
-            Get Started
-          </Link>
-          <Link href="/about" className={styles.secondaryButton}>
-            Learn More
-          </Link>
+          <div className={styles.actions}>
+            <Link href="/auth/signin" className={styles.primaryButton}>
+              Get Started
+            </Link>
+            <Link href="/hub" className={styles.secondaryButton}>
+              Explore DAW Shortcuts
+            </Link>
+          </div>
         </div>
       </div>
 
       <section className={styles.features}>
         <div className={styles.feature}>
           <div className={styles.featureIcon} aria-hidden="true">
-            {/* Calendar icon */}
             <svg
               width="24"
               height="24"
@@ -45,13 +46,12 @@ export default function HomePage() {
           <h2 className={styles.featureTitle}>Plan</h2>
           <p className={styles.featureDescription}>
             Organize your day with quests, schedules, and templates. Track your
-            progress and earn XP.
+            progress and earn XP as you complete tasks.
           </p>
         </div>
 
         <div className={styles.feature}>
           <div className={styles.featureIcon} aria-hidden="true">
-            {/* Focus/Target icon */}
             <svg
               width="24"
               height="24"
@@ -69,14 +69,13 @@ export default function HomePage() {
           </div>
           <h2 className={styles.featureTitle}>Focus</h2>
           <p className={styles.featureDescription}>
-            Stay in the zone with focus timers. Track your deep work sessions
-            and build consistency.
+            Stay in the zone with Pomodoro-style focus timers. Track your deep work sessions
+            and build consistency over time.
           </p>
         </div>
 
         <div className={styles.feature}>
           <div className={styles.featureIcon} aria-hidden="true">
-            {/* Music/Create icon */}
             <svg
               width="24"
               height="24"
@@ -94,14 +93,59 @@ export default function HomePage() {
           </div>
           <h2 className={styles.featureTitle}>Create</h2>
           <p className={styles.featureDescription}>
-            Access DAW shortcuts, templates, and tools to accelerate your music
-            production workflow.
+            Access DAW shortcuts, arrangement tools, and reference track analysis to
+            accelerate your music production workflow.
           </p>
         </div>
       </section>
 
+      <section className={styles.howItWorks}>
+        <h2 className={styles.sectionTitle}>How to Get Started</h2>
+        <div className={styles.steps}>
+          <div className={styles.step}>
+            <div className={styles.stepNumber}>1</div>
+            <h3 className={styles.stepTitle}>Age Verification</h3>
+            <p className={styles.stepDescription}>
+              Confirm you are 16 years or older to use Passion OS. We take privacy seriously.
+            </p>
+          </div>
+          <div className={styles.stepDivider} aria-hidden="true" />
+          <div className={styles.step}>
+            <div className={styles.stepNumber}>2</div>
+            <h3 className={styles.stepTitle}>Sign In</h3>
+            <p className={styles.stepDescription}>
+              Create your account using Google or Microsoft. No passwords to remember.
+            </p>
+          </div>
+          <div className={styles.stepDivider} aria-hidden="true" />
+          <div className={styles.step}>
+            <div className={styles.stepNumber}>3</div>
+            <h3 className={styles.stepTitle}>Get Approved</h3>
+            <p className={styles.stepDescription}>
+              New accounts are reviewed for approval. You will receive access shortly after signing up.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.cta}>
+        <h2 className={styles.ctaTitle}>Ready to level up?</h2>
+        <p className={styles.ctaDescription}>
+          Join Passion OS and start building better habits, shipping more music, and tracking your progress.
+        </p>
+        <Link href="/auth/signin" className={styles.ctaButton}>
+          Start Your Journey
+        </Link>
+        <p className={styles.ageNotice}>
+          Must be 16+ to use Passion OS. See our{" "}
+          <Link href="/privacy">Privacy Policy</Link> for details.
+        </p>
+      </section>
+
       <footer className={styles.footer}>
         <p>
+          <Link href="/about">About</Link>
+          {" | "}
           <Link href="/privacy">Privacy</Link>
           {" | "}
           <Link href="/terms">Terms</Link>
