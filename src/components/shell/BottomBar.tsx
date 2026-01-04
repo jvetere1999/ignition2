@@ -2,6 +2,8 @@
  * BottomBar Component
  * Unified bottom bar that displays both focus indicator and audio player
  * Handles stacking and body padding in a single component
+ *
+ * Performance optimization: Uses shared FocusStateContext to avoid duplicate polling
  */
 
 "use client";
@@ -31,6 +33,7 @@ import {
   clearQueueState,
   formatTime,
 } from "@/lib/player";
+import { useFocusState } from "@/lib/focus";
 import { Waveform } from "@/components/player/Waveform";
 import styles from "./BottomBar.module.css";
 
@@ -39,22 +42,6 @@ const TrackAnalysisPopup = dynamic(
   () => import("@/components/player/TrackAnalysisPopup").then((mod) => mod.TrackAnalysisPopup),
   { ssr: false }
 );
-
-// Focus types
-interface FocusSession {
-  id: string;
-  started_at: string;
-  planned_duration: number;
-  status: "active" | "completed" | "abandoned";
-  mode: "focus" | "break" | "long_break";
-  expires_at: string | null;
-}
-
-interface PausedState {
-  mode: "focus" | "break" | "long_break";
-  timeRemaining: number;
-  pausedAt: string;
-}
 
 const MODE_LABELS: Record<string, string> = {
   focus: "Focus",
@@ -88,13 +75,9 @@ export function BottomBar() {
   const [isPlayerMinimized, setIsPlayerMinimized] = useState(false);
   const [showAnalysisPanel, setShowAnalysisPanel] = useState(false);
 
-  // ===== FOCUS STATE =====
-  const [focusSession, setFocusSession] = useState<FocusSession | null>(null);
-  const [pausedState, setPausedState] = useState<PausedState | null>(null);
-  const [focusTimeRemaining, setFocusTimeRemaining] = useState(0);
-  const [focusLoading, setFocusLoading] = useState(true);
+  // ===== FOCUS STATE (from shared context) =====
+  const { session: focusSession, pausedState, timeRemaining: focusTimeRemaining, isLoading: focusLoading, clearPausedState, refresh: refreshFocus } = useFocusState();
   const [isFocusMinimized, setIsFocusMinimized] = useState(false);
-  const focusTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Derived state
   const isFocusActive = focusSession !== null && focusSession.status === "active";
@@ -176,93 +159,9 @@ export function BottomBar() {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
 
-  // ===== FOCUS EFFECTS =====
-  const checkPausedState = useCallback(() => {
-    try {
-      const stored = localStorage.getItem("focus_paused_state");
-      if (stored) {
-        const parsed = JSON.parse(stored) as PausedState;
-        const pausedTime = new Date(parsed.pausedAt).getTime();
-        const hourAgo = Date.now() - 60 * 60 * 1000;
-        if (pausedTime > hourAgo) {
-          setPausedState(parsed);
-          setFocusTimeRemaining(parsed.timeRemaining);
-          return true;
-        } else {
-          localStorage.removeItem("focus_paused_state");
-        }
-      }
-    } catch {
-      localStorage.removeItem("focus_paused_state");
-    }
-    setPausedState(null);
-    return false;
-  }, []);
-
-  const fetchActiveSession = useCallback(async () => {
-    try {
-      const response = await fetch("/api/focus/active");
-      if (response.ok) {
-        const data = await response.json() as { session?: FocusSession | null };
-        if (data.session && data.session.status === "active") {
-          setFocusSession(data.session);
-          setPausedState(null);
-          const startTime = new Date(data.session.started_at).getTime();
-          const elapsed = Math.floor((Date.now() - startTime) / 1000);
-          const remaining = Math.max(0, data.session.planned_duration - elapsed);
-          setFocusTimeRemaining(remaining);
-        } else {
-          setFocusSession(null);
-          checkPausedState();
-        }
-      }
-    } catch (error) {
-      console.error("Failed to fetch active focus session:", error);
-    } finally {
-      setFocusLoading(false);
-    }
-  }, [checkPausedState]);
-
-  useEffect(() => {
-    checkPausedState();
-    fetchActiveSession();
-    const pollInterval = setInterval(fetchActiveSession, 30000);
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "focus_paused_state") {
-        checkPausedState();
-      }
-    };
-    window.addEventListener("storage", handleStorageChange);
-    return () => {
-      clearInterval(pollInterval);
-      window.removeEventListener("storage", handleStorageChange);
-    };
-  }, [fetchActiveSession, checkPausedState]);
-
-  useEffect(() => {
-    if (!focusSession || focusSession.status !== "active") {
-      if (focusTimerRef.current) {
-        clearInterval(focusTimerRef.current);
-        focusTimerRef.current = null;
-      }
-      return;
-    }
-    focusTimerRef.current = setInterval(() => {
-      setFocusTimeRemaining((prev) => {
-        if (prev <= 1) {
-          fetchActiveSession();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => {
-      if (focusTimerRef.current) {
-        clearInterval(focusTimerRef.current);
-        focusTimerRef.current = null;
-      }
-    };
-  }, [focusSession, fetchActiveSession]);
+  // ===== FOCUS EFFECTS (now handled by FocusStateContext) =====
+  // The polling, timer countdown, and localStorage sync are all handled by the shared context
+  // BottomBar just consumes the state via useFocusState() hook
 
   // ===== PLAYER HANDLERS =====
   const handleSeek = useCallback((time: number) => {
@@ -323,18 +222,18 @@ export function BottomBar() {
           method: "POST",
         });
         if (response.ok) {
-          setFocusSession(null);
+          // Refresh the shared context to pick up the change
+          refreshFocus();
         }
       } catch (error) {
         console.error("Failed to abandon focus session:", error);
       }
     }
-  }, [focusSession]);
+  }, [focusSession, refreshFocus]);
 
   const handleDismissPaused = useCallback(() => {
-    localStorage.removeItem("focus_paused_state");
-    setPausedState(null);
-  }, []);
+    clearPausedState();
+  }, [clearPausedState]);
 
   const handleToggleFocusMinimize = useCallback(() => {
     setIsFocusMinimized((prev) => !prev);

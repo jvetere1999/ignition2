@@ -1,6 +1,8 @@
 /**
  * App Shell Component
  * Main layout wrapper with header and navigation
+ *
+ * Includes FocusStateProvider for deduplicating focus session polling
  */
 
 "use client";
@@ -13,6 +15,7 @@ import { Sidebar } from "./Sidebar";
 import { BottomBar } from "./BottomBar";
 import { Omnibar } from "./Omnibar";
 import { TOSModal } from "./TOSModal";
+import { FocusStateProvider } from "@/lib/focus";
 import styles from "./AppShell.module.css";
 
 interface AppShellProps {
@@ -103,23 +106,25 @@ export function AppShell({ children }: AppShellProps) {
   }, [omnibarOpen]);
 
   return (
-    <div className={styles.shell}>
-      <Header
-        onMenuClick={toggleSidebar}
-        onCommandPaletteClick={() => setOmnibarOpen(true)}
-        onInboxClick={() => setOmnibarOpen(true)}
-      />
-      <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} userEmail={session?.user?.email || undefined} />
-      <main className={styles.main}>
-        <div className={styles.content}>{children}</div>
-      </main>
-      <BottomBar />
-      <Omnibar
-        isOpen={omnibarOpen}
-        onClose={() => setOmnibarOpen(false)}
-      />
-      {showTOS && <TOSModal onAccept={handleTOSAccept} />}
-    </div>
+    <FocusStateProvider>
+      <div className={styles.shell}>
+        <Header
+          onMenuClick={toggleSidebar}
+          onCommandPaletteClick={() => setOmnibarOpen(true)}
+          onInboxClick={() => setOmnibarOpen(true)}
+        />
+        <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} userEmail={session?.user?.email || undefined} />
+        <main className={styles.main}>
+          <div className={styles.content}>{children}</div>
+        </main>
+        <BottomBar />
+        <Omnibar
+          isOpen={omnibarOpen}
+          onClose={() => setOmnibarOpen(false)}
+        />
+        {showTOS && <TOSModal onAccept={handleTOSAccept} />}
+      </div>
+    </FocusStateProvider>
   );
 }
 
