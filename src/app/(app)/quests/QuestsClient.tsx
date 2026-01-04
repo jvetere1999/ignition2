@@ -4,9 +4,12 @@
  * Quests Client Component
  * Daily and weekly quests with XP and coin rewards
  * Fetches universal quests from database
+ *
+ * Auto-refresh: Refetches on focus after 1 minute staleness (per SYNC.md)
  */
 
 import { useState, useEffect, useCallback } from "react";
+import { useAutoRefresh } from "@/lib/hooks";
 import styles from "./page.module.css";
 
 interface Quest {
@@ -42,63 +45,76 @@ export function QuestsClient() {
     target: 1,
   });
 
-  // Load quests from API and merge with local progress
-  useEffect(() => {
-    const loadQuests = async () => {
-      try {
-        // Fetch universal quests from API
-        const response = await fetch("/api/quests");
-        let apiQuests: Quest[] = [];
-        let d1Progress: Record<string, { progress: number; completed: boolean }> = {};
+  // Fetch quests function for reuse
+  const fetchQuests = useCallback(async () => {
+    try {
+      const response = await fetch("/api/quests");
+      let apiQuests: Quest[] = [];
+      let d1Progress: Record<string, { progress: number; completed: boolean }> = {};
 
-        if (response.ok) {
-          const data = await response.json() as {
-            quests?: Record<string, unknown>[];
-            userProgress?: Record<string, { progress: number; completed: boolean }>;
-          };
-          apiQuests = (data.quests || []).map((q: Record<string, unknown>) => ({
-            id: String(q.id || ""),
-            title: String(q.title || ""),
-            description: String(q.description || ""),
-            type: (q.type as Quest["type"]) || "daily",
-            xpReward: Number(q.xpReward || q.xp_reward || 10),
-            coinReward: Number(q.coinReward || q.coin_reward || 5),
-            target: Number(q.target || 1),
-            progress: 0,
-            completed: false,
-            skillId: q.skillId as string | undefined,
-          }));
-          d1Progress = data.userProgress || {};
-        }
-
-        // Load local progress as fallback
-        const storedProgress = localStorage.getItem(QUEST_PROGRESS_KEY);
-        const localProgress: Record<string, { progress: number; completed: boolean }> = storedProgress
-          ? JSON.parse(storedProgress)
-          : {};
-
-        // Merge progress - D1 takes priority, then local
-        const questsWithProgress = apiQuests.map((q) => ({
-          ...q,
-          progress: d1Progress[q.id]?.progress ?? localProgress[q.id]?.progress ?? 0,
-          completed: d1Progress[q.id]?.completed ?? localProgress[q.id]?.completed ?? false,
+      if (response.ok) {
+        const data = await response.json() as {
+          quests?: Record<string, unknown>[];
+          userProgress?: Record<string, { progress: number; completed: boolean }>;
+        };
+        apiQuests = (data.quests || []).map((q: Record<string, unknown>) => ({
+          id: String(q.id || ""),
+          title: String(q.title || ""),
+          description: String(q.description || ""),
+          type: (q.type as Quest["type"]) || "daily",
+          xpReward: Number(q.xpReward || q.xp_reward || 10),
+          coinReward: Number(q.coinReward || q.coin_reward || 5),
+          target: Number(q.target || 1),
+          progress: 0,
+          completed: false,
+          skillId: q.skillId as string | undefined,
         }));
-
-        setQuests(questsWithProgress);
-
-        // Load wallet
-        const storedWallet = localStorage.getItem(WALLET_KEY);
-        if (storedWallet) {
-          setWallet(JSON.parse(storedWallet));
-        }
-      } catch (e) {
-        console.error("Failed to load quests:", e);
+        d1Progress = data.userProgress || {};
       }
-      setIsLoading(false);
-    };
 
-    loadQuests();
+      // Load local progress as fallback
+      const storedProgress = localStorage.getItem(QUEST_PROGRESS_KEY);
+      const localProgress: Record<string, { progress: number; completed: boolean }> = storedProgress
+        ? JSON.parse(storedProgress)
+        : {};
+
+      // Merge progress - D1 takes priority, then local
+      const questsWithProgress = apiQuests.map((q) => ({
+        ...q,
+        progress: d1Progress[q.id]?.progress ?? localProgress[q.id]?.progress ?? 0,
+        completed: d1Progress[q.id]?.completed ?? localProgress[q.id]?.completed ?? false,
+      }));
+
+      setQuests(questsWithProgress);
+
+      // Load wallet
+      const storedWallet = localStorage.getItem(WALLET_KEY);
+      if (storedWallet) {
+        setWallet(JSON.parse(storedWallet));
+      }
+    } catch (e) {
+      console.error("Failed to load quests:", e);
+    }
+    setIsLoading(false);
   }, []);
+
+  // Auto-refresh: refetch on focus after 1 minute staleness
+  // Pauses on page unload, soft refreshes on reload if stale
+  // Disabled when add form is open (user might be typing)
+  useAutoRefresh({
+    onRefresh: fetchQuests,
+    refreshKey: "quests",
+    stalenessMs: 60000, // 1 minute per SYNC.md contract
+    refreshOnMount: true,
+    refetchOnFocus: true,
+    refetchOnVisible: true,
+    enabled: !showAddForm && !isLoading, // Disable when form is open or loading
+  });
+
+  // Load quests on mount
+  useEffect(() => {
+    fetchQuests();
+  }, [fetchQuests]);
 
   // Save wallet when it changes
   useEffect(() => {

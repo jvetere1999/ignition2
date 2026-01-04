@@ -93,7 +93,7 @@ const RECURRENCE_OPTIONS = [
 
 export function ExerciseClient() {
   // State
-  const [activeTab, setActiveTab] = useState<"library" | "workouts" | "history" | "records">("library");
+  const [activeTab, setActiveTab] = useState<"library" | "workouts" | "programs" | "history" | "records">("library");
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [sessions, setSessions] = useState<WorkoutSession[]>([]);
@@ -122,13 +122,25 @@ export function ExerciseClient() {
     equipment: [] as string[],
     instructions: "",
   });
+
+  // Workout sections type
+  interface WorkoutSection {
+    id: string;
+    name: string;
+    type: "warmup" | "main" | "cooldown" | "superset" | "circuit";
+    exercises: { exercise_id: string; exercise_name: string; target_sets: number; target_reps: string; rest_seconds: number }[];
+  }
+
   const [newWorkout, setNewWorkout] = useState({
     name: "",
     description: "",
     workout_type: "strength",
     estimated_duration: 60,
+    sections: [{ id: `section_${Date.now()}`, name: "Main", type: "main" as const, exercises: [] }] as WorkoutSection[],
+    // Legacy flat exercises for backward compatibility
     exercises: [] as { exercise_id: string; exercise_name: string; target_sets: number; target_reps: string; rest_seconds: number }[],
   });
+  const [activeSection, setActiveSection] = useState(0);
   const [plannerLink, setPlannerLink] = useState({
     title: "",
     start_time: "",
@@ -228,7 +240,15 @@ export function ExerciseClient() {
       });
       if (res.ok) {
         setShowCreateWorkout(false);
-        setNewWorkout({ name: "", description: "", workout_type: "strength", estimated_duration: 60, exercises: [] });
+        setNewWorkout({
+          name: "",
+          description: "",
+          workout_type: "strength",
+          estimated_duration: 60,
+          sections: [{ id: `section_${Date.now()}`, name: "Main", type: "main" as const, exercises: [] }],
+          exercises: []
+        });
+        setActiveSection(0);
         loadData();
       }
     } catch (error) {
@@ -393,24 +413,73 @@ export function ExerciseClient() {
     }
   };
 
-  // Add exercise to new workout
+  // Add exercise to new workout (to active section)
   const addExerciseToWorkout = (exercise: Exercise) => {
-    setNewWorkout((prev) => ({
-      ...prev,
-      exercises: [
-        ...prev.exercises,
-        {
-          exercise_id: exercise.id,
-          exercise_name: exercise.name,
-          target_sets: 3,
-          target_reps: "8-12",
-          rest_seconds: 90,
-        },
-      ],
-    }));
+    setNewWorkout((prev) => {
+      const updatedSections = [...prev.sections];
+      if (updatedSections[activeSection]) {
+        updatedSections[activeSection] = {
+          ...updatedSections[activeSection],
+          exercises: [
+            ...updatedSections[activeSection].exercises,
+            {
+              exercise_id: exercise.id,
+              exercise_name: exercise.name,
+              target_sets: 3,
+              target_reps: "8-12",
+              rest_seconds: 90,
+            },
+          ],
+        };
+      }
+      return { ...prev, sections: updatedSections };
+    });
   };
 
-  // Remove exercise from workout
+  // Add new section to workout
+  const addWorkoutSection = (type: "warmup" | "main" | "cooldown" | "superset" | "circuit") => {
+    const names: Record<string, string> = {
+      warmup: "Warmup",
+      main: "Main",
+      cooldown: "Cooldown",
+      superset: "Superset",
+      circuit: "Circuit",
+    };
+    setNewWorkout((prev) => ({
+      ...prev,
+      sections: [
+        ...prev.sections,
+        { id: `section_${Date.now()}`, name: names[type], type, exercises: [] },
+      ],
+    }));
+    setActiveSection(newWorkout.sections.length);
+  };
+
+  // Remove section from workout
+  const removeWorkoutSection = (index: number) => {
+    if (newWorkout.sections.length <= 1) return;
+    setNewWorkout((prev) => ({
+      ...prev,
+      sections: prev.sections.filter((_, i) => i !== index),
+    }));
+    if (activeSection >= index && activeSection > 0) {
+      setActiveSection(activeSection - 1);
+    }
+  };
+
+  // Remove exercise from section
+  const removeExerciseFromSection = (sectionIndex: number, exerciseIndex: number) => {
+    setNewWorkout((prev) => {
+      const updatedSections = [...prev.sections];
+      updatedSections[sectionIndex] = {
+        ...updatedSections[sectionIndex],
+        exercises: updatedSections[sectionIndex].exercises.filter((_, i) => i !== exerciseIndex),
+      };
+      return { ...prev, sections: updatedSections };
+    });
+  };
+
+  // Remove exercise from workout (legacy)
   const removeExerciseFromWorkout = (index: number) => {
     setNewWorkout((prev) => ({
       ...prev,
@@ -476,6 +545,12 @@ export function ExerciseClient() {
           onClick={() => setActiveTab("workouts")}
         >
           My Workouts
+        </button>
+        <button
+          className={`${styles.tab} ${activeTab === "programs" ? styles.activeTab : ""}`}
+          onClick={() => setActiveTab("programs")}
+        >
+          Programs
         </button>
         <button
           className={`${styles.tab} ${activeTab === "history" ? styles.activeTab : ""}`}
@@ -638,6 +713,60 @@ export function ExerciseClient() {
             )}
           </div>
         )}
+
+        {/* Training Programs */}
+        {activeTab === "programs" && !loading && (
+          <div className={styles.programsList}>
+            <div className={styles.programsHeader}>
+              <p className={styles.programsDescription}>
+                Multi-week training plans that auto-schedule workouts to your planner.
+              </p>
+              <button className={styles.secondaryButton} onClick={() => alert("Program creation coming soon!")}>
+                Create Program
+              </button>
+            </div>
+
+            <div className={styles.programsGrid}>
+              <div className={styles.programCard}>
+                <div className={styles.programBadge}>Coming Soon</div>
+                <h3>Strength Builder</h3>
+                <p>4-week progressive overload program</p>
+                <div className={styles.programMeta}>
+                  <span>4 weeks</span>
+                  <span>4 days/week</span>
+                  <span>Intermediate</span>
+                </div>
+              </div>
+
+              <div className={styles.programCard}>
+                <div className={styles.programBadge}>Coming Soon</div>
+                <h3>HIIT Circuit</h3>
+                <p>6-week cardio and strength combo</p>
+                <div className={styles.programMeta}>
+                  <span>6 weeks</span>
+                  <span>3 days/week</span>
+                  <span>All Levels</span>
+                </div>
+              </div>
+
+              <div className={styles.programCard}>
+                <div className={styles.programBadge}>Coming Soon</div>
+                <h3>Hypertrophy</h3>
+                <p>8-week muscle building program</p>
+                <div className={styles.programMeta}>
+                  <span>8 weeks</span>
+                  <span>5 days/week</span>
+                  <span>Advanced</span>
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.programTip}>
+              <strong>Tip:</strong> Programs automatically schedule your workouts to the planner and track your progress over multiple weeks.
+              They include deload weeks and progressive overload built-in.
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Create Exercise Modal */}
@@ -694,7 +823,7 @@ export function ExerciseClient() {
 
       {/* Create Workout Modal */}
       {showCreateWorkout && (
-        <Modal title="Create Workout" onClose={() => setShowCreateWorkout(false)}>
+        <Modal title="Create Workout" onClose={() => setShowCreateWorkout(false)} large>
           <div className={styles.form}>
             <input
               type="text"
@@ -726,38 +855,100 @@ export function ExerciseClient() {
               />
             </div>
 
-            <h4>Exercises</h4>
-            <div className={styles.workoutExercises}>
-              {newWorkout.exercises.map((ex, i) => (
-                <div key={i} className={styles.workoutExerciseItem}>
-                  <span>{ex.exercise_name}</span>
-                  <input
-                    type="number"
-                    placeholder="Sets"
-                    value={ex.target_sets}
-                    onChange={(e) => {
-                      const updated = [...newWorkout.exercises];
-                      updated[i].target_sets = parseInt(e.target.value) || 3;
-                      setNewWorkout((p) => ({ ...p, exercises: updated }));
-                    }}
-                    style={{ width: "60px" }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Reps"
-                    value={ex.target_reps}
-                    onChange={(e) => {
-                      const updated = [...newWorkout.exercises];
-                      updated[i].target_reps = e.target.value;
-                      setNewWorkout((p) => ({ ...p, exercises: updated }));
-                    }}
-                    style={{ width: "60px" }}
-                  />
-                  <button onClick={() => removeExerciseFromWorkout(i)}>X</button>
-                </div>
+            {/* Sections */}
+            <div className={styles.sectionsHeader}>
+              <h4>Workout Sections</h4>
+              <div className={styles.sectionActions}>
+                <button type="button" className={styles.smallBtn} onClick={() => addWorkoutSection("warmup")}>+ Warmup</button>
+                <button type="button" className={styles.smallBtn} onClick={() => addWorkoutSection("main")}>+ Main</button>
+                <button type="button" className={styles.smallBtn} onClick={() => addWorkoutSection("superset")}>+ Superset</button>
+                <button type="button" className={styles.smallBtn} onClick={() => addWorkoutSection("circuit")}>+ Circuit</button>
+                <button type="button" className={styles.smallBtn} onClick={() => addWorkoutSection("cooldown")}>+ Cooldown</button>
+              </div>
+            </div>
+
+            {/* Section Tabs */}
+            <div className={styles.sectionTabs}>
+              {newWorkout.sections.map((section, idx) => (
+                <button
+                  key={section.id}
+                  type="button"
+                  className={`${styles.sectionTab} ${activeSection === idx ? styles.activeSectionTab : ""}`}
+                  onClick={() => setActiveSection(idx)}
+                >
+                  <span className={styles.sectionType}>{section.type}</span>
+                  <span className={styles.sectionName}>{section.name}</span>
+                  {newWorkout.sections.length > 1 && (
+                    <span className={styles.removeSection} onClick={(e) => { e.stopPropagation(); removeWorkoutSection(idx); }}>x</span>
+                  )}
+                </button>
               ))}
             </div>
-            <p className={styles.hint}>Search exercises in the Library tab and click Add to include them here.</p>
+
+            {/* Active Section Content */}
+            {newWorkout.sections[activeSection] && (
+              <div className={styles.sectionContent}>
+                <input
+                  type="text"
+                  placeholder="Section name"
+                  value={newWorkout.sections[activeSection].name}
+                  onChange={(e) => {
+                    const updated = [...newWorkout.sections];
+                    updated[activeSection].name = e.target.value;
+                    setNewWorkout((p) => ({ ...p, sections: updated }));
+                  }}
+                  className={styles.sectionNameInput}
+                />
+
+                <div className={styles.workoutExercises}>
+                  {newWorkout.sections[activeSection].exercises.length === 0 ? (
+                    <p className={styles.emptySection}>No exercises yet. Search in Library tab and click &quot;Add&quot; to include exercises.</p>
+                  ) : (
+                    newWorkout.sections[activeSection].exercises.map((ex, i) => (
+                      <div key={i} className={styles.workoutExerciseItem}>
+                        <span className={styles.exerciseName}>{ex.exercise_name}</span>
+                        <input
+                          type="number"
+                          placeholder="Sets"
+                          value={ex.target_sets}
+                          onChange={(e) => {
+                            const updated = [...newWorkout.sections];
+                            updated[activeSection].exercises[i].target_sets = parseInt(e.target.value) || 3;
+                            setNewWorkout((p) => ({ ...p, sections: updated }));
+                          }}
+                          style={{ width: "60px" }}
+                        />
+                        <input
+                          type="text"
+                          placeholder="Reps"
+                          value={ex.target_reps}
+                          onChange={(e) => {
+                            const updated = [...newWorkout.sections];
+                            updated[activeSection].exercises[i].target_reps = e.target.value;
+                            setNewWorkout((p) => ({ ...p, sections: updated }));
+                          }}
+                          style={{ width: "60px" }}
+                        />
+                        <input
+                          type="number"
+                          placeholder="Rest (s)"
+                          value={ex.rest_seconds}
+                          onChange={(e) => {
+                            const updated = [...newWorkout.sections];
+                            updated[activeSection].exercises[i].rest_seconds = parseInt(e.target.value) || 90;
+                            setNewWorkout((p) => ({ ...p, sections: updated }));
+                          }}
+                          style={{ width: "70px" }}
+                        />
+                        <button type="button" onClick={() => removeExerciseFromSection(activeSection, i)}>X</button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+
+            <p className={styles.hint}>Tip: Select a section tab above, then search exercises in the Library tab and click &quot;Add&quot; to include them.</p>
 
             <button onClick={handleCreateWorkout} disabled={!newWorkout.name}>Create Workout</button>
           </div>

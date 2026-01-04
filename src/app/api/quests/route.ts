@@ -1,13 +1,14 @@
 /**
  * Quests API Route
  * GET /api/quests - List universal quests for all users
+ *
+ * Optimized with:
+ * - createAPIHandler for timing instrumentation
+ * - Parallel DB queries for quests and user progress
  */
 
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { ensureUserExists } from "@/lib/db/repositories/users";
-import type { CloudflareEnv } from "@/env";
+import { createAPIHandler, type APIContext } from "@/lib/perf";
 
 export const dynamic = "force-dynamic";
 
@@ -15,75 +16,10 @@ export const dynamic = "force-dynamic";
  * GET /api/quests
  * List active universal quests
  */
-export async function GET() {
-  try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const ctx = await getCloudflareContext();
-    const db = (ctx.env as unknown as CloudflareEnv).DB;
-
-    if (!db) {
-      // Return default quests for development
-      return NextResponse.json({
-        quests: [
-          {
-            id: "quest-daily-focus",
-            title: "Deep Focus",
-            description: "Complete 2 focus sessions",
-            type: "daily",
-            xpReward: 50,
-            coinReward: 25,
-            target: 2,
-            skillId: "knowledge",
-          },
-          {
-            id: "quest-daily-exercise",
-            title: "Stay Active",
-            description: "Log 1 exercise session",
-            type: "daily",
-            xpReward: 30,
-            coinReward: 15,
-            target: 1,
-            skillId: "guts",
-          },
-          {
-            id: "quest-daily-planner",
-            title: "Plan Ahead",
-            description: "Add 3 events to your planner",
-            type: "daily",
-            xpReward: 20,
-            coinReward: 10,
-            target: 3,
-            skillId: "proficiency",
-          },
-          {
-            id: "quest-weekly-focus",
-            title: "Focus Master",
-            description: "Complete 10 focus sessions this week",
-            type: "weekly",
-            xpReward: 200,
-            coinReward: 100,
-            target: 10,
-            skillId: "knowledge",
-          },
-          {
-            id: "quest-weekly-streak",
-            title: "Consistency",
-            description: "Maintain a 5-day streak",
-            type: "weekly",
-            xpReward: 150,
-            coinReward: 75,
-            target: 5,
-            skillId: "proficiency",
-          },
-        ],
-      });
-    }
-
-    const result = await db
+export const GET = createAPIHandler(async (ctx: APIContext) => {
+  // Run both queries in parallel for better performance
+  const [questsResult, progressResult] = await Promise.all([
+    ctx.db
       .prepare(`
         SELECT 
           id,
@@ -98,156 +34,113 @@ export async function GET() {
         WHERE is_active = 1
         ORDER BY type, created_at DESC
       `)
-      .all();
-
-    // Get the database user ID
-    const dbUser = await ensureUserExists(db, session.user.id, {
-      name: session.user.name,
-      email: session.user.email,
-      image: session.user.image,
-    });
-
-    // Also fetch user progress for these quests
-    const progressResult = await db
+      .all(),
+    ctx.db
       .prepare(`
         SELECT quest_id, progress, completed, completed_at
         FROM user_quest_progress 
         WHERE user_id = ?
       `)
-      .bind(dbUser.id)
-      .all<{ quest_id: string; progress: number; completed: number; completed_at: string | null }>();
+      .bind(ctx.dbUser.id)
+      .all<{ quest_id: string; progress: number; completed: number; completed_at: string | null }>(),
+  ]);
 
-    const progressMap: Record<string, { progress: number; completed: boolean }> = {};
-    (progressResult.results || []).forEach((p) => {
-      progressMap[p.quest_id] = { progress: p.progress, completed: p.completed === 1 };
-    });
+  const progressMap: Record<string, { progress: number; completed: boolean }> = {};
+  (progressResult.results || []).forEach((p) => {
+    progressMap[p.quest_id] = { progress: p.progress, completed: p.completed === 1 };
+  });
 
-    return NextResponse.json({ quests: result.results || [], userProgress: progressMap });
-  } catch (error) {
-    console.error("Quest GET error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
+  return NextResponse.json({ quests: questsResult.results || [], userProgress: progressMap });
+});
 
 /**
  * POST /api/quests
  * Update quest progress or complete a quest
  */
-export async function POST(request: Request) {
-  try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export const POST = createAPIHandler(async (ctx: APIContext) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const body: any = await ctx.request.json();
+  const { type, questId, progress, xpReward, coinReward, skillId } = body;
+
+  const userId = ctx.dbUser.id;
+  const now = new Date().toISOString();
+
+  if (type === "progress") {
+    // Update quest progress in user_quest_progress table
+    const existing = await ctx.db
+      .prepare(`SELECT * FROM user_quest_progress WHERE user_id = ? AND quest_id = ?`)
+      .bind(userId, questId)
+      .first();
+
+    if (existing) {
+      await ctx.db
+        .prepare(`UPDATE user_quest_progress SET progress = ?, updated_at = ? WHERE user_id = ? AND quest_id = ?`)
+        .bind(progress, now, userId, questId)
+        .run();
+    } else {
+      await ctx.db
+        .prepare(`INSERT INTO user_quest_progress (id, user_id, quest_id, progress, completed, created_at, updated_at) VALUES (?, ?, ?, ?, 0, ?, ?)`)
+        .bind(`uqp_${Date.now()}`, userId, questId, progress, now, now)
+        .run();
     }
 
-    const ctx = await getCloudflareContext();
-    const db = (ctx.env as unknown as CloudflareEnv).DB;
+    return NextResponse.json({ success: true, persisted: true });
+  }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const body: any = await request.json();
-    const { type, questId, progress, xpReward, coinReward, skillId } = body;
+  if (type === "complete") {
+    // Mark quest as completed
+    await ctx.db
+      .prepare(`
+        INSERT INTO user_quest_progress (id, user_id, quest_id, progress, completed, completed_at, created_at, updated_at) 
+        VALUES (?, ?, ?, ?, 1, ?, ?, ?)
+        ON CONFLICT(user_id, quest_id) DO UPDATE SET 
+          completed = 1, 
+          completed_at = ?,
+          updated_at = ?
+      `)
+      .bind(`uqp_${Date.now()}`, userId, questId, progress || 1, now, now, now, now, now)
+      .run();
 
-    if (!db) {
-      // Still return success for local dev but log warning
-      console.warn("[quests] D1 not available, quest progress not persisted");
-      return NextResponse.json({ success: true, persisted: false });
-    }
+    // Award XP to skill
+    if (xpReward && skillId) {
+      const skillResult = await ctx.db
+        .prepare(`SELECT xp FROM user_skills WHERE user_id = ? AND skill_id = ?`)
+        .bind(userId, skillId)
+        .first<{ xp: number }>();
 
-    // Get the database user ID
-    const dbUser = await ensureUserExists(db, session.user.id, {
-      name: session.user.name,
-      email: session.user.email,
-      image: session.user.image,
-    });
-    const userId = dbUser.id;
-    const now = new Date().toISOString();
+      const currentXp = skillResult?.xp || 0;
+      const newXp = currentXp + xpReward;
 
-    if (type === "progress") {
-      // Update quest progress in user_quest_progress table
-      const existing = await db
-        .prepare(`SELECT * FROM user_quest_progress WHERE user_id = ? AND quest_id = ?`)
-        .bind(userId, questId)
-        .first();
-
-      if (existing) {
-        await db
-          .prepare(`UPDATE user_quest_progress SET progress = ?, updated_at = ? WHERE user_id = ? AND quest_id = ?`)
-          .bind(progress, now, userId, questId)
-          .run();
-      } else {
-        await db
-          .prepare(`INSERT INTO user_quest_progress (id, user_id, quest_id, progress, completed, created_at, updated_at) VALUES (?, ?, ?, ?, 0, ?, ?)`)
-          .bind(`uqp_${Date.now()}`, userId, questId, progress, now, now)
-          .run();
-      }
-
-      return NextResponse.json({ success: true, persisted: true });
-    }
-
-    if (type === "complete") {
-      // Mark quest as completed
-      await db
+      await ctx.db
         .prepare(`
-          INSERT INTO user_quest_progress (id, user_id, quest_id, progress, completed, completed_at, created_at, updated_at) 
-          VALUES (?, ?, ?, ?, 1, ?, ?, ?)
-          ON CONFLICT(user_id, quest_id) DO UPDATE SET 
-            completed = 1, 
-            completed_at = ?,
+          INSERT INTO user_skills (id, user_id, skill_id, xp, level, created_at, updated_at)
+          VALUES (?, ?, ?, ?, 1, ?, ?)
+          ON CONFLICT(user_id, skill_id) DO UPDATE SET
+            xp = ?,
             updated_at = ?
         `)
-        .bind(`uqp_${Date.now()}`, userId, questId, progress || 1, now, now, now, now, now)
+        .bind(`skill_${Date.now()}`, userId, skillId, newXp, now, now, newXp, now)
         .run();
-
-      // Award XP to skill
-      if (xpReward && skillId) {
-        const skillResult = await db
-          .prepare(`SELECT xp FROM user_skills WHERE user_id = ? AND skill_id = ?`)
-          .bind(userId, skillId)
-          .first<{ xp: number }>();
-
-        const currentXp = skillResult?.xp || 0;
-        const newXp = currentXp + xpReward;
-
-        await db
-          .prepare(`
-            INSERT INTO user_skills (id, user_id, skill_id, xp, level, created_at, updated_at)
-            VALUES (?, ?, ?, ?, 1, ?, ?)
-            ON CONFLICT(user_id, skill_id) DO UPDATE SET
-              xp = ?,
-              updated_at = ?
-          `)
-          .bind(`skill_${Date.now()}`, userId, skillId, newXp, now, now, newXp, now)
-          .run();
-      }
-
-      // Add to reward ledger
-      if (xpReward) {
-        await db
-          .prepare(`INSERT INTO reward_ledger (id, user_id, domain_id, reward_type, amount, reason, created_at) VALUES (?, ?, 'quests', 'xp', ?, ?, ?)`)
-          .bind(`reward_${Date.now()}_xp`, userId, xpReward, `Quest completed: ${questId}`, now)
-          .run();
-      }
-
-      if (coinReward) {
-        await db
-          .prepare(`INSERT INTO reward_ledger (id, user_id, domain_id, reward_type, amount, reason, created_at) VALUES (?, ?, 'quests', 'coins', ?, ?, ?)`)
-          .bind(`reward_${Date.now()}_coins`, userId, coinReward, `Quest completed: ${questId}`, now)
-          .run();
-      }
-
-      return NextResponse.json({ success: true, persisted: true, xpAwarded: xpReward, coinsAwarded: coinReward });
     }
 
-    return NextResponse.json({ error: "Invalid type" }, { status: 400 });
-  } catch (error) {
-    console.error("Quest POST error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    // Add to reward ledger
+    if (xpReward) {
+      await ctx.db
+        .prepare(`INSERT INTO reward_ledger (id, user_id, domain_id, reward_type, amount, reason, created_at) VALUES (?, ?, 'quests', 'xp', ?, ?, ?)`)
+        .bind(`reward_${Date.now()}_xp`, userId, xpReward, `Quest completed: ${questId}`, now)
+        .run();
+    }
+
+    if (coinReward) {
+      await ctx.db
+        .prepare(`INSERT INTO reward_ledger (id, user_id, domain_id, reward_type, amount, reason, created_at) VALUES (?, ?, 'quests', 'coins', ?, ?, ?)`)
+        .bind(`reward_${Date.now()}_coins`, userId, coinReward, `Quest completed: ${questId}`, now)
+        .run();
+    }
+
+    return NextResponse.json({ success: true, persisted: true, xpAwarded: xpReward, coinsAwarded: coinReward });
   }
-}
+
+  return NextResponse.json({ error: "Invalid type" }, { status: 400 });
+});
 

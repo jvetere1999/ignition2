@@ -118,7 +118,18 @@ npm run test:all         # Full suite
 npm run build           # Build Next.js
 npm run build:worker    # Build for Workers
 npm run deploy          # Deploy to Cloudflare
+npm run deploy:full     # Full pipeline: test -> build -> build:worker -> deploy
 ```
+
+### Full Deployment Script
+
+Use `npm run deploy:full` for the complete pipeline. This runs:
+1. Unit tests (fails fast if tests fail)
+2. Next.js build
+3. Cloudflare Worker build
+4. Deploy to Cloudflare
+
+All logs are written to `.tmp/` directory for debugging.
 
 ### Required Secrets (set via `wrangler secret put`)
 
@@ -128,6 +139,13 @@ npm run deploy          # Deploy to Cloudflare
 - AZURE_AD_CLIENT_ID
 - AZURE_AD_CLIENT_SECRET
 - AZURE_AD_TENANT_ID
+
+### Environment Variables (set in wrangler.toml [vars])
+
+- ADMIN_EMAILS - Comma-separated list of admin email addresses (e.g., "admin1@example.com,admin2@example.com")
+- NODE_ENV - Environment (production, preview)
+- AUTH_URL - Auth.js callback URL
+- NEXT_PUBLIC_APP_URL - Public app URL
 
 ### Bindings
 
@@ -173,6 +191,39 @@ Each PR must include:
 3. Add repository in `src/lib/db/repositories/`
 4. Export from `src/lib/db/index.ts`
 5. Add unit tests
+6. **Update database version** (see below)
+
+### Database Version Management (REQUIRED)
+
+**Every database schema change requires:**
+
+1. **Create new migration file:** `migrations/NNNN_description.sql`
+   - Number sequentially (e.g., 0013, 0014, etc.)
+   - Use descriptive name
+
+2. **Update version constants in:**
+   - `src/app/api/admin/backup/route.ts`: Update `CURRENT_DB_VERSION` and `CURRENT_DB_VERSION_NAME`
+   - `src/app/api/admin/restore/route.ts`: Update `CURRENT_DB_VERSION`
+
+3. **Add migration function in restore API:**
+   - Add version-specific migration logic in `migrateData()` function
+   - Handle upgrading from previous version to new version
+
+4. **Update documentation:**
+   - Add entry to version history table in `docs/DATABASE_SCHEMA.md`
+   - Document new tables/columns in appropriate sections
+
+**Example migration update:**
+```typescript
+// In migrateData() function
+if (version < 13) {
+  data.tables.users = (data.tables.users || []).map((user) => ({
+    ...user,
+    new_column: user.new_column ?? defaultValue,
+  }));
+  version = 13;
+}
+```
 
 ---
 

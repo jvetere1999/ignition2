@@ -1,0 +1,79 @@
+{
+  "timestamp": "2026-01-04T00:00:00.000Z",
+  "description": "Client-side fetch call inventory - baseline before optimization",
+  "methodology": "Manual analysis of useEffect + setInterval patterns",
+
+  "pages": {
+    "today": {
+      "onMount": [
+        { "endpoint": "/api/daily-plan", "count": 1 },
+        { "endpoint": "/api/auth/accept-tos", "count": 1, "source": "AppShell TOS check" }
+      ],
+      "polling": [
+        { "endpoint": "/api/focus/active", "interval_ms": 30000, "source": "FocusStateContext" }
+      ],
+      "callsPerMinute": 2.0
+    },
+    "focus": {
+      "onMount": [
+        { "endpoint": "/api/focus?stats=true&period=day", "count": 1 },
+        { "endpoint": "/api/focus/active", "count": 1 },
+        { "endpoint": "/api/focus/pause", "count": 1 }
+      ],
+      "polling": [
+        { "endpoint": "/api/focus/active", "interval_ms": 30000, "source": "FocusStateContext" }
+      ],
+      "callsPerMinute": 2.0
+    },
+    "planner": {
+      "onMount": [
+        { "endpoint": "/api/calendar", "count": 1 }
+      ],
+      "polling": [
+        { "endpoint": "/api/calendar", "interval_ms": 30000, "source": "PlannerClient" },
+        { "endpoint": "/api/focus/active", "interval_ms": 30000, "source": "FocusStateContext" }
+      ],
+      "callsPerMinute": 4.0
+    },
+    "quests": {
+      "onMount": [
+        { "endpoint": "/api/quests", "count": 1 }
+      ],
+      "polling": [
+        { "endpoint": "/api/focus/active", "interval_ms": 30000, "source": "FocusStateContext" }
+      ],
+      "callsPerMinute": 2.0
+    },
+    "habits": {
+      "onMount": [
+        { "endpoint": "/api/habits", "count": 1 }
+      ],
+      "polling": [
+        { "endpoint": "/api/focus/active", "interval_ms": 30000, "source": "FocusStateContext" }
+      ],
+      "callsPerMinute": 2.0
+    }
+  },
+
+  "optimizations": {
+    "applied": [
+      {
+        "description": "Deduplicate focus polling (BottomBar + FocusIndicator -> FocusStateContext)",
+        "before": { "endpoint": "/api/focus/active", "calls_per_30s": 2 },
+        "after": { "endpoint": "/api/focus/active", "calls_per_30s": 1 },
+        "reduction": "50%"
+      }
+    ],
+    "planned": [
+      {
+        "description": "Visibility-based pause for planner polling",
+        "impact": "~50% reduction when tab hidden"
+      },
+      {
+        "description": "ETag/If-None-Match for delta fetching",
+        "impact": "Reduced payload when no changes"
+      }
+    ]
+  }
+}
+

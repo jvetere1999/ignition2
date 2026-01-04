@@ -26,6 +26,10 @@ export function SiteFooter() {
         <Link href="/contact" className={styles.link}>
           Contact
         </Link>
+        <span className={styles.separator}>{String.fromCharCode(8226)}</span>
+        <Link href="/help" className={styles.link}>
+          Need Help?
+        </Link>
       </div>
     </footer>
   );

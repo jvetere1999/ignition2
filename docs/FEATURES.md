@@ -344,7 +344,7 @@ Passion OS is a comprehensive productivity and music production assistant design
 
 **Purpose:** Administrative interface for system management.
 
-**Access:** Restricted to admin emails (jvetere1999@gmail.com)
+**Access:** Restricted to admin emails defined in ADMIN_EMAILS environment variable
 
 **Features:**
 - User management (approval, levels, skills)

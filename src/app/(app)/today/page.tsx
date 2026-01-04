@@ -7,6 +7,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import styles from "./page.module.css";
+import { DailyPlanWidget } from "./DailyPlan";
 
 export const metadata: Metadata = {
   title: "Today",
@@ -32,6 +33,11 @@ export default async function TodayPage() {
       </header>
 
       <div className={styles.grid}>
+        {/* Daily Plan */}
+        <section className={styles.planSection}>
+          <DailyPlanWidget />
+        </section>
+
         {/* Primary Actions */}
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Get Started</h2>

@@ -1,6 +1,14 @@
 "use client";
 
+/**
+ * Planner Client Component
+ * Calendar with events and scheduling
+ *
+ * Auto-refresh: 30s polling for multi-device sync + focus refetch (per SYNC.md)
+ */
+
 import { useState, useMemo, useEffect, useCallback } from "react";
+import { useAutoRefresh } from "@/lib/hooks";
 import styles from "./page.module.css";
 
 // Types
@@ -166,22 +174,24 @@ export function PlannerClient({ initialEvents = [] }: PlannerClientProps) {
     }
   }, []);
 
-  // Fetch events on mount and set up polling for multi-device sync
+  // Fetch events on mount
   useEffect(() => {
     fetchEvents();
-
-    // Poll for updates every 30 seconds for multi-device sync
-    const pollInterval = setInterval(fetchEvents, 30000);
-
-    // Also refetch when window regains focus
-    const handleFocus = () => fetchEvents();
-    window.addEventListener("focus", handleFocus);
-
-    return () => {
-      clearInterval(pollInterval);
-      window.removeEventListener("focus", handleFocus);
-    };
   }, [fetchEvents]);
+
+  // Auto-refresh: 30s polling for multi-device sync + focus refetch (per SYNC.md)
+  // Pauses on page unload and when tab is hidden to reduce CPU usage
+  // Soft refreshes on reload if stale
+  useAutoRefresh({
+    onRefresh: fetchEvents,
+    refreshKey: "planner",
+    stalenessMs: 30000, // 30 seconds per SYNC.md contract
+    refreshOnMount: true,
+    refetchOnFocus: true,
+    refetchOnVisible: true,
+    pollingIntervalMs: 30000, // Poll every 30s for multi-device sync
+    enabled: !isLoading && !isSaving,
+  });
 
   // Form state
   const [formData, setFormData] = useState({

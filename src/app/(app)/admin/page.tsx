@@ -1,20 +1,18 @@
 /**
  * Admin Console Page
- * Only accessible to admin users (jvetere1999@gmail.com)
+ * Only accessible to admin users defined in ADMIN_EMAILS env var
  */
 
 import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { isAdminEmail } from "@/lib/admin";
 import { AdminClient } from "./AdminClient";
 
 export const metadata: Metadata = {
   title: "Admin Console - Passion OS",
   description: "Administrator dashboard for Passion OS.",
 };
-
-// Admin email addresses (both Google and Microsoft)
-const ADMIN_EMAILS = ["jvetere1999@gmail.com"];
 
 export default async function AdminPage() {
   const session = await auth();
@@ -24,9 +22,7 @@ export default async function AdminPage() {
   }
 
   // Check if user is admin
-  const isAdmin = ADMIN_EMAILS.includes(session.user.email || "");
-
-  if (!isAdmin) {
+  if (!isAdminEmail(session.user.email)) {
     redirect("/today");
   }
 

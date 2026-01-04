@@ -3,10 +3,13 @@
 /**
  * Progress Client Component
  * Displays user stats with Persona 5 style skill wheel
+ *
+ * Auto-refresh: Refetches on focus after 1 minute staleness (per SYNC.md)
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { SkillWheel, DEFAULT_SKILLS, type Skill } from "@/components/progress";
+import { useAutoRefresh } from "@/lib/hooks";
 import styles from "./page.module.css";
 
 interface ProgressStats {
@@ -59,26 +62,38 @@ export function ProgressClient() {
   }, [skills, isLoading]);
 
   // Fetch stats from API
-  useEffect(() => {
-    async function fetchStats() {
-      try {
-        // Fetch focus stats
-        const focusRes = await fetch("/api/focus?stats=true&period=week");
-        if (focusRes.ok) {
-          const focusData = await focusRes.json() as { totalFocusTime?: number; completedSessions?: number };
-          setStats((prev) => ({
-            ...prev,
-            focusHours: Math.round((focusData.totalFocusTime || 0) / 3600),
-            questsCompleted: focusData.completedSessions || 0,
-          }));
-        }
-      } catch (e) {
-        console.error("Failed to fetch stats:", e);
+  const fetchStats = useCallback(async () => {
+    try {
+      // Fetch focus stats
+      const focusRes = await fetch("/api/focus?stats=true&period=week");
+      if (focusRes.ok) {
+        const focusData = await focusRes.json() as { totalFocusTime?: number; completedSessions?: number };
+        setStats((prev) => ({
+          ...prev,
+          focusHours: Math.round((focusData.totalFocusTime || 0) / 3600),
+          questsCompleted: focusData.completedSessions || 0,
+        }));
       }
+    } catch (e) {
+      console.error("Failed to fetch stats:", e);
     }
-
-    fetchStats();
   }, []);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
+
+  // Auto-refresh: refetch on focus after 1 minute staleness (per SYNC.md)
+  // Pauses on page unload, soft refreshes on reload if stale
+  useAutoRefresh({
+    onRefresh: fetchStats,
+    refreshKey: "progress",
+    stalenessMs: 60000, // 1 minute per SYNC.md contract
+    refreshOnMount: true,
+    refetchOnFocus: true,
+    refetchOnVisible: true,
+    enabled: !isLoading,
+  });
 
   // Calculate total XP and level
   useEffect(() => {

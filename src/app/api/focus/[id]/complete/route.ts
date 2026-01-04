@@ -8,6 +8,7 @@ import type { D1Database } from "@cloudflare/workers-types";
 import { auth } from "@/lib/auth";
 import { completeFocusSession } from "@/lib/db";
 import { ensureUserExists } from "@/lib/db/repositories/users";
+import { logActivityEvent } from "@/lib/db/repositories/activity-events";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 export const dynamic = "force-dynamic";
@@ -60,6 +61,16 @@ export async function POST(
         { status: 404 }
       );
     }
+
+    // Log activity event for XP/coins and automatic quest progress
+    await logActivityEvent(db, dbUser.id, "focus_complete", {
+      entityType: "focus_session",
+      entityId: id,
+      metadata: {
+        duration: focusSession.planned_duration,
+        mode: focusSession.mode,
+      },
+    });
 
     return NextResponse.json({ session: focusSession });
   } catch (error) {

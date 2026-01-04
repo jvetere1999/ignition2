@@ -2,13 +2,13 @@
 
 /**
  * Admin Client Component
- * Full admin dashboard with user management, quests, feedback, and skills
+ * Admin dashboard with user list, quests, feedback, skills, and database operations
  */
 
 import { useState, useEffect, useCallback } from "react";
 import styles from "./page.module.css";
 
-type AdminTab = "users" | "quests" | "feedback" | "skills" | "stats";
+type AdminTab = "users" | "quests" | "feedback" | "skills" | "stats" | "database";
 
 interface User {
   id: string;
@@ -16,10 +16,10 @@ interface User {
   name: string | null;
   image: string | null;
   role: string;
-  approved: boolean;
   createdAt: string;
   level?: number;
   totalXp?: number;
+  tosAccepted?: boolean;
 }
 
 interface Quest {
@@ -72,6 +72,23 @@ export function AdminClient({ userEmail }: AdminClientProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [showQuestForm, setShowQuestForm] = useState(false);
   const [showSkillForm, setShowSkillForm] = useState(false);
+
+  // Delete confirmation modal state
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    userId: string;
+    userEmail: string;
+    confirmText: string;
+    error: string;
+    isDeleting: boolean;
+  }>({
+    isOpen: false,
+    userId: "",
+    userEmail: "",
+    confirmText: "",
+    error: "",
+    isDeleting: false,
+  });
 
   // Quest form state
   const [newQuest, setNewQuest] = useState({
@@ -131,35 +148,61 @@ export function AdminClient({ userEmail }: AdminClientProps) {
     fetchData();
   }, [fetchData]);
 
-  // User actions
-  const handleApproveUser = async (userId: string) => {
-    try {
-      const response = await fetch("/api/admin/users", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, action: "approve" }),
-      });
-      if (response.ok) {
-        setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, approved: true } : u)));
-      }
-    } catch (error) {
-      console.error("Failed to approve user:", error);
-    }
+  // Open delete confirmation modal
+  const openDeleteModal = (userId: string, email: string) => {
+    setDeleteModal({
+      isOpen: true,
+      userId,
+      userEmail: email,
+      confirmText: "",
+      error: "",
+      isDeleting: false,
+    });
   };
 
-  const handleDenyUser = async (userId: string) => {
-    const reason = prompt("Reason for denial (optional):");
+  // Close delete modal
+  const closeDeleteModal = () => {
+    setDeleteModal({
+      isOpen: false,
+      userId: "",
+      userEmail: "",
+      confirmText: "",
+      error: "",
+      isDeleting: false,
+    });
+  };
+
+  // Handle delete confirmation
+  const handleDeleteConfirm = async () => {
+    if (deleteModal.confirmText !== "DELETE") {
+      setDeleteModal((prev) => ({ ...prev, error: "Please type DELETE exactly to confirm" }));
+      return;
+    }
+
+    setDeleteModal((prev) => ({ ...prev, isDeleting: true, error: "" }));
+
     try {
-      const response = await fetch("/api/admin/users", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, action: "deny", reason }),
+      const response = await fetch(`/api/admin/users?userId=${deleteModal.userId}`, {
+        method: "DELETE",
       });
       if (response.ok) {
-        fetchData();
+        setUsers((prev) => prev.filter((u) => u.id !== deleteModal.userId));
+        closeDeleteModal();
+      } else {
+        const data = await response.json() as { error?: string };
+        setDeleteModal((prev) => ({
+          ...prev,
+          isDeleting: false,
+          error: data.error || "Failed to delete user"
+        }));
       }
     } catch (error) {
-      console.error("Failed to deny user:", error);
+      console.error("Failed to delete user:", error);
+      setDeleteModal((prev) => ({
+        ...prev,
+        isDeleting: false,
+        error: "Network error. Please try again."
+      }));
     }
   };
 
@@ -307,8 +350,6 @@ export function AdminClient({ userEmail }: AdminClientProps) {
     }
   };
 
-  const pendingUsers = users.filter((u) => !u.approved);
-  const approvedUsers = users.filter((u) => u.approved);
 
   return (
     <div className={styles.page}>
@@ -321,16 +362,13 @@ export function AdminClient({ userEmail }: AdminClientProps) {
 
       {/* Tabs */}
       <div className={styles.tabs}>
-        {(["users", "quests", "feedback", "skills", "stats"] as AdminTab[]).map((tab) => (
+        {(["users", "quests", "feedback", "skills", "stats", "database"] as AdminTab[]).map((tab) => (
           <button
             key={tab}
             className={`${styles.tab} ${activeTab === tab ? styles.active : ""}`}
             onClick={() => setActiveTab(tab)}
           >
             {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            {tab === "users" && pendingUsers.length > 0 && (
-              <span className={styles.badge}>{pendingUsers.length}</span>
-            )}
           </button>
         ))}
       </div>
@@ -343,42 +381,9 @@ export function AdminClient({ userEmail }: AdminClientProps) {
             {/* Users Tab */}
             {activeTab === "users" && (
               <div className={styles.section}>
-                {pendingUsers.length > 0 && (
-                  <>
-                    <h2 className={styles.sectionTitle}>Pending Approval ({pendingUsers.length})</h2>
-                    <div className={styles.userList}>
-                      {pendingUsers.map((user) => (
-                        <div key={user.id} className={styles.userCard}>
-                          <div className={styles.userInfo}>
-                            <span className={styles.userName}>{user.name || "No name"}</span>
-                            <span className={styles.userEmail}>{user.email}</span>
-                            <span className={styles.userDate}>
-                              Signed up: {new Date(user.createdAt).toLocaleDateString()}
-                            </span>
-                          </div>
-                          <div className={styles.userActions}>
-                            <button
-                              className={styles.approveButton}
-                              onClick={() => handleApproveUser(user.id)}
-                            >
-                              Approve
-                            </button>
-                            <button
-                              className={styles.denyButton}
-                              onClick={() => handleDenyUser(user.id)}
-                            >
-                              Deny
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
-
-                <h2 className={styles.sectionTitle}>Approved Users ({approvedUsers.length})</h2>
+                <h2 className={styles.sectionTitle}>All Users ({users.length})</h2>
                 <div className={styles.userList}>
-                  {approvedUsers.map((user) => (
+                  {users.map((user) => (
                     <div key={user.id} className={styles.userCard}>
                       <div className={styles.userInfo}>
                         <span className={styles.userName}>{user.name || "No name"}</span>
@@ -387,9 +392,18 @@ export function AdminClient({ userEmail }: AdminClientProps) {
                           Level {user.level || 1} - {user.totalXp || 0} XP
                         </span>
                       </div>
-                      <span className={`${styles.roleBadge} ${styles[user.role]}`}>
-                        {user.role}
-                      </span>
+                      <div className={styles.userActions}>
+                        <span className={`${styles.roleBadge} ${styles[user.role]}`}>
+                          {user.role}
+                        </span>
+                        <button
+                          className={styles.deleteButton}
+                          onClick={() => openDeleteModal(user.id, user.email)}
+                          title="Delete user and all data"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -777,14 +791,6 @@ export function AdminClient({ userEmail }: AdminClientProps) {
                     <span className={styles.statLabel}>Total Users</span>
                   </div>
                   <div className={styles.statCard}>
-                    <span className={styles.statValue}>{approvedUsers.length}</span>
-                    <span className={styles.statLabel}>Approved</span>
-                  </div>
-                  <div className={styles.statCard}>
-                    <span className={styles.statValue}>{pendingUsers.length}</span>
-                    <span className={styles.statLabel}>Pending</span>
-                  </div>
-                  <div className={styles.statCard}>
                     <span className={styles.statValue}>{quests.filter((q) => q.isActive).length}</span>
                     <span className={styles.statLabel}>Active Quests</span>
                   </div>
@@ -792,11 +798,259 @@ export function AdminClient({ userEmail }: AdminClientProps) {
                     <span className={styles.statValue}>{feedback.filter((f) => f.status === "open").length}</span>
                     <span className={styles.statLabel}>Open Feedback</span>
                   </div>
+                  <div className={styles.statCard}>
+                    <span className={styles.statValue}>{skills.filter((s) => s.isActive).length}</span>
+                    <span className={styles.statLabel}>Active Skills</span>
+                  </div>
                 </div>
               </div>
             )}
+
+            {/* Database Tab */}
+            {activeTab === "database" && (
+              <DatabaseTab />
+            )}
           </>
         )}
+      </div>
+
+      {/* Delete User Confirmation Modal */}
+      {deleteModal.isOpen && (
+        <div className={styles.modalOverlay} onClick={closeDeleteModal}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <h3 className={styles.modalTitle}>Delete User</h3>
+            <p className={styles.modalText}>
+              You are about to permanently delete <strong>{deleteModal.userEmail}</strong> and ALL their data.
+            </p>
+            <p className={styles.modalWarning}>
+              This action cannot be undone. All focus sessions, quests, workouts, goals, and other data will be permanently removed.
+            </p>
+            <div className={styles.modalInputGroup}>
+              <label className={styles.modalLabel}>Type DELETE to confirm:</label>
+              <input
+                type="text"
+                value={deleteModal.confirmText}
+                onChange={(e) => setDeleteModal((prev) => ({ ...prev, confirmText: e.target.value, error: "" }))}
+                className={styles.modalInput}
+                placeholder="DELETE"
+                autoFocus
+              />
+              {deleteModal.error && (
+                <p className={styles.modalError}>{deleteModal.error}</p>
+              )}
+            </div>
+            <div className={styles.modalActions}>
+              <button
+                className={styles.cancelButton}
+                onClick={closeDeleteModal}
+                disabled={deleteModal.isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                className={styles.dangerButton}
+                onClick={handleDeleteConfirm}
+                disabled={deleteModal.isDeleting}
+              >
+                {deleteModal.isDeleting ? "Deleting..." : "Delete User"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Database Tab Component
+ * Backup, restore, and documentation access
+ */
+function DatabaseTab() {
+  const [isBackingUp, setIsBackingUp] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
+  const [restoreFile, setRestoreFile] = useState<File | null>(null);
+  const [dbInfo, setDbInfo] = useState<{ currentVersion: number; currentVersionName: string } | null>(null);
+  const [restoreResult, setRestoreResult] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/backup")
+      .then((res) => res.json() as Promise<{ currentVersion: number; currentVersionName: string }>)
+      .then((data) => setDbInfo(data))
+      .catch(console.error);
+  }, []);
+
+  const handleBackup = async () => {
+    setIsBackingUp(true);
+    try {
+      const response = await fetch("/api/admin/backup", { method: "POST" });
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `passion-os-backup-${new Date().toISOString().split("T")[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } else {
+        alert("Failed to create backup");
+      }
+    } catch (error) {
+      console.error("Backup failed:", error);
+      alert("Backup failed");
+    } finally {
+      setIsBackingUp(false);
+    }
+  };
+
+  const handleRestore = async () => {
+    if (!restoreFile) {
+      alert("Please select a backup file");
+      return;
+    }
+
+    if (!confirm("This will overwrite existing data. Are you sure?")) {
+      return;
+    }
+
+    setIsRestoring(true);
+    setRestoreResult(null);
+    try {
+      const text = await restoreFile.text();
+      const data = JSON.parse(text);
+
+      const response = await fetch("/api/admin/restore", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json() as { originalVersion?: number; restoredVersion?: number; error?: string };
+      if (response.ok) {
+        setRestoreResult(`Restored successfully from v${result.originalVersion} to v${result.restoredVersion}`);
+      } else {
+        setRestoreResult(`Error: ${result.error}`);
+      }
+    } catch (error) {
+      console.error("Restore failed:", error);
+      setRestoreResult("Restore failed: Invalid backup file");
+    } finally {
+      setIsRestoring(false);
+    }
+  };
+
+  return (
+    <div className={styles.databasePage}>
+      {/* Version Card */}
+      <div className={styles.dbVersionCard}>
+        <div className={styles.dbVersionIcon}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <ellipse cx="12" cy="5" rx="9" ry="3" />
+            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+          </svg>
+        </div>
+        <div className={styles.dbVersionInfo}>
+          <span className={styles.dbVersionLabel}>Database Version</span>
+          <span className={styles.dbVersionValue}>v{dbInfo?.currentVersion || "..."}</span>
+          <span className={styles.dbVersionMigration}>{dbInfo?.currentVersionName || "Loading..."}</span>
+        </div>
+      </div>
+
+      {/* Action Cards Grid */}
+      <div className={styles.dbActionsGrid}>
+        {/* Backup Card */}
+        <div className={styles.dbActionCard}>
+          <div className={styles.dbActionHeader}>
+            <div className={styles.dbActionIcon} style={{ background: "rgba(34, 197, 94, 0.1)", color: "#22c55e" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                <polyline points="7,10 12,15 17,10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+            </div>
+            <h3 className={styles.dbActionTitle}>Backup Database</h3>
+          </div>
+          <p className={styles.dbActionDesc}>
+            Download a complete JSON backup of all tables with version metadata for safe migration.
+          </p>
+          <button
+            className={styles.dbBackupButton}
+            onClick={handleBackup}
+            disabled={isBackingUp}
+          >
+            {isBackingUp ? "Creating..." : "Download Backup"}
+          </button>
+        </div>
+
+        {/* Restore Card */}
+        <div className={styles.dbActionCard}>
+          <div className={styles.dbActionHeader}>
+            <div className={styles.dbActionIcon} style={{ background: "rgba(249, 115, 22, 0.1)", color: "#f97316" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                <polyline points="17,8 12,3 7,8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+            </div>
+            <h3 className={styles.dbActionTitle}>Restore Database</h3>
+          </div>
+          <p className={styles.dbActionDesc}>
+            Upload a backup file to restore. Older versions are automatically migrated.
+          </p>
+          <div className={styles.dbRestoreForm}>
+            <label className={styles.dbFileLabel}>
+              <input
+                type="file"
+                accept=".json"
+                onChange={(e) => setRestoreFile(e.target.files?.[0] || null)}
+                className={styles.dbFileInput}
+              />
+              <span className={styles.dbFileName}>
+                {restoreFile ? restoreFile.name : "Choose backup file..."}
+              </span>
+            </label>
+            <button
+              className={styles.dbRestoreButton}
+              onClick={handleRestore}
+              disabled={isRestoring || !restoreFile}
+            >
+              {isRestoring ? "Restoring..." : "Restore"}
+            </button>
+          </div>
+          {restoreResult && (
+            <p className={restoreResult.startsWith("Error") ? styles.dbResultError : styles.dbResultSuccess}>
+              {restoreResult}
+            </p>
+          )}
+        </div>
+
+        {/* Documentation Card */}
+        <div className={styles.dbActionCard}>
+          <div className={styles.dbActionHeader}>
+            <div className={styles.dbActionIcon} style={{ background: "rgba(99, 102, 241, 0.1)", color: "#6366f1" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                <polyline points="14,2 14,8 20,8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <polyline points="10,9 9,9 8,9" />
+              </svg>
+            </div>
+            <h3 className={styles.dbActionTitle}>Documentation</h3>
+          </div>
+          <p className={styles.dbActionDesc}>
+            View complete database schema, API routes, table definitions, and technical specs.
+          </p>
+          <a href="/admin/docs" className={styles.dbDocsLink}>
+            View Technical Docs
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
       </div>
     </div>
   );

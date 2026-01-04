@@ -3,6 +3,7 @@
 /**
  * Infobase Client Component
  * Interactive knowledge base with CRUD operations
+ * Syncs with D1 database for cross-device persistence
  */
 
 import { useState, useEffect, useCallback, useMemo } from "react";
@@ -37,6 +38,7 @@ export function InfobaseClient() {
   const [selectedEntry, setSelectedEntry] = useState<InfoEntry | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Form state
   const [formTitle, setFormTitle] = useState("");
@@ -44,28 +46,70 @@ export function InfobaseClient() {
   const [formCategory, setFormCategory] = useState("Tips");
   const [formTags, setFormTags] = useState("");
 
-  // Load entries from localStorage
-  useEffect(() => {
+  // Fetch entries from API
+  const fetchEntries = useCallback(async () => {
     try {
+      const res = await fetch(`/api/infobase?category=${selectedCategory === "All Entries" ? "" : selectedCategory}&search=${searchQuery}`);
+      if (res.ok) {
+        const data = await res.json() as { entries?: Array<{ id: string; title: string; content: string; category: string; tags: string[] | string; created_at: string; updated_at: string }> };
+        if (data.entries && data.entries.length > 0) {
+          const mapped = data.entries.map((e) => ({
+            id: e.id,
+            title: e.title,
+            content: e.content,
+            category: e.category,
+            tags: Array.isArray(e.tags) ? e.tags : [],
+            createdAt: e.created_at,
+            updatedAt: e.updated_at,
+          }));
+          setEntries(mapped);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(mapped));
+          return;
+        }
+      }
+      // Fall back to localStorage
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        setEntries(JSON.parse(stored));
+        const localEntries = JSON.parse(stored);
+        setEntries(localEntries);
+        // Sync local entries to D1
+        syncEntriesToD1(localEntries);
       }
     } catch (e) {
-      console.error("Failed to load infobase:", e);
+      console.error("Failed to fetch infobase:", e);
+      // Fall back to localStorage
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          setEntries(JSON.parse(stored));
+        }
+      } catch {
+        // Ignore
+      }
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
+  }, [selectedCategory, searchQuery]);
 
-  // Save entries to localStorage
-  useEffect(() => {
+  // Sync entries to D1
+  const syncEntriesToD1 = async (entriesToSync: InfoEntry[]) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+      await fetch("/api/infobase", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "sync", entries: entriesToSync }),
+      });
     } catch (e) {
-      console.error("Failed to save infobase:", e);
+      console.error("Failed to sync infobase to D1:", e);
     }
-  }, [entries]);
+  };
 
-  // Filter entries
+  // Load entries on mount and when filters change
+  useEffect(() => {
+    fetchEntries();
+  }, [fetchEntries]);
+
+  // Filter entries (for local filtering if needed)
   const filteredEntries = useMemo(() => {
     return entries.filter((entry) => {
       const matchesCategory =
@@ -120,7 +164,7 @@ export function InfobaseClient() {
     setFormTags(entry.tags.join(", "));
   }, []);
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     if (!formTitle.trim()) return;
 
     const tags = formTags
@@ -140,40 +184,70 @@ export function InfobaseClient() {
       };
       setEntries((prev) => [newEntry, ...prev]);
       setSelectedEntry(newEntry);
+
+      // Save to D1
+      try {
+        await fetch("/api/infobase", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "create", ...newEntry, tags }),
+        });
+      } catch (e) {
+        console.error("Failed to save to D1:", e);
+      }
     } else if (selectedEntry) {
-      setEntries((prev) =>
-        prev.map((e) =>
-          e.id === selectedEntry.id
-            ? {
-                ...e,
-                title: formTitle.trim(),
-                content: formContent.trim(),
-                category: formCategory,
-                tags,
-                updatedAt: new Date().toISOString(),
-              }
-            : e
-        )
-      );
-      setSelectedEntry({
+      const updatedEntry = {
         ...selectedEntry,
         title: formTitle.trim(),
         content: formContent.trim(),
         category: formCategory,
         tags,
         updatedAt: new Date().toISOString(),
-      });
+      };
+      setEntries((prev) =>
+        prev.map((e) => (e.id === selectedEntry.id ? updatedEntry : e))
+      );
+      setSelectedEntry(updatedEntry);
+
+      // Update in D1
+      try {
+        await fetch("/api/infobase", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "update",
+            id: selectedEntry.id,
+            title: updatedEntry.title,
+            content: updatedEntry.content,
+            category: updatedEntry.category,
+            tags
+          }),
+        });
+      } catch (e) {
+        console.error("Failed to update in D1:", e);
+      }
     }
     setIsEditing(false);
     setIsCreating(false);
   }, [isCreating, selectedEntry, formTitle, formContent, formCategory, formTags]);
 
   const handleDelete = useCallback(
-    (id: string) => {
+    async (id: string) => {
       if (confirm("Delete this entry?")) {
         setEntries((prev) => prev.filter((e) => e.id !== id));
         if (selectedEntry?.id === id) {
           setSelectedEntry(null);
+        }
+
+        // Delete from D1
+        try {
+          await fetch("/api/infobase", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "delete", id }),
+          });
+        } catch (e) {
+          console.error("Failed to delete from D1:", e);
         }
       }
     },
