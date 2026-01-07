@@ -1,0 +1,41 @@
+{
+  "name": "@ignition/api-client",
+  "version": "0.1.0",
+  "description": "Shared API client for Ignition frontend and admin",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ignition/ignition.git",
+    "directory": "shared/api-client"
+  },
+  "keywords": [
+    "ignition",
+    "api",
+    "client",
+    "fetch"
+  ]
+}
+

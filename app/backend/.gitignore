@@ -1,0 +1,21 @@
+# Build artifacts
+/target/
+
+# IDE
+/.idea/
+/.vscode/
+
+# Environment files (keep .env.example)
+.env
+.env.local
+.env.*.local
+
+# Local logs
+*.log
+
+# MacOS
+.DS_Store
+
+# Debug files
+*.pdb
+
