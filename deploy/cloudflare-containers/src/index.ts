@@ -43,6 +43,16 @@ export class ApiContainer extends Container {
   // @ts-expect-error - Cloudflare Containers beta types define envVars as property, but getter works at runtime
   get envVars() {
     const env = this.env as Env;
+    
+    // Log DATABASE_URL availability for debugging
+    const dbUrl = env.DATABASE_URL;
+    if (!dbUrl) {
+      console.error("[ApiContainer] DATABASE_URL is undefined/empty in secrets!");
+    } else {
+      const redacted = dbUrl.substring(0, 30) + "..." + dbUrl.substring(dbUrl.length - 15);
+      console.log(`[ApiContainer] DATABASE_URL found: ${redacted}`);
+    }
+    
     return {
       // Database
       DATABASE_URL: env.DATABASE_URL,

@@ -41,10 +41,20 @@ pub struct DatabaseConfig {
 
 fn default_database_url() -> String {
     // Check environment directly as fallback
-    std::env::var("DATABASE_URL")
+    let db_url = std::env::var("DATABASE_URL")
         .ok()
         .filter(|s| !s.is_empty() && s != "undefined")
-        .unwrap_or_else(|| "postgres://localhost/ignition".to_string())
+        .unwrap_or_else(|| "postgres://localhost/ignition".to_string());
+    
+    // Log what we got (redacted for security)
+    let redacted = if db_url.len() > 30 {
+        format!("{}...{}", &db_url[..15], &db_url[db_url.len()-10..])
+    } else {
+        "***".to_string()
+    };
+    tracing::info!("DATABASE_URL from env: {}", redacted);
+    
+    db_url
 }
 
 #[derive(Debug, Clone, Deserialize)]

@@ -25,6 +25,13 @@ impl AppState {
     pub async fn new(config: &AppConfig) -> anyhow::Result<Self> {
         // Log the database URL (redacted for security)
         let db_url = &config.database.url;
+        tracing::info!("DATABASE_URL received: {} chars", db_url.len());
+        
+        if db_url.is_empty() || db_url == "postgres://localhost/ignition" {
+            tracing::error!("DATABASE_URL not set or using fallback: {}", db_url);
+            return Err(anyhow::anyhow!("DATABASE_URL environment variable not configured"));
+        }
+        
         let redacted_url = if db_url.contains('@') {
             let parts: Vec<&str> = db_url.splitn(2, '@').collect();
             format!("***@{}", parts.get(1).unwrap_or(&"unknown"))
