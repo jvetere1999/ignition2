@@ -4,7 +4,7 @@
  */
 
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/server";
 import { redirect } from "next/navigation";
 import { isAdminEmail } from "@/lib/admin";
 import { AdminClient } from "./AdminClient";

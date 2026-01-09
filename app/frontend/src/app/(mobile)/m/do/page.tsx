@@ -5,7 +5,7 @@
  * Shows Focus, active plan item, and quests.
  */
 
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/server";
 import { redirect } from "next/navigation";
 import { MobileDoClient } from "@/components/mobile/screens/MobileDoClient";
 import { getDB } from "@/lib/db";

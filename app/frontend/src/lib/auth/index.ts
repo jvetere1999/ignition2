@@ -26,5 +26,6 @@ export {
   useRequireAuth,
 } from './AuthProvider';
 
-// Server-side auth (for server components)
-export { auth } from './server';
+// NOTE: Server-side auth uses next/headers and CANNOT be re-exported here.
+// Server components must import directly:
+//   import { auth } from '@/lib/auth/server';

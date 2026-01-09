@@ -23,7 +23,7 @@
 
 import type { Metadata } from "next";
 import type { D1Database } from "@cloudflare/workers-types";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/server";
 import { getDB } from "@/lib/perf";
 import { ensureUserExists, isReturningAfterGap } from "@/lib/db/repositories/users";
 import {

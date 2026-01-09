@@ -2,7 +2,7 @@
  * Mobile Focus Page
  */
 
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/server";
 import { redirect } from "next/navigation";
 import { MobileFocus } from "@/components/mobile/screens/MobileFocus";
 

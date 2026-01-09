@@ -2,7 +2,7 @@
  * Mobile Quests Page
  */
 
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/server";
 import { redirect } from "next/navigation";
 import { MobileQuests } from "@/components/mobile/screens/MobileQuests";
 

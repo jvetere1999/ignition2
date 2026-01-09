@@ -8,7 +8,7 @@
  */
 
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/server";
 import { redirect } from "next/navigation";
 import { IgnitionsClient } from "./IgnitionsClient";
 

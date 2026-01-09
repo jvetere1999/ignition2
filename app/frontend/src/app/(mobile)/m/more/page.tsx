@@ -3,7 +3,7 @@
  * Navigation to additional features
  */
 
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/server";
 import { redirect } from "next/navigation";
 import { MobileMore } from "@/components/mobile/screens/MobileMore";
 
