@@ -22,7 +22,7 @@ use crate::state::AppState;
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/", get(list_habits).post(create_habit))
-        .route("/:id/complete", post(complete_habit))
+        .route("/{id}/complete", post(complete_habit))
 }
 
 // ============================================================================
