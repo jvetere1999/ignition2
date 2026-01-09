@@ -20,7 +20,7 @@ tower-http = { version = "0.6", default-features = false, features = ["cors", "t
 tokio = { version = "1.42", default-features = false, features = ["rt-multi-thread", "net", "time", "sync", "signal", "macros"] }
 
 # Database (minimal features, no sqlite)
-sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "tls-rustls", "postgres", "uuid", "chrono", "json", "derive"] }
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "tls-rustls", "postgres", "uuid", "chrono", "json", "derive", "migrate", "macros"] }
 
 # S3/R2 storage - lightweight alternative (10x faster compile than aws-sdk)
 rust-s3 = { version = "0.35", default-features = false, features = ["tokio-rustls-tls", "fail-on-err"] }

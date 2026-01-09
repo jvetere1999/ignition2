@@ -24,10 +24,21 @@ impl AppState {
         // Create database pool
         let db = PgPool::connect(&config.database.url).await?;
 
-        // Run pending migrations (in development)
-        if config.is_development() {
-            tracing::info!("Running database migrations...");
-            // TODO: sqlx::migrate!().run(&db).await?;
+        // Run pending migrations on every startup
+        // sqlx tracks applied migrations in _sqlx_migrations table
+        tracing::info!("Checking database migrations...");
+        match Self::run_migrations(&db).await {
+            Ok(applied) => {
+                if applied > 0 {
+                    tracing::info!("Applied {} new migration(s)", applied);
+                } else {
+                    tracing::info!("Database schema is up to date");
+                }
+            }
+            Err(e) => {
+                tracing::error!("Migration failed: {}", e);
+                return Err(e.into());
+            }
         }
 
         // Create storage client if configured
@@ -52,5 +63,47 @@ impl AppState {
             db,
             storage,
         })
+    }
+
+    /// Run database migrations
+    /// 
+    /// Embeds migrations from app/database/migrations at compile time.
+    /// Tracks applied migrations in _sqlx_migrations table.
+    /// Returns the number of newly applied migrations.
+    async fn run_migrations(db: &PgPool) -> Result<usize, sqlx::migrate::MigrateError> {
+        // Migrations are embedded at compile time from the migrations directory
+        let migrator = sqlx::migrate!("../../../database/migrations");
+        
+        // Get current migration count before running
+        let before = sqlx::query_scalar::<_, i64>(
+            "SELECT COUNT(*) FROM _sqlx_migrations"
+        )
+        .fetch_one(db)
+        .await
+        .unwrap_or(0);
+
+        // Run all pending migrations
+        migrator.run(db).await?;
+
+        // Get count after running
+        let after = sqlx::query_scalar::<_, i64>(
+            "SELECT COUNT(*) FROM _sqlx_migrations"
+        )
+        .fetch_one(db)
+        .await
+        .unwrap_or(0);
+
+        Ok((after - before) as usize)
+    }
+
+    /// Get the current database schema version
+    pub async fn get_schema_version(&self) -> Option<i64> {
+        sqlx::query_scalar::<_, i64>(
+            "SELECT version FROM _sqlx_migrations ORDER BY version DESC LIMIT 1"
+        )
+        .fetch_optional(&self.db)
+        .await
+        .ok()
+        .flatten()
     }
 }
