@@ -9,9 +9,11 @@ compatibility_flags = ["nodejs_compat"]
 main = "src/index.ts"
 
 # Container configuration
+# Build context is repo root (../../) so migrations are accessible
 [[containers]]
 class_name = "ApiContainer"
 image = "../../app/backend/Dockerfile"
+build_context = "../.."
 max_instances = 5
 instance_type = "standard-1"  # 1 vCPU, 2GB RAM
 

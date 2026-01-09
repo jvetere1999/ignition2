@@ -72,6 +72,9 @@ impl AppState {
     /// Returns the number of newly applied migrations.
     async fn run_migrations(db: &PgPool) -> Result<usize, sqlx::migrate::MigrateError> {
         // Migrations are embedded at compile time from the migrations directory
+        // Path is relative to Cargo.toml location
+        // - Local dev: ../../../database/migrations (from app/backend/crates/api)
+        // - Docker: ../../database/migrations (from /app with COPY structure)
         let migrator = sqlx::migrate!("../../../database/migrations");
         
         // Get current migration count before running
