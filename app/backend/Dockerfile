@@ -1,6 +1,4 @@
 # Build stage
-# NOTE: This Dockerfile must be built from the REPO ROOT, not app/backend
-# e.g., docker build -f app/backend/Dockerfile .
 FROM rust:1.84-slim-bookworm AS builder
 
 WORKDIR /app
@@ -11,12 +9,10 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Recreate the local directory structure so sqlx::migrate! path works
-# Path in state.rs: "../../../database/migrations" (from crates/api/src/)
-# So we need: /app/crates/api/src -> ../../../database/migrations = /app/database/migrations
-COPY app/backend/Cargo.toml app/backend/Cargo.lock ./
-COPY app/backend/crates ./crates
-COPY app/database/migrations ./database/migrations
+# Copy manifests and source
+COPY Cargo.toml Cargo.lock ./
+COPY crates ./crates
+COPY migrations ./migrations
 
 # Build release binary with reduced parallelism to avoid OOM
 ENV CARGO_BUILD_JOBS=2
