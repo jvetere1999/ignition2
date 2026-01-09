@@ -40,9 +40,7 @@ API_URL = "https://api.ecent.online"
 pattern = "api.ecent.online/*"
 zone_name = "ecent.online"
 
-[[routes]]
-pattern = "ignition.ecent.dev/*"
-zone_name = "ecent.dev"
+# Remove the ecent.dev route - zone not configured
 
 # Observability
 [observability]
