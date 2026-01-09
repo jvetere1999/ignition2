@@ -1,0 +1,13 @@
+{
+  "name": "ignition-admin-deploy",
+  "private": true,
+  "scripts": {
+    "build": "cd ../../app/admin && npm run build && npx @opennextjs/cloudflare build",
+    "deploy": "npm run build && npx wrangler deploy",
+    "dev": "npx wrangler dev"
+  },
+  "devDependencies": {
+    "@opennextjs/cloudflare": "^1.3.0",
+    "wrangler": "^4.0.0"
+  }
+}

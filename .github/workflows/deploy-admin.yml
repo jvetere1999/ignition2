@@ -1,0 +1,55 @@
+name: Deploy Admin
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/admin/**'
+      - 'deploy/cloudflare-admin/**'
+      - '.github/workflows/deploy-admin.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy Admin to Workers
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: app/admin/package-lock.json
+
+      - name: Install Admin Dependencies
+        working-directory: app/admin
+        run: npm ci
+
+      - name: Build Admin App
+        working-directory: app/admin
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: https://api.ecent.online
+
+      - name: Build for Cloudflare with OpenNext
+        working-directory: app/admin
+        run: npx @opennextjs/cloudflare build
+
+      - name: Install Deploy Dependencies
+        working-directory: deploy/cloudflare-admin
+        run: npm ci
+
+      - name: Copy OpenNext Build
+        run: |
+          cp -r app/admin/.open-next deploy/cloudflare-admin/
+
+      - name: Deploy to Cloudflare Workers
+        working-directory: deploy/cloudflare-admin
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

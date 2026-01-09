@@ -2,6 +2,7 @@
  * Ignition Frontend Worker - Container Orchestrator
  *
  * Routes incoming requests to the Next.js frontend container.
+ * Includes static fallback for landing page during container cold starts.
  */
 
 import { Container, getContainer } from "@cloudflare/containers";
@@ -19,6 +20,9 @@ export class FrontendContainer extends Container {
   defaultPort = 3000;
   sleepAfter = "15m";
 
+  // Keep container warm by increasing startup grace period
+  startupTimeoutMs = 30000; // 30 seconds
+
   get envVars() {
     const env = this.env as Env;
     return {
@@ -29,6 +33,34 @@ export class FrontendContainer extends Container {
     };
   }
 }
+
+/**
+ * Simple HTML for landing page fallback during cold start
+ */
+const LANDING_PAGE_FALLBACK = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ignition - Loading...</title>
+  <style>
+    body { font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #0a0a0a; color: #fafafa; }
+    .container { text-align: center; }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    p { color: #888; }
+    .spinner { width: 40px; height: 40px; border: 3px solid #333; border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite; margin: 2rem auto; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+  <meta http-equiv="refresh" content="3">
+</head>
+<body>
+  <div class="container">
+    <h1>Ignition</h1>
+    <div class="spinner"></div>
+    <p>Starting up... This page will refresh automatically.</p>
+  </div>
+</body>
+</html>`;
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -41,7 +73,7 @@ export default {
       });
     }
 
-    // Debug: Return info about the request while we troubleshoot container
+    // Debug endpoint
     if (url.pathname === "/_debug") {
       return new Response(JSON.stringify({
         status: "worker running",
@@ -57,14 +89,36 @@ export default {
       const id = env.FRONTEND_CONTAINER.idFromName("frontend");
       const container = getContainer(env.FRONTEND_CONTAINER, id);
 
-      // Forward request to container
-      return container.fetch(request);
+      // Forward request to container with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
+
+      try {
+        const response = await container.fetch(new Request(request, { signal: controller.signal }));
+        clearTimeout(timeoutId);
+        return response;
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        
+        // If timeout or container starting, show fallback for landing page
+        if (url.pathname === "/" || url.pathname === "") {
+          return new Response(LANDING_PAGE_FALLBACK, {
+            status: 503,
+            headers: { 
+              "Content-Type": "text/html",
+              "Retry-After": "5",
+            },
+          });
+        }
+        
+        throw fetchError;
+      }
     } catch (error) {
       // Return error details for debugging
       return new Response(JSON.stringify({
         error: "Container fetch failed",
         message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
+        path: url.pathname,
       }), {
         status: 500,
         headers: { "Content-Type": "application/json" },
