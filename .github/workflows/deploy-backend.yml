@@ -43,23 +43,29 @@ jobs:
           restore-keys: |
             docker-${{ runner.os }}-
 
-      - name: Delete existing container app (if conflicts)
-        working-directory: deploy/cloudflare-containers
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: npx wrangler delete ignition-api --force || true
-
-      - name: Delete existing container application
+      - name: Delete existing worker and durable objects
         continue-on-error: true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          curl -X DELETE "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/containers/applications/ignition-api-apicontainer" \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-            -H "Content-Type: application/json" || true
-          sleep 5
+          # Delete the worker script first
+          curl -X DELETE "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/ignition-api" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" || true
+          
+          # Delete the old durable object namespace that's causing conflicts
+          curl -X DELETE "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/durable_objects/namespaces/5e08f208dd5e4a6e90e1cd8ccc32a142" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" || true
+          
+          # Also try deleting any other related namespaces by listing and deleting
+          NAMESPACES=$(curl -s "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/durable_objects/namespaces" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | jq -r '.result[] | select(.script_name == "ignition-api") | .id')
+          for ns in $NAMESPACES; do
+            curl -X DELETE "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/durable_objects/namespaces/$ns" \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" || true
+          done
+          
+          sleep 10
 
       - name: Deploy to Cloudflare Containers
         working-directory: deploy/cloudflare-containers
