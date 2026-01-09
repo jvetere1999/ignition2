@@ -40,8 +40,7 @@ export class ApiContainer extends Container {
   sleepAfter = "15m";
 
   // Environment variables passed to the container at runtime
-  // @ts-expect-error - Cloudflare Containers beta types define envVars as property, but getter works at runtime
-  get envVars() {
+  envVars = (() => {
     const env = this.env as Env;
     
     // Log DATABASE_URL availability for debugging
@@ -85,7 +84,7 @@ export class ApiContainer extends Container {
       CORS_ALLOWED_ORIGINS:
         "https://ignition.ecent.online,https://admin.ignition.ecent.online",
     };
-  }
+  })();
 
   override onStart(): void {
     console.log("Ignition API container started");
