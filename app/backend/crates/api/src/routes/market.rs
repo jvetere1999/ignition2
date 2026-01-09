@@ -10,7 +10,6 @@ use axum::{
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 use crate::db::market_models::*;
 use crate::db::market_repos::MarketRepo;

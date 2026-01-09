@@ -1123,7 +1123,7 @@ impl OnboardingRepo {
     ) -> Result<OnboardingProgress, AppError> {
         let state = Self::get_user_state(pool, user_id).await?;
 
-        let Some(state) = state else {
+        let Some(_state) = state else {
             return Ok(OnboardingProgress {
                 completed_steps: 0,
                 total_steps: 0,
