@@ -11,7 +11,7 @@ main = "src/index.ts"
 # Container configuration
 [[containers]]
 class_name = "ApiContainer"
-image = "../../app/backend"
+image = "../../app/backend/Dockerfile"
 max_instances = 5
 instance_type = "standard-1"  # 1 vCPU, 2GB RAM
 
