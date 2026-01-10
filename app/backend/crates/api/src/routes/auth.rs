@@ -87,9 +87,17 @@ async fn signin_google(
 ) -> AppResult<Response> {
     let oauth_service = OAuthService::new(&state.config)?;
 
-    let google = oauth_service
-        .google
-        .ok_or_else(|| AppError::Config("Google OAuth not configured".to_string()))?;
+    let google = match oauth_service.google {
+        Some(g) => g,
+        None => {
+            // Redirect to error page instead of 500
+            let error_url = format!(
+                "https://ignition.ecent.online/auth/error?error=OAuthNotConfigured&provider=Google&details={}",
+                urlencoding::encode("Google OAuth credentials are not configured on the server")
+            );
+            return Ok(Redirect::temporary(&error_url).into_response());
+        }
+    };
 
     let (auth_url, oauth_state) = google.authorization_url();
 
@@ -109,9 +117,17 @@ async fn signin_azure(
 ) -> AppResult<Response> {
     let oauth_service = OAuthService::new(&state.config)?;
 
-    let azure = oauth_service
-        .azure
-        .ok_or_else(|| AppError::Config("Azure OAuth not configured".to_string()))?;
+    let azure = match oauth_service.azure {
+        Some(a) => a,
+        None => {
+            // Redirect to error page instead of 500
+            let error_url = format!(
+                "https://ignition.ecent.online/auth/error?error=OAuthNotConfigured&provider=Azure&details={}",
+                urlencoding::encode("Azure/Microsoft OAuth credentials are not configured on the server")
+            );
+            return Ok(Redirect::temporary(&error_url).into_response());
+        }
+    };
 
     let (auth_url, oauth_state) = azure.authorization_url();
 
