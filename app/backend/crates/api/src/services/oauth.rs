@@ -273,8 +273,20 @@ impl OAuthService {
 
         let google = if let Some(ref oauth_config) = config.auth.oauth {
             if let Some(ref google_config) = oauth_config.google {
-                let redirect_uri = format!("{}/auth/callback/google", base_url);
-                Some(GoogleOAuth::new(google_config, &redirect_uri)?)
+                // Skip if credentials are empty
+                if google_config.client_id.is_empty() || google_config.client_secret.is_empty() {
+                    tracing::info!("Google OAuth credentials not configured. Google login disabled.");
+                    None
+                } else {
+                    let redirect_uri = format!("{}/auth/callback/google", base_url);
+                    match GoogleOAuth::new(google_config, &redirect_uri) {
+                        Ok(google_oauth) => Some(google_oauth),
+                        Err(e) => {
+                            tracing::warn!("Google OAuth setup failed: {}. Google login disabled.", e);
+                            None
+                        }
+                    }
+                }
             } else {
                 None
             }
@@ -284,12 +296,25 @@ impl OAuthService {
 
         let azure = if let Some(ref oauth_config) = config.auth.oauth {
             if let Some(ref azure_config) = oauth_config.azure {
-                let tenant_id = azure_config
-                    .tenant_id
-                    .as_deref()
-                    .ok_or_else(|| AppError::Config("Azure tenant_id required".to_string()))?;
-                let redirect_uri = format!("{}/auth/callback/azure", base_url);
-                Some(AzureOAuth::new(azure_config, tenant_id, &redirect_uri)?)
+                // Azure requires tenant_id - skip if not configured
+                if let Some(ref tenant_id) = azure_config.tenant_id {
+                    if !tenant_id.is_empty() {
+                        let redirect_uri = format!("{}/auth/callback/azure", base_url);
+                        match AzureOAuth::new(azure_config, tenant_id, &redirect_uri) {
+                            Ok(azure_oauth) => Some(azure_oauth),
+                            Err(e) => {
+                                tracing::warn!("Azure OAuth setup failed: {}. Azure login disabled.", e);
+                                None
+                            }
+                        }
+                    } else {
+                        tracing::info!("Azure OAuth tenant_id is empty. Azure login disabled.");
+                        None
+                    }
+                } else {
+                    tracing::info!("Azure OAuth tenant_id not configured. Azure login disabled.");
+                    None
+                }
             } else {
                 None
             }

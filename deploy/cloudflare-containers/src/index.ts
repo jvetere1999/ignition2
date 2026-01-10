@@ -60,6 +60,7 @@ export class ApiContainer extends Container {
       SERVER_HOST: "0.0.0.0",
       SERVER_PORT: "8080",
       SERVER_ENVIRONMENT: env.NODE_ENV,
+      SERVER_PUBLIC_URL: "https://api.ecent.online",
 
       // Auth
       SESSION_SECRET: env.SESSION_SECRET,
