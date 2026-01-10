@@ -43,51 +43,82 @@ export class ApiContainer extends Container {
   envVars = (() => {
     const env = this.env as Env;
     
-    // Log DATABASE_URL availability for debugging
-    const dbUrl = env.DATABASE_URL;
-    if (!dbUrl) {
-      console.error("[ApiContainer] DATABASE_URL is undefined/empty in secrets!");
-    } else {
-      const redacted = dbUrl.substring(0, 30) + "..." + dbUrl.substring(dbUrl.length - 15);
-      console.log(`[ApiContainer] DATABASE_URL found: ${redacted}`);
-    }
+    // Helper to safely get env var - returns undefined for empty/missing
+    const safeGet = (value: string | undefined): string | undefined => {
+      if (!value || value === "" || value === "undefined") return undefined;
+      return value;
+    };
     
-    return {
+    // Log configuration status for debugging
+    console.log("[ApiContainer] Env var status:");
+    console.log(`  DATABASE_URL: ${safeGet(env.DATABASE_URL) ? "✓ SET" : "✗ MISSING"}`);
+    console.log(`  SESSION_SECRET: ${safeGet(env.SESSION_SECRET) ? "✓ SET" : "✗ MISSING"}`);
+    console.log(`  GOOGLE_CLIENT_ID: ${safeGet(env.GOOGLE_CLIENT_ID) ? "✓ SET" : "✗ MISSING"}`);
+    console.log(`  GOOGLE_CLIENT_SECRET: ${safeGet(env.GOOGLE_CLIENT_SECRET) ? "✓ SET" : "✗ MISSING"}`);
+    console.log(`  AZURE_CLIENT_ID: ${safeGet(env.AZURE_CLIENT_ID) ? "✓ SET" : "✗ MISSING"}`);
+    console.log(`  AZURE_CLIENT_SECRET: ${safeGet(env.AZURE_CLIENT_SECRET) ? "✓ SET" : "✗ MISSING"}`);
+    console.log(`  AZURE_TENANT_ID: ${safeGet(env.AZURE_TENANT_ID) ? "✓ SET" : "✗ MISSING"}`);
+    console.log(`  STORAGE_ENDPOINT: ${safeGet(env.STORAGE_ENDPOINT) ? "✓ SET" : "✗ MISSING"}`);
+    console.log(`  STORAGE_ACCESS_KEY_ID: ${safeGet(env.STORAGE_ACCESS_KEY_ID) ? "✓ SET" : "✗ MISSING"}`);
+    console.log(`  STORAGE_SECRET_ACCESS_KEY: ${safeGet(env.STORAGE_SECRET_ACCESS_KEY) ? "✓ SET" : "✗ MISSING"}`);
+
+    // Build env vars object - only include storage vars if ALL are present
+    const hasAllStorageSecrets = !!(
+      safeGet(env.STORAGE_ENDPOINT) &&
+      safeGet(env.STORAGE_ACCESS_KEY_ID) &&
+      safeGet(env.STORAGE_SECRET_ACCESS_KEY)
+    );
+
+    const result: Record<string, string> = {
       // Database
-      DATABASE_URL: env.DATABASE_URL,
+      DATABASE_URL: safeGet(env.DATABASE_URL) || "",
 
       // Server config
       SERVER_HOST: "0.0.0.0",
       SERVER_PORT: "8080",
-      SERVER_ENVIRONMENT: env.NODE_ENV,
+      SERVER_ENVIRONMENT: env.NODE_ENV || "production",
       SERVER_PUBLIC_URL: "https://api.ecent.online",
 
       // Auth
-      SESSION_SECRET: env.SESSION_SECRET,
+      SESSION_SECRET: safeGet(env.SESSION_SECRET) || "",
       AUTH_COOKIE_DOMAIN: "ecent.online",
       AUTH_SESSION_TTL_SECONDS: "2592000", // 30 days
       AUTH_DEV_BYPASS: "false",
 
       // OAuth - use nested format for config crate with _ separator
-      AUTH_OAUTH_GOOGLE_CLIENT_ID: env.GOOGLE_CLIENT_ID,
-      AUTH_OAUTH_GOOGLE_CLIENT_SECRET: env.GOOGLE_CLIENT_SECRET,
-      AUTH_OAUTH_GOOGLE_REDIRECT_URI: "https://api.ecent.online/auth/callback/google",
-      AUTH_OAUTH_AZURE_CLIENT_ID: env.AZURE_CLIENT_ID,
-      AUTH_OAUTH_AZURE_CLIENT_SECRET: env.AZURE_CLIENT_SECRET,
-      AUTH_OAUTH_AZURE_REDIRECT_URI: "https://api.ecent.online/auth/callback/azure",
-      AUTH_OAUTH_AZURE_TENANT_ID: env.AZURE_TENANT_ID,
+      // Only set if credentials are present
+      ...(safeGet(env.GOOGLE_CLIENT_ID) && safeGet(env.GOOGLE_CLIENT_SECRET) ? {
+        AUTH_OAUTH_GOOGLE_CLIENT_ID: env.GOOGLE_CLIENT_ID,
+        AUTH_OAUTH_GOOGLE_CLIENT_SECRET: env.GOOGLE_CLIENT_SECRET,
+        AUTH_OAUTH_GOOGLE_REDIRECT_URI: "https://api.ecent.online/auth/callback/google",
+      } : {}),
 
-      // Storage (R2)
-      STORAGE_ENDPOINT: env.STORAGE_ENDPOINT,
-      STORAGE_ACCESS_KEY_ID: env.STORAGE_ACCESS_KEY_ID,
-      STORAGE_SECRET_ACCESS_KEY: env.STORAGE_SECRET_ACCESS_KEY,
-      STORAGE_BUCKET: "ignition",
-      STORAGE_REGION: "auto",
+      ...(safeGet(env.AZURE_CLIENT_ID) && safeGet(env.AZURE_CLIENT_SECRET) && safeGet(env.AZURE_TENANT_ID) ? {
+        AUTH_OAUTH_AZURE_CLIENT_ID: env.AZURE_CLIENT_ID,
+        AUTH_OAUTH_AZURE_CLIENT_SECRET: env.AZURE_CLIENT_SECRET,
+        AUTH_OAUTH_AZURE_REDIRECT_URI: "https://api.ecent.online/auth/callback/azure",
+        AUTH_OAUTH_AZURE_TENANT_ID: env.AZURE_TENANT_ID,
+      } : {}),
+
+      // Storage (R2) - only include if ALL storage secrets are present
+      ...(hasAllStorageSecrets ? {
+        STORAGE_ENDPOINT: env.STORAGE_ENDPOINT,
+        STORAGE_ACCESS_KEY_ID: env.STORAGE_ACCESS_KEY_ID,
+        STORAGE_SECRET_ACCESS_KEY: env.STORAGE_SECRET_ACCESS_KEY,
+        STORAGE_BUCKET: "ignition",
+        STORAGE_REGION: "auto",
+      } : {}),
 
       // CORS
       CORS_ALLOWED_ORIGINS:
         "https://ignition.ecent.online,https://admin.ignition.ecent.online",
     };
+
+    console.log(`[ApiContainer] OAuth Google: ${safeGet(env.GOOGLE_CLIENT_ID) ? "ENABLED" : "DISABLED"}`);
+    console.log(`[ApiContainer] OAuth Azure: ${safeGet(env.AZURE_TENANT_ID) ? "ENABLED" : "DISABLED"}`);
+    console.log(`[ApiContainer] Storage R2: ${hasAllStorageSecrets ? "ENABLED" : "DISABLED"}`);
+
+    return result;
   })();
 
   override onStart(): void {
@@ -127,7 +158,7 @@ function getApiContainer(env: Env, instanceId: number = 0) {
  * Simple round-robin load balancer across container instances.
  */
 let requestCounter = 0;
-const MAX_INSTANCES = 3;
+const MAX_INSTANCES = 2;
 
 function loadBalance(env: Env) {
   const instanceId = requestCounter % MAX_INSTANCES;
