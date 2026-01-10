@@ -92,35 +92,59 @@ pub async fn extract_session(
     let session_token = extract_session_token(&req);
 
     if let Some(token) = session_token {
+        tracing::debug!(token_preview = %&token[..token.len().min(10)], "Looking up session in database");
+        
         // Look up session in database
-        if let Some(session) = SessionRepo::find_by_token(&state.db, &token).await? {
-            // Get user
-            if let Some(user) = UserRepo::find_by_id(&state.db, session.user_id).await? {
-                // Get entitlements from RBAC
-                let entitlements = RbacRepo::get_entitlements(&state.db, user.id).await?;
+        match SessionRepo::find_by_token(&state.db, &token).await {
+            Ok(Some(session)) => {
+                tracing::debug!(session_id = %session.id, user_id = %session.user_id, "Session found in database");
+                
+                // Get user
+                match UserRepo::find_by_id(&state.db, session.user_id).await {
+                    Ok(Some(user)) => {
+                        tracing::debug!(user_id = %user.id, email = %user.email, "User found");
+                        
+                        // Get entitlements from RBAC
+                        let entitlements = RbacRepo::get_entitlements(&state.db, user.id).await?;
 
-                let auth_context = AuthContext {
-                    user_id: user.id,
-                    email: user.email,
-                    name: user.name,
-                    role: user.role,
-                    session_id: session.id,
-                    entitlements,
-                    is_dev_bypass: false,
-                };
+                        let auth_context = AuthContext {
+                            user_id: user.id,
+                            email: user.email,
+                            name: user.name,
+                            role: user.role,
+                            session_id: session.id,
+                            entitlements,
+                            is_dev_bypass: false,
+                        };
 
-                // Update last activity (fire and forget)
-                let db = state.db.clone();
-                let sid = session.id;
-                let uid = user.id;
-                tokio::spawn(async move {
-                    let _ = SessionRepo::touch(&db, sid).await;
-                    let _ = UserRepo::update_last_activity(&db, uid).await;
-                });
+                        // Update last activity (fire and forget)
+                        let db = state.db.clone();
+                        let sid = session.id;
+                        let uid = user.id;
+                        tokio::spawn(async move {
+                            let _ = SessionRepo::touch(&db, sid).await;
+                            let _ = UserRepo::update_last_activity(&db, uid).await;
+                        });
 
-                req.extensions_mut().insert(auth_context);
+                        req.extensions_mut().insert(auth_context);
+                    }
+                    Ok(None) => {
+                        tracing::warn!(user_id = %session.user_id, "User not found for valid session");
+                    }
+                    Err(e) => {
+                        tracing::error!(error = %e, "Error fetching user");
+                    }
+                }
+            }
+            Ok(None) => {
+                tracing::debug!("Session not found in database");
+            }
+            Err(e) => {
+                tracing::error!(error = %e, "Error looking up session");
             }
         }
+    } else {
+        tracing::debug!("No session token provided");
     }
 
     Ok(next.run(req).await)

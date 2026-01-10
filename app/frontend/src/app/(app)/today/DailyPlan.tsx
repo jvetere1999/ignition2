@@ -4,6 +4,7 @@
  * Daily Plan Component
  * Generates and displays a personalized daily plan
  *
+ * FAST LOADING: Uses SyncState for instant progress display
  * Auto-refresh: Refetches on focus after 5 minutes staleness (per SYNC.md)
  * Collapse state: Persisted in localStorage
  */
@@ -11,6 +12,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useAutoRefresh } from "@/lib/hooks";
+import { usePlanStatus } from "@/lib/sync/SyncStateContext";
 import styles from "./DailyPlan.module.css";
 
 const COLLAPSE_STATE_KEY = "today_dailyplan_collapsed";
@@ -213,6 +215,30 @@ export function DailyPlanWidget({ forceCollapsed = false, onExpand }: DailyPlanW
         return null;
     }
   };
+
+  // Get fast-loading plan status from polling (updates every 30s)
+  const pollStatus = usePlanStatus();
+
+  // Show instant skeleton with polled data while loading full plan
+  if (isLoading && pollStatus) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h3 className={styles.title}>Today&apos;s Plan</h3>
+          <span className={styles.progress}>
+            {pollStatus.completed}/{pollStatus.total}
+          </span>
+        </div>
+        <div className={styles.progressBar}>
+          <div 
+            className={styles.progressFill} 
+            style={{ width: `${pollStatus.percent_complete}%` }} 
+          />
+        </div>
+        <div className={styles.loading}>Loading items...</div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

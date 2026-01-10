@@ -3,10 +3,13 @@
 /**
  * Market Client Component (D1-backed)
  * Spend coins on personal rewards - now backed by server-side storage
+ *
+ * FAST LOADING: Uses SyncState for instant wallet display
  */
 
 import { useState, useEffect, useCallback } from "react";
 import { LoadingState } from "@/components/ui";
+import { useProgress } from "@/lib/sync/SyncStateContext";
 import styles from "./page.module.css";
 
 interface MarketItem {
@@ -127,6 +130,9 @@ export function MarketClient() {
   const [error, setError] = useState<string | null>(null);
   const [showPurchased, setShowPurchased] = useState(false);
 
+  // FAST LOADING: Get polled progress for instant wallet display
+  const polledProgress = useProgress();
+
   // Purchase confirmation state
   const [confirmingItem, setConfirmingItem] = useState<MarketItem | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
@@ -224,10 +230,34 @@ export function MarketClient() {
 
   const unredeemedPurchases = purchases.filter(p => !p.is_redeemed);
 
+  // FAST LOADING: Show instant wallet display while loading full market data
   if (isLoading) {
+    const instantCoins = polledProgress?.coins ?? 0;
+    const instantLevel = polledProgress?.level ?? 1;
     return (
       <div className={styles.page}>
-        <LoadingState message="Loading market..." />
+        <header className={styles.header}>
+          <div className={styles.headerTop}>
+            <div>
+              <h1 className={styles.title}>Market</h1>
+              <p className={styles.subtitle}>Spend your hard-earned coins</p>
+            </div>
+            {polledProgress && (
+              <div className={styles.walletDisplay}>
+                <div className={styles.walletCoins}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="12" r="10" />
+                  </svg>
+                  <span>{instantCoins}</span>
+                </div>
+                <div className={styles.walletLevel}>
+                  Level {instantLevel}
+                </div>
+              </div>
+            )}
+          </div>
+        </header>
+        <LoadingState message="Loading market items..." />
       </div>
     );
   }

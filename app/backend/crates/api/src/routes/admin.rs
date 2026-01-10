@@ -9,6 +9,8 @@ use rand::Rng;
 
 use axum::{
     extract::{Path, Query, State},
+    http::{header, StatusCode},
+    response::{IntoResponse, Response},
     routing::{get, post},
     Extension, Json, Router,
 };
@@ -19,7 +21,8 @@ use uuid::Uuid;
 use crate::db::admin_models::*;
 use crate::db::admin_repos::*;
 use crate::error::AppError;
-use crate::middleware::auth::AuthContext;
+use crate::middleware::auth::{create_session_cookie, AuthContext};
+use crate::services::AuthService;
 use crate::shared::audit::{write_audit, AuditEventType};
 use crate::state::AppState;
 
@@ -149,14 +152,15 @@ async fn admin_claim(
     State(state): State<Arc<AppState>>,
     Extension(auth): Extension<AuthContext>,
     Json(payload): Json<ClaimRequest>,
-) -> Result<Json<ClaimResponse>, AppError> {
+) -> Result<Response, AppError> {
     // Check if any admins exist
     let has_admins = AdminClaimRepo::has_any_admins(&state.db).await?;
     if has_admins {
-        return Ok(Json(ClaimResponse {
+        let response = ClaimResponse {
             success: false,
             message: "Admin claiming is disabled - admins already exist".to_string(),
-        }));
+        };
+        return Ok(Json(response).into_response());
     }
 
     // Validate claim key
@@ -166,10 +170,11 @@ async fn admin_claim(
             auth.user_id,
             payload.claim_key
         );
-        return Ok(Json(ClaimResponse {
+        let response = ClaimResponse {
             success: false,
             message: "Invalid claim key".to_string(),
-        }));
+        };
+        return Ok(Json(response).into_response());
     }
 
     // Set user as admin
@@ -191,10 +196,47 @@ async fn admin_claim(
         Some(auth.user_id),
     );
 
+    // Rotate session after privilege escalation (prevents session fixation)
+    if !auth.is_dev_bypass {
+        let new_session = AuthService::rotate_session(
+            &state.db,
+            auth.session_id,
+            auth.user_id,
+            "admin_claimed",
+        )
+        .await?;
+
+        // Return new session cookie to client
+        let cookie = create_session_cookie(
+            &new_session.token,
+            &state.config.auth.cookie_domain,
+            state.config.auth.session_ttl_seconds,
+        );
+
+        tracing::info!(
+            user_id = %auth.user_id,
+            "Admin claimed and session rotated"
+        );
+
+        let response = ClaimResponse {
+            success: true,
+            message: "Admin access granted".to_string(),
+        };
+
+        let response = Response::builder()
+            .status(StatusCode::OK)
+            .header(header::SET_COOKIE, cookie)
+            .header(header::CONTENT_TYPE, "application/json")
+            .body(axum::body::Body::from(serde_json::to_string(&response).unwrap()))
+            .map_err(|e| AppError::Internal(e.to_string()))?;
+
+        return Ok(response);
+    }
+
     Ok(Json(ClaimResponse {
         success: true,
         message: "Admin access granted".to_string(),
-    }))
+    }).into_response())
 }
 
 // User management routes

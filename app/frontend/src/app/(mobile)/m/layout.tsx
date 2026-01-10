@@ -2,11 +2,15 @@
  * Mobile Layout
  * Root layout for /m/* routes with PWA meta tags and mobile-specific styling
  * Completely isolated from desktop - does not import or modify desktop CSS
+ *
+ * SYNC STATE:
+ * SyncStateProvider enables 30-second polling for UI optimization data.
  */
 
 import type { Metadata, Viewport } from "next";
 import { AuthProvider } from "@/lib/auth";
 import { MobileShell } from "@/components/mobile/MobileShell";
+import { SyncStateProvider } from "@/lib/sync/SyncStateContext";
 import "@/styles/mobile.css";
 
 export const metadata: Metadata = {
@@ -61,7 +65,9 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
       </head>
       <body>
         <AuthProvider>
-          <MobileShell>{children}</MobileShell>
+          <SyncStateProvider>
+            <MobileShell>{children}</MobileShell>
+          </SyncStateProvider>
         </AuthProvider>
       </body>
     </html>

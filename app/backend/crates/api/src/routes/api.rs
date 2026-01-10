@@ -5,7 +5,7 @@
 use std::sync::Arc;
 
 use axum::{
-    routing::{get, post},
+    routing::get,
     Json, Router,
 };
 use serde::Serialize;
@@ -33,10 +33,12 @@ pub fn router() -> Router<Arc<AppState>> {
         .nest("/exercise", super::exercise::router())
         // Market module (Wave 3 - real implementation)
         .nest("/market", super::market::router())
-        // Reference tracks module
-        .nest("/reference", reference_routes())
+        // Reference tracks module (Wave 5 - real implementation)
+        .nest("/reference", super::reference::router())
         // References library module (stateless sync - 2026-01-10)
         .nest("/references", super::references_library::router())
+        // Frames module (Wave 5 - real implementation)
+        .nest("/frames", super::frames::router())
         // Learn module (Wave 3 - real implementation)
         .nest("/learn", super::learn::router())
         // User module (Wave 4 - real implementation)
@@ -58,6 +60,12 @@ pub fn router() -> Router<Arc<AppState>> {
         .nest("/gamification", super::gamification::router())
         // Blob storage module (real implementation)
         .nest("/blobs", super::blobs::router())
+        // Sync module - lightweight polling endpoints for UI optimization
+        .nest("/sync", super::sync::router())
+        // Settings module
+        .nest("/settings", super::settings::router())
+        // Today module - dashboard data aggregation (Wave 5)
+        .nest("/today", super::today::router())
     // Apply middleware (CSRF and auth will be added at top level)
 }
 
@@ -91,6 +99,8 @@ async fn api_info() -> Json<ApiInfo> {
             "books".to_string(),
             "gamification".to_string(),
             "blobs".to_string(),
+            "sync".to_string(),
+            "settings".to_string(),
         ],
     })
 }
@@ -98,37 +108,17 @@ async fn api_info() -> Json<ApiInfo> {
 // Stub route builders for modules not yet migrated
 // Note: focus, quests, habits, goals, exercise, market, learn, books, gamification, blobs are using real implementations
 // Wave 4 migrated: calendar, daily-plan, user, onboarding, infobase, ideas, feedback
-
-fn reference_routes() -> Router<Arc<AppState>> {
-    // Reference is already implemented in super::reference, but has custom routing
-    // TODO: Wire up super::reference::router() when frontend swap is ready
-    Router::new()
-        .route("/tracks", get(stub_list))
-        .route("/upload", post(stub_create))
-}
+// Wave 5 migrated: reference, frames (2026-01-10)
 
 fn analysis_routes() -> Router<Arc<AppState>> {
+    // Analysis is handled as part of reference tracks - this is a legacy compatibility route
     Router::new().route("/", get(stub_get))
 }
 
-// Stub handlers for not-yet-migrated routes
-#[allow(dead_code)]
-async fn stub_list() -> Json<serde_json::Value> {
-    Json(serde_json::json!({
-        "data": [],
-        "message": "Stub endpoint - feature migration pending"
-    }))
-}
-
+// Stub handlers for legacy routes
 async fn stub_get() -> Json<serde_json::Value> {
     Json(serde_json::json!({
         "data": null,
-        "message": "Stub endpoint - feature migration pending"
-    }))
-}
-
-async fn stub_create() -> Json<serde_json::Value> {
-    Json(serde_json::json!({
-        "message": "Stub endpoint - feature migration pending"
+        "message": "This endpoint has been moved. Use /api/reference/tracks/:id/analysis instead."
     }))
 }

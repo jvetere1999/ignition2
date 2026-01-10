@@ -392,13 +392,21 @@ async fn signout(
     if let Some(Extension(auth_context)) = auth {
         if !auth_context.is_dev_bypass {
             // Delete session from database
-            let _ = AuthService::logout(
+            if let Err(e) = AuthService::logout(
                 &state.db,
                 auth_context.session_id,
                 auth_context.user_id,
                 None,
             )
-            .await;
+            .await {
+                // Log error but continue - cookie will be cleared regardless
+                tracing::warn!(
+                    error = %e,
+                    user_id = %auth_context.user_id,
+                    session_id = %auth_context.session_id,
+                    "Failed to delete session from database during logout"
+                );
+            }
         }
     }
 
@@ -422,7 +430,7 @@ async fn verify_age(
     State(state): State<Arc<AppState>>,
     auth: Option<Extension<AuthContext>>,
     Json(payload): Json<VerifyAgeRequest>,
-) -> AppResult<StatusCode> {
+) -> AppResult<Response> {
     let auth_context = auth.ok_or(AppError::Unauthorized)?.0;
 
     if !payload.is_13_or_older {
@@ -432,18 +440,41 @@ async fn verify_age(
     // Update user record
     crate::db::repos::UserRepo::verify_age(&state.db, auth_context.user_id).await?;
 
-    // Rotate session after privilege change
+    // Rotate session after privilege change (prevents session fixation)
     if !auth_context.is_dev_bypass {
-        let _ = AuthService::rotate_session(
+        let new_session = AuthService::rotate_session(
             &state.db,
             auth_context.session_id,
             auth_context.user_id,
             "age_verification",
         )
-        .await;
+        .await?;
+
+        // Return new session cookie to client
+        let cookie = create_session_cookie(
+            &new_session.token,
+            &state.config.auth.cookie_domain,
+            state.config.auth.session_ttl_seconds,
+        );
+
+        tracing::info!(
+            user_id = %auth_context.user_id,
+            "Age verified and session rotated"
+        );
+
+        let response = Response::builder()
+            .status(StatusCode::OK)
+            .header(header::SET_COOKIE, cookie)
+            .body(axum::body::Body::empty())
+            .map_err(|e| AppError::Internal(e.to_string()))?;
+
+        return Ok(response);
     }
 
-    Ok(StatusCode::OK)
+    Ok(Response::builder()
+        .status(StatusCode::OK)
+        .body(axum::body::Body::empty())
+        .map_err(|e| AppError::Internal(e.to_string()))?)
 }
 
 #[derive(Deserialize)]
@@ -462,7 +493,7 @@ async fn accept_tos(
     State(state): State<Arc<AppState>>,
     auth: Option<Extension<AuthContext>>,
     Json(payload): Json<AcceptTosRequest>,
-) -> AppResult<StatusCode> {
+) -> AppResult<Response> {
     let auth_context = auth.ok_or(AppError::Unauthorized)?.0;
 
     if !payload.accepted {
@@ -473,16 +504,40 @@ async fn accept_tos(
     crate::db::repos::UserRepo::accept_tos(&state.db, auth_context.user_id, &payload.version)
         .await?;
 
-    // Rotate session after privilege change
+    // Rotate session after privilege change (prevents session fixation)
     if !auth_context.is_dev_bypass {
-        let _ = AuthService::rotate_session(
+        let new_session = AuthService::rotate_session(
             &state.db,
             auth_context.session_id,
             auth_context.user_id,
             "tos_acceptance",
         )
-        .await;
+        .await?;
+
+        // Return new session cookie to client
+        let cookie = create_session_cookie(
+            &new_session.token,
+            &state.config.auth.cookie_domain,
+            state.config.auth.session_ttl_seconds,
+        );
+
+        tracing::info!(
+            user_id = %auth_context.user_id,
+            tos_version = %payload.version,
+            "TOS accepted and session rotated"
+        );
+
+        let response = Response::builder()
+            .status(StatusCode::OK)
+            .header(header::SET_COOKIE, cookie)
+            .body(axum::body::Body::empty())
+            .map_err(|e| AppError::Internal(e.to_string()))?;
+
+        return Ok(response);
     }
 
-    Ok(StatusCode::OK)
+    Ok(Response::builder()
+        .status(StatusCode::OK)
+        .body(axum::body::Body::empty())
+        .map_err(|e| AppError::Internal(e.to_string()))?)
 }

@@ -5,11 +5,14 @@
  * Daily habit tracking with streaks
  *
  * Auto-refresh: Refetches on focus after 1 minute staleness (per SYNC.md)
+ *
+ * FAST LOADING: Uses SyncState for instant progress display
  */
 
 import { useState, useEffect, useCallback } from "react";
 import { useAutoRefresh } from "@/lib/hooks";
 import { LoadingState } from "@/components/ui";
+import { useBadges } from "@/lib/sync/SyncStateContext";
 import styles from "./page.module.css";
 
 interface Habit {
@@ -62,6 +65,9 @@ export function HabitsClient() {
     xp_reward: 10,
     coin_reward: 5,
   });
+
+  // FAST LOADING: Get polled badges for instant count display
+  const polledBadges = useBadges();
 
   const fetchHabits = useCallback(async () => {
     try {
@@ -152,9 +158,27 @@ export function HabitsClient() {
   const completedCount = habits.filter((h) => isCompletedToday(h.id)).length;
   const totalHabits = habits.length;
 
+  // FAST LOADING: Show instant habit count while loading full data
   if (isLoading) {
+    const pendingHabits = polledBadges?.pending_habits ?? 0;
     return (
       <div className={styles.page}>
+        <header className={styles.header}>
+          <div className={styles.headerTop}>
+            <div>
+              <h1 className={styles.title}>Habits</h1>
+              <p className={styles.subtitle}>Build consistency, earn rewards</p>
+            </div>
+          </div>
+          {polledBadges && (
+            <div className={styles.progressCard}>
+              <div className={styles.progressHeader}>
+                <span className={styles.progressLabel}>Today&apos;s Habits</span>
+                <span className={styles.progressValue}>{pendingHabits} remaining</span>
+              </div>
+            </div>
+          )}
+        </header>
         <LoadingState message="Loading habits..." />
       </div>
     );

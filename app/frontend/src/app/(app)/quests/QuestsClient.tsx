@@ -9,12 +9,15 @@
  *
  * STORAGE RULE: Quest progress is stored in D1 via /api/quests API.
  * localStorage cache is DEPRECATED when DISABLE_MASS_LOCAL_PERSISTENCE is enabled.
+ *
+ * FAST LOADING: Uses SyncState for instant progress display
  */
 
 import { useState, useEffect, useCallback } from "react";
 import { useAutoRefresh } from "@/lib/hooks";
 import { LoadingState, EmptyState } from "@/components/ui";
 import { DISABLE_MASS_LOCAL_PERSISTENCE } from "@/lib/storage/deprecation";
+import { useProgress, useBadges } from "@/lib/sync/SyncStateContext";
 import styles from "./page.module.css";
 
 interface Quest {
@@ -48,6 +51,10 @@ export function QuestsClient() {
     coinReward: 10,
     target: 1,
   });
+
+  // FAST LOADING: Get polled data for instant display
+  const polledProgress = useProgress();
+  const polledBadges = useBadges();
 
   // Fetch wallet from D1
   const fetchWallet = useCallback(async () => {
@@ -279,9 +286,38 @@ export function QuestsClient() {
 
   const filteredQuests = quests.filter((q) => q.type === activeTab);
 
+  // FAST LOADING: Show instant wallet while loading full quest list
   if (isLoading) {
+    const instantCoins = polledProgress?.coins ?? 0;
+    const instantXp = polledProgress?.current_xp ?? 0;
+    const activeQuests = polledBadges?.active_quests ?? 0;
     return (
       <div className={styles.page}>
+        <header className={styles.header}>
+          <div className={styles.headerTop}>
+            <div>
+              <h1 className={styles.title}>Quests</h1>
+              <p className={styles.subtitle}>Complete quests to earn rewards</p>
+            </div>
+            {polledProgress && (
+              <div className={styles.walletDisplay}>
+                <div className={styles.walletItem}>
+                  <span className={styles.coinIcon}>*</span>
+                  <span className={styles.walletValue}>{instantCoins}</span>
+                </div>
+                <div className={styles.walletItem}>
+                  <span className={styles.xpIcon}>XP</span>
+                  <span className={styles.walletValue}>{instantXp}</span>
+                </div>
+              </div>
+            )}
+          </div>
+          {activeQuests > 0 && (
+            <p className={styles.subtitle} style={{ marginTop: "0.5rem" }}>
+              {activeQuests} active quest{activeQuests !== 1 ? "s" : ""}
+            </p>
+          )}
+        </header>
         <LoadingState message="Loading quests..." />
       </div>
     );
