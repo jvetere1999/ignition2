@@ -23,12 +23,12 @@ export interface ServerSettings {
     largeText: boolean;
   };
   notificationsEnabled: boolean;
-  [key: string]: any; // Allow extensibility
+  [key: string]: unknown; // Allow extensibility
 }
 
 interface UseServerSettingsResult {
   settings: Partial<ServerSettings>;
-  updateSetting: (key: string, value: any) => Promise<void>;
+  updateSetting: (key: string, value: unknown) => Promise<void>;
   theme: ServerSettings['theme'];
   setTheme: (theme: ServerSettings['theme']) => Promise<void>;
   accessibility: ServerSettings['accessibility'];
@@ -67,10 +67,10 @@ export function useServerSettings(): UseServerSettingsResult {
         throw new Error(`Failed to fetch settings: ${response.status}`);
       }
 
-      const data = await response.json() as { settings?: Array<{ key: string; value: any }> };
+      const data = await response.json() as { settings?: Array<{ key: string; value: unknown }> };
       
       // Normalize response to ServerSettings format
-      const normalized = normalizeSettings((data.settings || []) as Array<{ key: string; value: any }>);
+      const normalized = normalizeSettings((data.settings || []) as Array<{ key: string; value: unknown }>);
       setSettings(normalized);
       setError(null);
     } catch (err) {
@@ -161,7 +161,7 @@ export function useServerSettings(): UseServerSettingsResult {
 
   // Update a single setting
   const updateSetting = useCallback(
-    async (key: string, value: any) => {
+    async (key: string, value: unknown) => {
       if (!user) {
         throw new Error('Not authenticated');
       }
@@ -226,9 +226,9 @@ export function useServerSettings(): UseServerSettingsResult {
  * Converts [{ key: 'theme', value: 'dark' }] to { theme: 'dark' }
  */
 function normalizeSettings(
-  settingsArray: Array<{ key: string; value: any }>
+  settingsArray: Array<{ key: string; value: unknown }>
 ): Partial<ServerSettings> {
-  const normalized: any = {};
+  const normalized: Record<string, unknown> = {};
   
   for (const setting of settingsArray) {
     normalized[setting.key] = setting.value;

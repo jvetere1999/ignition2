@@ -39,7 +39,7 @@ jobs:
 
       - name: Install Deploy Dependencies
         working-directory: deploy/cloudflare-admin
-        run: npm ci
+        run: npm install
 
       - name: Copy OpenNext Build
         run: |

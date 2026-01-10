@@ -12,7 +12,7 @@
 
 'use client';
 
-import React, { createContext, useContext, useEffect } from 'react';
+import React, { createContext, useContext } from 'react';
 import { useServerSettings, useApplyTheme } from '@/lib/hooks/useServerSettings';
 
 interface ThemeContextType {
@@ -30,7 +30,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useApplyTheme(theme as 'light' | 'dark' | 'system');
 
   return (
-    <ThemeContext.Provider value={{ theme: theme as any, setTheme, isLoading }}>
+    <ThemeContext.Provider value={{ theme: theme as 'light' | 'dark' | 'system', setTheme, isLoading }}>
       {children}
     </ThemeContext.Provider>
   );
