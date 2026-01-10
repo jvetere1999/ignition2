@@ -136,13 +136,13 @@ test.describe("AppShell Race Condition Prevention", () => {
     await expect(page).toHaveURL(/auth\/signin/);
 
     // Verify no console errors about race conditions
-    const consoleMessages = [];
+    const consoleMessages: string[] = [];
     page.on("console", (msg) => consoleMessages.push(msg.text()));
 
     await page.reload();
 
     // No warnings about isLoading/isAuthenticated race
-    const errors = consoleMessages.filter((m) =>
+    const errors = consoleMessages.filter((m: string) =>
       m.toLowerCase().includes("auth")
     );
     // Errors array may have warnings, but not about "isLoading" or "isAuthenticated"

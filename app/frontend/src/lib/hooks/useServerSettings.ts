@@ -11,7 +11,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/lib/auth';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online';
 
@@ -42,7 +42,7 @@ interface UseServerSettingsResult {
  * Handles polling fallback if WebSocket unavailable
  */
 export function useServerSettings(): UseServerSettingsResult {
-  const { data: session, status } = useSession();
+  const { user, isLoading: authLoading } = useAuth();
   const [settings, setSettings] = useState<Partial<ServerSettings>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -51,7 +51,7 @@ export function useServerSettings(): UseServerSettingsResult {
 
   // Fetch settings from /api/settings
   const fetchSettings = useCallback(async () => {
-    if (status !== 'authenticated' || !session?.user) {
+    if (!user) {
       setIsLoading(false);
       return;
     }
@@ -67,10 +67,10 @@ export function useServerSettings(): UseServerSettingsResult {
         throw new Error(`Failed to fetch settings: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as { settings?: Array<{ key: string; value: any }> };
       
       // Normalize response to ServerSettings format
-      const normalized = normalizeSettings(data.settings || []);
+      const normalized = normalizeSettings((data.settings || []) as Array<{ key: string; value: any }>);
       setSettings(normalized);
       setError(null);
     } catch (err) {
@@ -78,11 +78,11 @@ export function useServerSettings(): UseServerSettingsResult {
     } finally {
       setIsLoading(false);
     }
-  }, [session, status]);
+  }, [user]);
 
   // Setup WebSocket connection (Hybrid: desktop only)
   useEffect(() => {
-    if (status !== 'authenticated' || !session?.user) return;
+    if (!user) return;
 
     const isDesktop = typeof window !== 'undefined' && 
                       !/Mobile|Android|iPhone|iPad/.test(navigator.userAgent);
@@ -145,7 +145,7 @@ export function useServerSettings(): UseServerSettingsResult {
         clearInterval(pollingIntervalRef.current);
       }
     };
-  }, [session, status, fetchSettings]);
+  }, [user, fetchSettings]);
 
   // Polling fallback (30s interval for mobile, or if WS fails)
   const startPolling = useCallback(() => {
@@ -162,7 +162,7 @@ export function useServerSettings(): UseServerSettingsResult {
   // Update a single setting
   const updateSetting = useCallback(
     async (key: string, value: any) => {
-      if (status !== 'authenticated') {
+      if (!user) {
         throw new Error('Not authenticated');
       }
 
@@ -191,7 +191,7 @@ export function useServerSettings(): UseServerSettingsResult {
         throw err;
       }
     },
-    [status]
+    [user]
   );
 
   // Convenience setters
