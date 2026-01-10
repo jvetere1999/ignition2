@@ -221,6 +221,50 @@ impl AppConfig {
             app_config.database.url = database_url;
         }
 
+        // Manual OAuth override - the config crate separator("_") splits ALL underscores,
+        // so AUTH_OAUTH_GOOGLE_CLIENT_ID becomes auth.oauth.google.client.id instead of
+        // auth.oauth.google.client_id. We need to manually read these env vars.
+        let google_client_id = std::env::var("AUTH_OAUTH_GOOGLE_CLIENT_ID").unwrap_or_default();
+        let google_client_secret = std::env::var("AUTH_OAUTH_GOOGLE_CLIENT_SECRET").unwrap_or_default();
+        let google_redirect_uri = std::env::var("AUTH_OAUTH_GOOGLE_REDIRECT_URI").unwrap_or_default();
+        
+        if !google_client_id.is_empty() && !google_client_secret.is_empty() {
+            tracing::info!("Loading Google OAuth from environment variables");
+            let google_config = OAuthProviderConfig {
+                client_id: google_client_id,
+                client_secret: google_client_secret,
+                redirect_uri: google_redirect_uri,
+                tenant_id: None,
+            };
+            if app_config.auth.oauth.is_none() {
+                app_config.auth.oauth = Some(OAuthConfig::default());
+            }
+            if let Some(ref mut oauth) = app_config.auth.oauth {
+                oauth.google = Some(google_config);
+            }
+        }
+
+        let azure_client_id = std::env::var("AUTH_OAUTH_AZURE_CLIENT_ID").unwrap_or_default();
+        let azure_client_secret = std::env::var("AUTH_OAUTH_AZURE_CLIENT_SECRET").unwrap_or_default();
+        let azure_redirect_uri = std::env::var("AUTH_OAUTH_AZURE_REDIRECT_URI").unwrap_or_default();
+        let azure_tenant_id = std::env::var("AUTH_OAUTH_AZURE_TENANT_ID").unwrap_or_default();
+
+        if !azure_client_id.is_empty() && !azure_client_secret.is_empty() && !azure_tenant_id.is_empty() {
+            tracing::info!("Loading Azure OAuth from environment variables");
+            let azure_config = OAuthProviderConfig {
+                client_id: azure_client_id,
+                client_secret: azure_client_secret,
+                redirect_uri: azure_redirect_uri,
+                tenant_id: Some(azure_tenant_id),
+            };
+            if app_config.auth.oauth.is_none() {
+                app_config.auth.oauth = Some(OAuthConfig::default());
+            }
+            if let Some(ref mut oauth) = app_config.auth.oauth {
+                oauth.azure = Some(azure_config);
+            }
+        }
+
         Ok(app_config)
     }
 

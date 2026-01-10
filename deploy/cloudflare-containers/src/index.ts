@@ -52,7 +52,7 @@ export class ApiContainer extends Container<Env> {
   sleepAfter = "4h";
   
   // Config version - bump this to force container restart on deploy
-  private static readonly CONFIG_VERSION = "2026-01-10-v2";
+  private static readonly CONFIG_VERSION = "2026-01-10-v4";
   private configVersionKey = "__config_version";
 
   constructor(ctx: DurableObjectState<Env>, env: Env) {
