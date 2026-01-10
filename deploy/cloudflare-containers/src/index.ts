@@ -36,8 +36,8 @@ export class ApiContainer extends Container {
   // Port the Rust server listens on
   defaultPort = 8080;
 
-  // Keep container alive for 15 minutes after last request
-  sleepAfter = "15m";
+  // Keep container alive for 4 hours after last request
+  sleepAfter = "4h";
 
   // Environment variables passed to the container at runtime
   envVars = (() => {
@@ -203,6 +203,26 @@ export default {
           headers: { "Content-Type": "application/json" },
         }
       );
+    }
+  },
+
+  async scheduled(event: ScheduledEvent, env: Env): Promise<void> {
+    console.log("Keep-alive ping triggered at:", new Date().toISOString());
+    
+    try {
+      // Ping the health endpoint to keep container warm
+      const container = loadBalance(env);
+      await container.start();
+      
+      const response = await container.fetch(
+        new Request("https://api.ecent.online/health", {
+          method: "GET",
+        })
+      );
+      
+      console.log(`Keep-alive ping successful: ${response.status}`);
+    } catch (error) {
+      console.error("Keep-alive ping failed:", error);
     }
   },
 };

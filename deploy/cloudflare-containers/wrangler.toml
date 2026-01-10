@@ -40,6 +40,10 @@ API_URL = "https://api.ecent.online"
 pattern = "api.ecent.online/*"
 zone_name = "ecent.online"
 
+# Keep-alive cron (every 3 hours)
+[triggers]
+crons = ["0 */3 * * *"]
+
 # Remove the ecent.dev route - zone not configured
 
 # Observability
