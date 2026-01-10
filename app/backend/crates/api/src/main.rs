@@ -116,6 +116,15 @@ fn build_router(state: Arc<AppState>) -> Router {
                     middleware::auth::extract_session,
                 )),
         )
+        // Admin claiming routes (requires auth only, NOT admin role)
+        .nest(
+            "/admin-access",
+            routes::admin::claiming_router()
+                .layer(axum::middleware::from_fn_with_state(
+                    state.clone(),
+                    middleware::auth::extract_session,
+                )),
+        )
         // Admin routes (requires admin role + auth + CSRF)
         .nest(
             "/admin",

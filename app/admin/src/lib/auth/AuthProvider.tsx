@@ -32,7 +32,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 async function getSession(): Promise<Session> {
-  const response = await fetch(`${API_BASE_URL}/api/auth/session`, {
+  const response = await fetch(`${API_BASE_URL}/auth/session`, {
     credentials: 'include',
   });
 
@@ -44,7 +44,7 @@ async function getSession(): Promise<Session> {
 }
 
 async function signOutApi(): Promise<void> {
-  await fetch(`${API_BASE_URL}/api/auth/signout`, {
+  await fetch(`${API_BASE_URL}/auth/signout`, {
     method: 'POST',
     credentials: 'include',
   });

@@ -27,7 +27,7 @@ export function AdminButton() {
 
       try {
         const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online';
-        const response = await fetch(`${API_BASE}/api/auth/session`, {
+        const response = await fetch(`${API_BASE}/auth/session`, {
           credentials: 'include',
         });
         

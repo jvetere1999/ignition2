@@ -23,7 +23,7 @@ export interface AdminStatus {
  * Check if current user is admin and if admin claiming is available
  */
 export async function checkAdminStatus(): Promise<AdminStatus> {
-  const response = await fetch(`${API_BASE}/api/admin/status`, {
+  const response = await fetch(`${API_BASE}/admin-access/status`, {
     credentials: 'include',
   });
 
@@ -39,7 +39,7 @@ export async function checkAdminStatus(): Promise<AdminStatus> {
  * @param claimKey - Special key logged in API for verification
  */
 export async function claimAdmin(claimKey: string): Promise<{ success: boolean; message: string }> {
-  const response = await fetch(`${API_BASE}/api/admin/claim`, {
+  const response = await fetch(`${API_BASE}/admin-access/claim`, {
     method: 'POST',
     credentials: 'include',
     headers: {

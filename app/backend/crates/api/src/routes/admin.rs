@@ -4,7 +4,6 @@
 //! Per DEC-004=B: Role-based access using DB-backed roles.
 
 use std::sync::Arc;
-use once_cell::sync::Lazy;
 use rand::Rng;
 
 use axum::{
@@ -40,16 +39,22 @@ fn generate_claim_key() -> String {
     key
 }
 
-static CLAIM_KEY: Lazy<String> = Lazy::new(generate_claim_key);
+lazy_static::lazy_static! {
+    static ref CLAIM_KEY: String = generate_claim_key();
+}
+
+/// Create admin claiming routes (no admin role required)
+pub fn claiming_router() -> Router<Arc<AppState>> {
+    Router::new()
+        .route("/status", get(admin_status))
+        .route("/claim", post(admin_claim))
+}
 
 /// Create admin routes
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
         // Admin info
         .route("/", get(admin_info))
-        // Admin status and claiming (auth required, no admin role needed for these)
-        .route("/status", get(admin_status))
-        .route("/claim", post(admin_claim))
         // User management
         .nest("/users", users_routes())
         // Quest management
@@ -125,7 +130,7 @@ async fn admin_status(
     let user_info = Some(AdminUserInfo {
         id: auth.user_id.to_string(),
         email: auth.email.clone(),
-        name: auth.name.clone(),
+        name: Some(auth.name.clone()),
     });
 
     Ok(Json(AdminStatus {

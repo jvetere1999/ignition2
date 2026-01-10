@@ -73,6 +73,7 @@ impl std::fmt::Display for AuditEventType {
             AuditEventType::ResourceUpdated => write!(f, "resource_updated"),
             AuditEventType::ResourceDeleted => write!(f, "resource_deleted"),
             AuditEventType::AdminAction => write!(f, "admin_action"),
+            AuditEventType::AdminClaimed => write!(f, "admin_claimed"),
             AuditEventType::ConfigChanged => write!(f, "config_changed"),
             AuditEventType::BackupCreated => write!(f, "backup_created"),
             AuditEventType::BackupRestored => write!(f, "backup_restored"),

@@ -66,18 +66,23 @@ function isPublicRoute(path: string): boolean {
  */
 async function checkSession(request: NextRequest): Promise<{ authenticated: boolean }> {
   try {
-    // Forward the cookie header to the backend
-    const cookieHeader = request.headers.get('cookie') || '';
+    // Get session cookie directly from request
+    const sessionCookie = request.cookies.get('session');
     
-    // Debug: log what we're sending (don't log full cookie for security)
-    console.log(`[middleware] checkSession: cookie header present: ${!!cookieHeader}, length: ${cookieHeader.length}`);
-    console.log(`[middleware] checkSession: has session cookie: ${cookieHeader.includes('session=')}`);
+    // Debug: log what we're checking
+    console.log(`[middleware] checkSession: has session cookie: ${!!sessionCookie}, value length: ${sessionCookie?.value?.length || 0}`);
     
+    if (!sessionCookie?.value) {
+      console.log(`[middleware] checkSession: no session cookie found`);
+      return { authenticated: false };
+    }
+    
+    // Forward the session cookie to the backend
     const response = await fetch(`${API_BASE_URL}/auth/session`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Cookie': cookieHeader,
+        'Cookie': `session=${sessionCookie.value}`,
       },
       cache: 'no-store',
     });
