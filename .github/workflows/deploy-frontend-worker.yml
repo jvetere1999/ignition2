@@ -34,7 +34,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: app/frontend
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
       - name: Type Check
         working-directory: app/frontend
