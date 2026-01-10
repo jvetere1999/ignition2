@@ -52,7 +52,7 @@ export class ApiContainer extends Container<Env> {
   sleepAfter = "4h";
   
   // Config version - bump this to force container restart on deploy
-  private static readonly CONFIG_VERSION = "2026-01-10-v4";
+  private static readonly CONFIG_VERSION = "2026-01-10-v5";
   private configVersionKey = "__config_version";
 
   constructor(ctx: DurableObjectState<Env>, env: Env) {
@@ -231,6 +231,18 @@ export class ApiContainer extends Container<Env> {
         }),
         { headers: { "Content-Type": "application/json" } }
       );
+    }
+    
+    // Ensure container is started before forwarding requests
+    try {
+      const state = await this.getState();
+      if (state.status !== "healthy" && state.status !== "running") {
+        console.log(`[ApiContainer] Container status: ${state.status}, starting...`);
+        await this.start();
+      }
+    } catch (e) {
+      console.log("[ApiContainer] Starting container (no state available)...");
+      await this.start();
     }
     
     // Forward all other requests to the container
