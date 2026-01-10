@@ -69,6 +69,10 @@ async function checkSession(request: NextRequest): Promise<{ authenticated: bool
     // Forward the cookie header to the backend
     const cookieHeader = request.headers.get('cookie') || '';
     
+    // Debug: log what we're sending (don't log full cookie for security)
+    console.log(`[middleware] checkSession: cookie header present: ${!!cookieHeader}, length: ${cookieHeader.length}`);
+    console.log(`[middleware] checkSession: has session cookie: ${cookieHeader.includes('session=')}`);
+    
     const response = await fetch(`${API_BASE_URL}/auth/session`, {
       headers: {
         'Content-Type': 'application/json',
@@ -78,12 +82,15 @@ async function checkSession(request: NextRequest): Promise<{ authenticated: bool
     });
 
     if (!response.ok) {
+      console.log(`[middleware] checkSession: backend returned ${response.status}`);
       return { authenticated: false };
     }
 
     const data = await response.json() as { user: unknown | null };
+    console.log(`[middleware] checkSession: authenticated: ${!!data.user}`);
     return { authenticated: !!data.user };
-  } catch {
+  } catch (error) {
+    console.error(`[middleware] checkSession error:`, error);
     return { authenticated: false };
   }
 }

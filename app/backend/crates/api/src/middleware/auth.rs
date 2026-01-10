@@ -172,8 +172,20 @@ pub fn require_entitlement(
 
 /// Extract session token from cookie header
 fn extract_session_token(req: &Request) -> Option<String> {
-    req.headers()
-        .get(header::COOKIE)?
+    let cookie_header = req.headers().get(header::COOKIE);
+    
+    // Debug log to trace cookie issues
+    match cookie_header {
+        Some(h) => {
+            let cookie_str = h.to_str().unwrap_or("<invalid>");
+            tracing::debug!(cookie_header = %cookie_str, "Received cookie header");
+        }
+        None => {
+            tracing::debug!("No cookie header in request");
+        }
+    }
+    
+    let token = cookie_header?
         .to_str()
         .ok()?
         .split(';')
@@ -186,7 +198,15 @@ fn extract_session_token(req: &Request) -> Option<String> {
             } else {
                 None
             }
-        })
+        });
+    
+    if token.is_some() {
+        tracing::debug!("Session token extracted from cookie");
+    } else {
+        tracing::debug!("No session token found in cookies");
+    }
+    
+    token
 }
 
 /// Create session cookie header value

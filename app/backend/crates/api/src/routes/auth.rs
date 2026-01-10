@@ -328,7 +328,17 @@ async fn get_session(
     State(state): State<Arc<AppState>>,
     auth: Option<Extension<AuthContext>>,
 ) -> Json<SessionResponse> {
+    tracing::debug!(
+        has_auth = auth.is_some(),
+        "get_session called"
+    );
+    
     if let Some(Extension(auth_context)) = auth {
+        tracing::debug!(
+            user_id = %auth_context.user_id,
+            email = %auth_context.email,
+            "Session found for user"
+        );
         // Get full user data
         if let Ok(Some(user)) =
             crate::db::repos::UserRepo::find_by_id(&state.db, auth_context.user_id).await
@@ -348,6 +358,7 @@ async fn get_session(
         }
     }
 
+    tracing::debug!("No valid session, returning null user");
     Json(SessionResponse { user: None })
 }
 
