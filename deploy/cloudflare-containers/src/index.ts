@@ -158,6 +158,39 @@ export class ApiContainer extends Container<Env> {
   override onError(error: unknown): void {
     console.error("Container error:", error);
   }
+
+  // Override fetch to intercept debug requests BEFORE forwarding to container
+  override async fetch(request: Request): Promise<Response> {
+    const url = new URL(request.url);
+    
+    // Debug endpoint to check secrets from Durable Object context
+    if (url.pathname === "/_do-debug") {
+      const e = this.env as Env;
+      return new Response(
+        JSON.stringify({
+          context: "DurableObject",
+          secretsStatus: {
+            DATABASE_URL: !!e.DATABASE_URL,
+            SESSION_SECRET: !!e.SESSION_SECRET,
+            GOOGLE_CLIENT_ID: !!e.GOOGLE_CLIENT_ID,
+            GOOGLE_CLIENT_SECRET: !!e.GOOGLE_CLIENT_SECRET,
+            AZURE_CLIENT_ID: !!e.AZURE_CLIENT_ID,
+            AZURE_CLIENT_SECRET: !!e.AZURE_CLIENT_SECRET,
+            AZURE_TENANT_ID: !!e.AZURE_TENANT_ID,
+            STORAGE_ENDPOINT: !!e.STORAGE_ENDPOINT,
+            STORAGE_ACCESS_KEY_ID: !!e.STORAGE_ACCESS_KEY_ID,
+            STORAGE_SECRET_ACCESS_KEY: !!e.STORAGE_SECRET_ACCESS_KEY,
+          },
+          envVarsKeys: Object.keys(this.envVars || {}),
+          envVarsHasStorage: !!(this.envVars && "STORAGE_ACCESS_KEY_ID" in this.envVars),
+        }),
+        { headers: { "Content-Type": "application/json" } }
+      );
+    }
+    
+    // Forward all other requests to the container
+    return super.fetch(request);
+  }
 }
 
 /**
@@ -216,6 +249,12 @@ export default {
           headers: { "Content-Type": "application/json" },
         }
       );
+    }
+
+    // Debug endpoint to check Durable Object's env (forwarded to DO)
+    if (url.pathname === "/_do-debug") {
+      const container = loadBalance(env);
+      return container.fetch(request);
     }
 
     // CORS preflight handling
