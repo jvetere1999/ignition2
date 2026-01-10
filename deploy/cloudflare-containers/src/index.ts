@@ -163,6 +163,29 @@ export class ApiContainer extends Container<Env> {
   override async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
     
+    // Restart endpoint - stop container so it restarts with new envVars
+    if (url.pathname === "/_restart") {
+      try {
+        await this.stop();
+        return new Response(
+          JSON.stringify({
+            success: true,
+            message: "Container stopped. It will restart on next request with updated envVars.",
+            envVarsKeys: Object.keys(this.envVars || {}),
+          }),
+          { headers: { "Content-Type": "application/json" } }
+        );
+      } catch (err) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: String(err),
+          }),
+          { status: 500, headers: { "Content-Type": "application/json" } }
+        );
+      }
+    }
+    
     // Debug endpoint to check secrets from Durable Object context
     if (url.pathname === "/_do-debug") {
       const e = this.env as Env;
@@ -255,6 +278,25 @@ export default {
     if (url.pathname === "/_do-debug") {
       const container = loadBalance(env);
       return container.fetch(request);
+    }
+
+    // Restart endpoint - stop containers so they restart with new envVars
+    if (url.pathname === "/_restart") {
+      // Restart all instances
+      const results = [];
+      for (let i = 0; i < MAX_INSTANCES; i++) {
+        const container = getApiContainer(env, i);
+        try {
+          const response = await container.fetch(request);
+          results.push(await response.json());
+        } catch (err) {
+          results.push({ instance: i, error: String(err) });
+        }
+      }
+      return new Response(
+        JSON.stringify({ restarted: results }),
+        { headers: { "Content-Type": "application/json" } }
+      );
     }
 
     // CORS preflight handling
