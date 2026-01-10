@@ -64,6 +64,19 @@ export class ApiContainer extends Container<Env> {
     // Use constructor env (like fuse-on-r2 example does)
     const e = env;
     
+    // Log ALL secrets individually for debugging
+    console.log("[ApiContainer] All secrets status:");
+    console.log(`  DATABASE_URL: ${safeGet(e.DATABASE_URL) ? "✓" : "✗"}`);
+    console.log(`  SESSION_SECRET: ${safeGet(e.SESSION_SECRET) ? "✓" : "✗"}`);
+    console.log(`  GOOGLE_CLIENT_ID: ${safeGet(e.GOOGLE_CLIENT_ID) ? "✓" : "✗"}`);
+    console.log(`  GOOGLE_CLIENT_SECRET: ${safeGet(e.GOOGLE_CLIENT_SECRET) ? "✓" : "✗"}`);
+    console.log(`  AZURE_CLIENT_ID: ${safeGet(e.AZURE_CLIENT_ID) ? "✓" : "✗"}`);
+    console.log(`  AZURE_CLIENT_SECRET: ${safeGet(e.AZURE_CLIENT_SECRET) ? "✓" : "✗"}`);
+    console.log(`  AZURE_TENANT_ID: ${safeGet(e.AZURE_TENANT_ID) ? "✓" : "✗"}`);
+    console.log(`  STORAGE_ENDPOINT: ${safeGet(e.STORAGE_ENDPOINT) ? "✓" : "✗"}`);
+    console.log(`  STORAGE_ACCESS_KEY_ID: ${safeGet(e.STORAGE_ACCESS_KEY_ID) ? "✓" : "✗"}`);
+    console.log(`  STORAGE_SECRET_ACCESS_KEY: ${safeGet(e.STORAGE_SECRET_ACCESS_KEY) ? "✓" : "✗"}`);
+    
     // Build env vars object - only include storage vars if ALL are present
     const hasAllStorageSecrets = !!(
       safeGet(e.STORAGE_ENDPOINT) &&
@@ -185,11 +198,18 @@ export default {
           status: "ok",
           service: "ignition-api",
           timestamp: new Date().toISOString(),
-          // Debug: include env check in response
-          envCheck: {
-            hasGoogleClientId: !!env.GOOGLE_CLIENT_ID,
-            hasGoogleSecret: !!env.GOOGLE_CLIENT_SECRET,
-            hasDbUrl: !!env.DATABASE_URL,
+          // Debug: include ALL secrets status in response
+          secretsStatus: {
+            DATABASE_URL: !!env.DATABASE_URL,
+            SESSION_SECRET: !!env.SESSION_SECRET,
+            GOOGLE_CLIENT_ID: !!env.GOOGLE_CLIENT_ID,
+            GOOGLE_CLIENT_SECRET: !!env.GOOGLE_CLIENT_SECRET,
+            AZURE_CLIENT_ID: !!env.AZURE_CLIENT_ID,
+            AZURE_CLIENT_SECRET: !!env.AZURE_CLIENT_SECRET,
+            AZURE_TENANT_ID: !!env.AZURE_TENANT_ID,
+            STORAGE_ENDPOINT: !!env.STORAGE_ENDPOINT,
+            STORAGE_ACCESS_KEY_ID: !!env.STORAGE_ACCESS_KEY_ID,
+            STORAGE_SECRET_ACCESS_KEY: !!env.STORAGE_SECRET_ACCESS_KEY,
           }
         }),
         {
