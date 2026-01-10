@@ -23,6 +23,7 @@ pub fn router() -> Router<Arc<AppState>> {
         .route("/settings", get(get_settings).put(update_settings))
         .route("/delete", delete(delete_account))
         .route("/export", get(export_data))
+        .nest("/inbox", super::inbox::router())
 }
 
 // ============================================================================

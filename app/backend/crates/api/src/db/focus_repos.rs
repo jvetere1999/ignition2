@@ -429,3 +429,134 @@ impl FocusPauseRepo {
         Ok(())
     }
 }
+
+// ============================================================================
+// FOCUS LIBRARIES REPOSITORY
+// ============================================================================
+
+pub struct FocusLibraryRepo;
+
+impl FocusLibraryRepo {
+    /// List focus libraries for user
+    pub async fn list(
+        pool: &PgPool,
+        user_id: Uuid,
+        page: i64,
+        page_size: i64,
+    ) -> Result<FocusLibrariesListResponse, AppError> {
+        let offset = (page - 1) * page_size;
+
+        let libraries = sqlx::query_as::<_, FocusLibrary>(
+            "SELECT * FROM focus_libraries WHERE user_id = $1 ORDER BY is_favorite DESC, created_at DESC LIMIT $2 OFFSET $3",
+        )
+        .bind(user_id)
+        .bind(page_size)
+        .bind(offset)
+        .fetch_all(pool)
+        .await?;
+
+        let total: (i64,) = sqlx::query_as(
+            "SELECT COUNT(*) FROM focus_libraries WHERE user_id = $1",
+        )
+        .bind(user_id)
+        .fetch_one(pool)
+        .await?;
+
+        Ok(FocusLibrariesListResponse {
+            libraries: libraries.into_iter().map(FocusLibraryResponse::from).collect(),
+            total: total.0,
+            page,
+            page_size,
+        })
+    }
+
+    /// Get single focus library
+    pub async fn get(
+        pool: &PgPool,
+        user_id: Uuid,
+        library_id: Uuid,
+    ) -> Result<FocusLibrary, AppError> {
+        let library = sqlx::query_as::<_, FocusLibrary>(
+            "SELECT * FROM focus_libraries WHERE id = $1 AND user_id = $2",
+        )
+        .bind(library_id)
+        .bind(user_id)
+        .fetch_optional(pool)
+        .await?
+        .ok_or(AppError::NotFound("Library not found".into()))?;
+
+        Ok(library)
+    }
+
+    /// Create focus library
+    pub async fn create(
+        pool: &PgPool,
+        user_id: Uuid,
+        req: &CreateFocusLibraryRequest,
+    ) -> Result<FocusLibrary, AppError> {
+        let library_type = req.library_type.as_deref().unwrap_or("custom");
+
+        let library = sqlx::query_as::<_, FocusLibrary>(
+            "INSERT INTO focus_libraries (user_id, name, description, library_type)
+             VALUES ($1, $2, $3, $4)
+             RETURNING *",
+        )
+        .bind(user_id)
+        .bind(&req.name)
+        .bind(&req.description)
+        .bind(library_type)
+        .fetch_one(pool)
+        .await?;
+
+        Ok(library)
+    }
+
+    /// Delete focus library
+    pub async fn delete(
+        pool: &PgPool,
+        user_id: Uuid,
+        library_id: Uuid,
+    ) -> Result<(), AppError> {
+        // First delete all tracks
+        sqlx::query("DELETE FROM focus_library_tracks WHERE library_id = $1")
+            .bind(library_id)
+            .execute(pool)
+            .await?;
+
+        // Then delete library
+        let result = sqlx::query(
+            "DELETE FROM focus_libraries WHERE id = $1 AND user_id = $2",
+        )
+        .bind(library_id)
+        .bind(user_id)
+        .execute(pool)
+        .await?;
+
+        if result.rows_affected() == 0 {
+            return Err(AppError::NotFound("Library not found".into()));
+        }
+
+        Ok(())
+    }
+
+    /// Toggle library favorite status
+    pub async fn toggle_favorite(
+        pool: &PgPool,
+        user_id: Uuid,
+        library_id: Uuid,
+    ) -> Result<FocusLibrary, AppError> {
+        let library = sqlx::query_as::<_, FocusLibrary>(
+            "UPDATE focus_libraries 
+             SET is_favorite = NOT is_favorite, updated_at = NOW()
+             WHERE id = $1 AND user_id = $2
+             RETURNING *",
+        )
+        .bind(library_id)
+        .bind(user_id)
+        .fetch_optional(pool)
+        .await?
+        .ok_or(AppError::NotFound("Library not found".into()))?;
+
+        Ok(library)
+    }
+}

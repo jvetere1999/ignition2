@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::db::focus_models::*;
-use crate::db::focus_repos::{FocusPauseRepo, FocusSessionRepo};
+use crate::db::focus_repos::{FocusLibraryRepo, FocusPauseRepo, FocusSessionRepo};
 use crate::db::models::User;
 use crate::error::AppError;
 use crate::state::AppState;
@@ -32,6 +32,9 @@ pub fn router() -> Router<Arc<AppState>> {
         )
         .route("/{id}/complete", post(complete_session))
         .route("/{id}/abandon", post(abandon_session))
+        .route("/libraries", get(list_libraries).post(create_library))
+        .route("/libraries/{id}", get(get_library).delete(delete_library))
+        .route("/libraries/{id}/favorite", post(toggle_favorite))
 }
 
 // ============================================================================
@@ -211,5 +214,87 @@ async fn abandon_session(
 
     Ok(Json(SessionResponse {
         data: session.into(),
+    }))
+}
+
+// ============================================================================
+// FOCUS LIBRARIES HANDLERS
+// ============================================================================
+
+#[derive(Serialize)]
+struct LibraryWrapper {
+    data: FocusLibraryResponse,
+}
+
+#[derive(Serialize)]
+struct LibrariesWrapper {
+    data: FocusLibrariesListResponse,
+}
+
+/// GET /focus/libraries
+/// List focus libraries
+async fn list_libraries(
+    State(state): State<Arc<AppState>>,
+    Extension(user): Extension<User>,
+    Query(query): Query<ListSessionsQuery>,
+) -> Result<Json<LibrariesWrapper>, AppError> {
+    let response = FocusLibraryRepo::list(&state.db, user.id, query.page, query.page_size).await?;
+    Ok(Json(LibrariesWrapper { data: response }))
+}
+
+/// POST /focus/libraries
+/// Create focus library
+async fn create_library(
+    State(state): State<Arc<AppState>>,
+    Extension(user): Extension<User>,
+    Json(req): Json<CreateFocusLibraryRequest>,
+) -> Result<Json<LibraryWrapper>, AppError> {
+    if req.name.is_empty() {
+        return Err(AppError::Validation("Library name cannot be empty".into()));
+    }
+
+    let library = FocusLibraryRepo::create(&state.db, user.id, &req).await?;
+    Ok(Json(LibraryWrapper {
+        data: FocusLibraryResponse::from(library),
+    }))
+}
+
+/// GET /focus/libraries/:id
+/// Get focus library
+async fn get_library(
+    State(state): State<Arc<AppState>>,
+    Extension(user): Extension<User>,
+    Path(id): Path<Uuid>,
+) -> Result<Json<LibraryWrapper>, AppError> {
+    let library = FocusLibraryRepo::get(&state.db, user.id, id).await?;
+    Ok(Json(LibraryWrapper {
+        data: FocusLibraryResponse::from(library),
+    }))
+}
+
+/// DELETE /focus/libraries/:id
+/// Delete focus library
+async fn delete_library(
+    State(state): State<Arc<AppState>>,
+    Extension(user): Extension<User>,
+    Path(id): Path<Uuid>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    FocusLibraryRepo::delete(&state.db, user.id, id).await?;
+    Ok(Json(serde_json::json!({
+        "success": true,
+        "id": id
+    })))
+}
+
+/// POST /focus/libraries/:id/favorite
+/// Toggle library favorite status
+async fn toggle_favorite(
+    State(state): State<Arc<AppState>>,
+    Extension(user): Extension<User>,
+    Path(id): Path<Uuid>,
+) -> Result<Json<LibraryWrapper>, AppError> {
+    let library = FocusLibraryRepo::toggle_favorite(&state.db, user.id, id).await?;
+    Ok(Json(LibraryWrapper {
+        data: FocusLibraryResponse::from(library),
     }))
 }

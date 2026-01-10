@@ -35,6 +35,8 @@ pub fn router() -> Router<Arc<AppState>> {
         .nest("/market", super::market::router())
         // Reference tracks module
         .nest("/reference", reference_routes())
+        // References library module (stateless sync - 2026-01-10)
+        .nest("/references", super::references_library::router())
         // Learn module (Wave 3 - real implementation)
         .nest("/learn", super::learn::router())
         // User module (Wave 4 - real implementation)

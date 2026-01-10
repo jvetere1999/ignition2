@@ -243,3 +243,80 @@ pub struct FocusSessionsListResponse {
     pub page: i64,
     pub page_size: i64,
 }
+
+// ============================================================================
+// FOCUS LIBRARIES
+// ============================================================================
+
+/// Focus library database model
+#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
+pub struct FocusLibrary {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub name: String,
+    pub description: Option<String>,
+    pub library_type: String,
+    pub tracks_count: i32,
+    pub is_favorite: bool,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+/// Focus library track database model
+#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
+pub struct FocusLibraryTrack {
+    pub id: Uuid,
+    pub library_id: Uuid,
+    pub track_id: String,
+    pub track_title: String,
+    pub track_url: Option<String>,
+    pub duration_seconds: Option<i32>,
+    pub added_at: DateTime<Utc>,
+}
+
+/// Create focus library request
+#[derive(Debug, Deserialize)]
+pub struct CreateFocusLibraryRequest {
+    pub name: String,
+    #[serde(default)]
+    pub description: Option<String>,
+    #[serde(default)]
+    pub library_type: Option<String>,
+}
+
+/// Focus library response
+#[derive(Debug, Serialize)]
+pub struct FocusLibraryResponse {
+    pub id: Uuid,
+    pub name: String,
+    pub description: Option<String>,
+    pub library_type: String,
+    pub tracks_count: i32,
+    pub is_favorite: bool,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+impl From<FocusLibrary> for FocusLibraryResponse {
+    fn from(lib: FocusLibrary) -> Self {
+        FocusLibraryResponse {
+            id: lib.id,
+            name: lib.name,
+            description: lib.description,
+            library_type: lib.library_type,
+            tracks_count: lib.tracks_count,
+            is_favorite: lib.is_favorite,
+            created_at: lib.created_at,
+            updated_at: lib.updated_at,
+        }
+    }
+}
+
+/// Focus libraries list response
+#[derive(Debug, Serialize)]
+pub struct FocusLibrariesListResponse {
+    pub libraries: Vec<FocusLibraryResponse>,
+    pub total: i64,
+    pub page: i64,
+    pub page_size: i64,
+}
