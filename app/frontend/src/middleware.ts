@@ -115,7 +115,9 @@ export async function middleware(req: NextRequest) {
     pathname.includes(".")
   ) {
     console.log(`[middleware] SKIP: static/api route`);
-    return NextResponse.next();
+    const response = NextResponse.next();
+    response.headers.set('X-Middleware-Skip', 'true');
+    return response;
   }
 
   // Check public routes before auth (avoid API call when not needed)
@@ -126,7 +128,9 @@ export async function middleware(req: NextRequest) {
   // For other public routes, skip auth entirely
   if (isPublic && pathname !== "/") {
     console.log(`[middleware] ALLOW: public route (non-landing)`);
-    return NextResponse.next();
+    const response = NextResponse.next();
+    response.headers.set('X-Middleware-Public', 'true');
+    return response;
   }
 
   // Get session from backend - this is the expensive call
@@ -140,6 +144,7 @@ export async function middleware(req: NextRequest) {
   if (pathname === "/" && authenticated) {
     console.log(`[middleware] REDIRECT: authenticated user at landing -> /today`);
     const response = NextResponse.redirect(new URL("/today", req.url));
+    response.headers.set('X-Middleware-Auth', 'redirect-to-today');
     if (perfDebug) {
       response.headers.set(
         "Server-Timing",
@@ -152,7 +157,9 @@ export async function middleware(req: NextRequest) {
   // Allow public routes (landing page for unauthenticated)
   if (isPublic) {
     console.log(`[middleware] ALLOW: public route (landing page)`);
-    return NextResponse.next();
+    const response = NextResponse.next();
+    response.headers.set('X-Middleware-Public-Landing', 'true');
+    return response;
   }
 
   // Redirect unauthenticated users to sign in
@@ -160,12 +167,15 @@ export async function middleware(req: NextRequest) {
     console.log(`[middleware] REDIRECT: unauthenticated user -> /auth/signin?callbackUrl=${pathname}`);
     const signInUrl = new URL("/auth/signin", req.url);
     signInUrl.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(signInUrl);
+    const response = NextResponse.redirect(signInUrl);
+    response.headers.set('X-Middleware-Auth', `redirect-to-signin:${authenticated}`);
+    return response;
   }
 
   // Authenticated user accessing protected route
   console.log(`[middleware] ALLOW: authenticated user accessing ${pathname}`);
   const response = NextResponse.next();
+  response.headers.set('X-Middleware-Auth', 'authenticated');
   if (perfDebug) {
     response.headers.set(
       "Server-Timing",
