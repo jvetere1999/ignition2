@@ -7,6 +7,7 @@ IN ADDITION EVERY PHASE IS FOLLOWED BY A GAP ANALYSIS AND VALIDATION STEP LIMIT 
 ## Absolute Rules (follow to the T)
 - Root is the project root directory.
 - Work only on branch: `refactor/stack-split`
+- **Before every `git push`**: Bump `CONFIG_VERSION` in `deploy/cloudflare-containers/src/index.ts` to force container restart with new env vars. Format: `"YYYY-MM-DD-vN"` (increment N for same-day changes).
 
 ## Target Repo Layout (parallel siblings notation)
 Notation:
