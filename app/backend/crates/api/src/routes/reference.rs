@@ -29,30 +29,30 @@ pub fn router() -> Router<Arc<AppState>> {
         // Track routes
         .route("/tracks", get(list_tracks))
         .route("/tracks", post(create_track))
-        .route("/tracks/:id", get(get_track))
-        .route("/tracks/:id", patch(update_track))
-        .route("/tracks/:id", delete(delete_track))
+        .route("/tracks/{id}", get(get_track))
+        .route("/tracks/{id}", patch(update_track))
+        .route("/tracks/{id}", delete(delete_track))
         // Upload routes
         .route("/upload", post(upload_track))
         .route("/upload/init", post(init_upload))
         // Analysis routes
-        .route("/tracks/:id/analysis", get(get_analysis))
-        .route("/tracks/:id/analysis", post(start_analysis))
+        .route("/tracks/{id}/analysis", get(get_analysis))
+        .route("/tracks/{id}/analysis", post(start_analysis))
         // Streaming routes
-        .route("/tracks/:id/stream", get(stream_track))
-        .route("/tracks/:id/play", get(stream_track))
+        .route("/tracks/{id}/stream", get(stream_track))
+        .route("/tracks/{id}/play", get(stream_track))
         // Annotation routes
-        .route("/tracks/:id/annotations", get(list_annotations))
-        .route("/tracks/:id/annotations", post(create_annotation))
-        .route("/annotations/:id", get(get_annotation))
-        .route("/annotations/:id", patch(update_annotation))
-        .route("/annotations/:id", delete(delete_annotation))
+        .route("/tracks/{id}/annotations", get(list_annotations))
+        .route("/tracks/{id}/annotations", post(create_annotation))
+        .route("/annotations/{id}", get(get_annotation))
+        .route("/annotations/{id}", patch(update_annotation))
+        .route("/annotations/{id}", delete(delete_annotation))
         // Region routes
-        .route("/tracks/:id/regions", get(list_regions))
-        .route("/tracks/:id/regions", post(create_region))
-        .route("/regions/:id", get(get_region))
-        .route("/regions/:id", patch(update_region))
-        .route("/regions/:id", delete(delete_region))
+        .route("/tracks/{id}/regions", get(list_regions))
+        .route("/tracks/{id}/regions", post(create_region))
+        .route("/regions/{id}", get(get_region))
+        .route("/regions/{id}", patch(update_region))
+        .route("/regions/{id}", delete(delete_region))
 }
 
 // =============================================================================

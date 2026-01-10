@@ -23,7 +23,7 @@ pub fn router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/", get(get_market_overview))
         .route("/items", get(list_items).post(create_item))
-        .route("/items/:key", get(get_item))
+        .route("/items/{key}", get(get_item))
         .route("/purchase", post(purchase_item))
         .route("/redeem", post(redeem_item))
         .route("/history", get(get_purchase_history))
