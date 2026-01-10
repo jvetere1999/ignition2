@@ -24,7 +24,7 @@ interface Stats {
 }
 
 interface StatsClientProps {
-  userId: string;
+  userId?: string; // Optional - will use useAuth() if not provided
 }
 
 interface FocusStatsResponse {

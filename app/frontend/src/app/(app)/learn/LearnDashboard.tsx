@@ -48,10 +48,10 @@ interface DashboardData {
 }
 
 interface LearnDashboardProps {
-  userId: string;
+  userId?: string; // Optional - will use useAuth() if not provided
 }
 
-export function LearnDashboard({ userId }: LearnDashboardProps) {
+export function LearnDashboard({ userId }: LearnDashboardProps = {}) {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 

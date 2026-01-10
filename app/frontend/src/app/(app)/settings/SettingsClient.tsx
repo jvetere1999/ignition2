@@ -11,15 +11,15 @@ import { ThemeSelector } from "@/components/settings/ThemeSelector";
 import styles from "./page.module.css";
 
 interface SettingsClientProps {
-  user: {
+  user?: {
     id: string;
     name?: string | null;
     email?: string | null;
     image?: string | null;
-  };
+  }; // Optional - will use useAuth() if not provided
 }
 
-export function SettingsClient({ user }: SettingsClientProps) {
+export function SettingsClient({ user }: SettingsClientProps = {}) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");

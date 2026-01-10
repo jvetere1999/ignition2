@@ -7,10 +7,10 @@
 import styles from "./MobileProgress.module.css";
 
 interface MobileProgressProps {
-  userId: string;
+  userId?: string; // Optional - will use useAuth() if not provided
 }
 
-export function MobileProgress({ userId }: MobileProgressProps) {
+export function MobileProgress({ userId }: MobileProgressProps = {}) {
   void userId;
 
   return (

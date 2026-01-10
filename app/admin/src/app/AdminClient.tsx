@@ -68,10 +68,10 @@ interface SkillDefinition {
 }
 
 interface AdminClientProps {
-  userEmail: string;
+  userEmail?: string; // Optional - will use useAuth() if not provided
 }
 
-export function AdminClient({ userEmail }: AdminClientProps) {
+export function AdminClient({ userEmail }: AdminClientProps = {}) {
   const [activeTab, setActiveTab] = useState<AdminTab>("users");
   const [users, setUsers] = useState<User[]>([]);
   const [quests, setQuests] = useState<Quest[]>([]);

@@ -8,12 +8,12 @@ import { useState, useEffect, useCallback } from "react";
 import styles from "./MobileFocus.module.css";
 
 interface MobileFocusProps {
-  userId: string;
+  userId?: string; // Optional - will use useAuth() if not provided
 }
 
 type FocusMode = "focus" | "break";
 
-export function MobileFocus({ userId }: MobileFocusProps) {
+export function MobileFocus({ userId }: MobileFocusProps = {}) {
   const [isActive, setIsActive] = useState(false);
   const [mode, setMode] = useState<FocusMode>("focus");
   const [timeRemaining, setTimeRemaining] = useState(25 * 60); // 25 minutes

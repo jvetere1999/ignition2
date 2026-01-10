@@ -11,15 +11,15 @@ import { signOut } from "@/lib/auth/api-auth";
 import styles from "./MobileMe.module.css";
 
 interface MobileMeClientProps {
-  user: {
+  user?: {
     name: string;
     email: string;
     image: string | null;
-  };
-  isAdmin: boolean;
+  }; // Optional - will use useAuth() if not provided
+  isAdmin?: boolean; // Optional - will check via useAuth() if not provided
 }
 
-export function MobileMeClient({ user, isAdmin }: MobileMeClientProps) {
+export function MobileMeClient({ user, isAdmin }: MobileMeClientProps = {}) {
   const handleSignOut = async () => {
     await signOut();
     // signOut redirects to / automatically

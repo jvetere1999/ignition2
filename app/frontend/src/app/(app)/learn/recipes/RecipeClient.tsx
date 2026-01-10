@@ -73,10 +73,10 @@ const TARGET_DESCRIPTIONS: Record<TargetType, string> = {
 const DESCRIPTORS: Descriptor[] = ["bright", "dark", "wide", "narrow", "clean", "gritty", "slow", "fast"];
 
 interface RecipeClientProps {
-  userId: string;
+  userId?: string; // Optional - will use useAuth() if not provided
 }
 
-export function RecipeClient({ userId }: RecipeClientProps) {
+export function RecipeClient({ userId }: RecipeClientProps = {}) {
   const [settings, setSettings] = useState<RecipeSettings>({
     synth: "serum",
     targetType: "bass",

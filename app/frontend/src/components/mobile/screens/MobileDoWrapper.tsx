@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { MobileDoClient } from "./MobileDoClient";
 
 interface MobileDoWrapperProps {
-  userId: string;
+  userId?: string; // Optional - will use useAuth() if not provided
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online';

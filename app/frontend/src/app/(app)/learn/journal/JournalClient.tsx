@@ -24,10 +24,10 @@ interface JournalEntry {
 const STORAGE_KEY = "passion_patch_journal_v1";
 
 interface JournalClientProps {
-  userId: string;
+  userId?: string; // Optional - will use useAuth() if not provided
 }
 
-export function JournalClient({ userId }: JournalClientProps) {
+export function JournalClient({ userId }: JournalClientProps = {}) {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [synthFilter, setSynthFilter] = useState<"all" | "serum" | "vital" | "other">("all");

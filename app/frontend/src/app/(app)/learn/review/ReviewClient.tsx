@@ -106,10 +106,10 @@ const MOCK_CARDS: ReviewCard[] = [
 ];
 
 interface ReviewClientProps {
-  userId: string;
+  userId?: string; // Optional - will use useAuth() if not provided
 }
 
-export function ReviewClient({ userId }: ReviewClientProps) {
+export function ReviewClient({ userId }: ReviewClientProps = {}) {
   const [session, setSession] = useState<ReviewSession | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);

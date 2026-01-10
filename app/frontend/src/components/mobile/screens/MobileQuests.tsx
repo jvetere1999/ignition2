@@ -7,10 +7,10 @@
 import styles from "./MobileQuests.module.css";
 
 interface MobileQuestsProps {
-  userId: string;
+  userId?: string; // Optional - will use useAuth() if not provided
 }
 
-export function MobileQuests({ userId }: MobileQuestsProps) {
+export function MobileQuests({ userId }: MobileQuestsProps = {}) {
   void userId;
 
   return (

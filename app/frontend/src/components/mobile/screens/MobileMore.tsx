@@ -13,7 +13,7 @@ type User = AuthUser;
 import styles from "./MobileMore.module.css";
 
 interface MobileMoreProps {
-  user: User;
+  user?: User; // Optional - will use useAuth() if not provided
 }
 
 const MENU_SECTIONS = [

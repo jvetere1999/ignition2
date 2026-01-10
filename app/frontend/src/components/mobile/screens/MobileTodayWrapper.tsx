@@ -23,8 +23,8 @@ import { MobileTodayClient } from "./MobileTodayClient";
 
 interface MobileTodayWrapperProps {
   greeting: string;
-  firstName: string;
-  userId: string;
+  firstName?: string; // Optional - will derive from useAuth() if not provided
+  userId?: string; // Optional - will use useAuth() if not provided
 }
 
 /**

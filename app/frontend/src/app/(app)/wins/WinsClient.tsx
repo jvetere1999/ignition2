@@ -24,7 +24,7 @@ interface Win {
 }
 
 interface WinsClientProps {
-  userId: string;
+  userId?: string; // Optional - will use useAuth() if not provided
 }
 
 interface FocusItem {

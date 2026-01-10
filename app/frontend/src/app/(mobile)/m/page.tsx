@@ -26,8 +26,6 @@ export default async function MobileHomePage() {
   return (
     <MobileTodayWrapper
       greeting={greeting}
-      firstName={firstName}
-      userId={session.user.id}
     />
   );
 }
