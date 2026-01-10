@@ -74,12 +74,15 @@ export function BrowseReferenceTracks() {
         title: track.name,
         artist: track.artist || "Unknown Artist",
         duration: track.duration_seconds || 0,
-        url,
+        audioUrl: url,
         source: "reference",
-        sourceId: track.id,
+        referenceTrackId: track.id,
       };
 
-      playerStore.playTrack(queueTrack);
+      // Set queue with single track and start playing
+      playerStore.setQueue([queueTrack], 0);
+      playerStore.setStatus("loading");
+      playerStore.setVisible(true);
       setPlayingTrackId(track.id);
     } catch (e) {
       console.error("Failed to play track:", e);
