@@ -99,8 +99,6 @@ impl AppState {
 
     /// Run database migrations
     /// 
-    /// Embeds migrations at compile time.
-    /// Tracks applied migrations in _sqlx_migrations table.
     /// Returns the number of newly applied migrations.
     async fn run_migrations(db: &PgPool) -> Result<usize, sqlx::migrate::MigrateError> {
         // Migrations are embedded at compile time

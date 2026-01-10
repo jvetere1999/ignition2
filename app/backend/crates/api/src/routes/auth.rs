@@ -190,8 +190,8 @@ async fn callback_google(
         state.config.auth.session_ttl_seconds,
     );
 
-    // Redirect to app with session cookie
-    let redirect_url = format!("{}/today", state.config.server.public_url);
+    // Redirect to frontend app with session cookie
+    let redirect_url = format!("{}/today", state.config.server.frontend_url);
     let response = Response::builder()
         .status(StatusCode::FOUND)
         .header(header::LOCATION, redirect_url)
@@ -249,8 +249,8 @@ async fn callback_azure(
         state.config.auth.session_ttl_seconds,
     );
 
-    // Redirect to app with session cookie
-    let redirect_url = format!("{}/today", state.config.server.public_url);
+    // Redirect to frontend app with session cookie
+    let redirect_url = format!("{}/today", state.config.server.frontend_url);
     let response = Response::builder()
         .status(StatusCode::FOUND)
         .header(header::LOCATION, redirect_url)

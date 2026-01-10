@@ -25,6 +25,9 @@ pub struct ServerConfig {
     pub environment: String,
     #[serde(default = "default_public_url")]
     pub public_url: String,
+    /// Frontend URL for OAuth redirects (e.g., https://ignition.ecent.online)
+    #[serde(default = "default_frontend_url")]
+    pub frontend_url: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -152,6 +155,13 @@ fn default_region() -> String {
 
 fn default_public_url() -> String {
     "http://localhost:8080".to_string()
+}
+
+fn default_frontend_url() -> String {
+    std::env::var("FRONTEND_URL")
+        .ok()
+        .filter(|s| !s.is_empty())
+        .unwrap_or_else(|| "http://localhost:3000".to_string())
 }
 
 impl AppConfig {

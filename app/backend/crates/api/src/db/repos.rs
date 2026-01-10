@@ -140,7 +140,7 @@ impl AccountRepo {
     ) -> Result<Option<Account>, AppError> {
         let account = sqlx::query_as::<_, Account>(
             r#"SELECT
-                id, user_id, type as account_type, provider, provider_account_id,
+                id, user_id, type, provider, provider_account_id,
                 refresh_token, access_token, expires_at, token_type, scope,
                 id_token, session_state, created_at, updated_at
             FROM accounts
@@ -160,7 +160,7 @@ impl AccountRepo {
     pub async fn find_by_user_id(pool: &PgPool, user_id: Uuid) -> Result<Vec<Account>, AppError> {
         let accounts = sqlx::query_as::<_, Account>(
             r#"SELECT
-                id, user_id, type as account_type, provider, provider_account_id,
+                id, user_id, type, provider, provider_account_id,
                 refresh_token, access_token, expires_at, token_type, scope,
                 id_token, session_state, created_at, updated_at
             FROM accounts
@@ -197,7 +197,7 @@ impl AccountRepo {
                 id_token = EXCLUDED.id_token,
                 updated_at = NOW()
             RETURNING
-                id, user_id, type as account_type, provider, provider_account_id,
+                id, user_id, type, provider, provider_account_id,
                 refresh_token, access_token, expires_at, token_type, scope,
                 id_token, session_state, created_at, updated_at"#
         )
