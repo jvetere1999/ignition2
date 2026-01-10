@@ -165,6 +165,22 @@ impl AppConfig {
             .filter(|s| !s.is_empty() && s != "undefined")
             .unwrap_or_else(|| "postgres://localhost/ignition".to_string());
 
+        // Debug: Log all AUTH_* and STORAGE_* env vars at startup
+        tracing::info!("=== Config Loading: Environment Variables ===");
+        for (key, value) in std::env::vars() {
+            if key.starts_with("AUTH_") || key.starts_with("STORAGE_") || key.starts_with("DATABASE") || key.starts_with("SERVER_") {
+                let display_value = if key.contains("SECRET") || key.contains("PASSWORD") || key.contains("KEY") {
+                    if value.is_empty() { "(empty)" } else { "(set)" }
+                } else if value.len() > 50 {
+                    &value[..50]
+                } else {
+                    &value
+                };
+                tracing::info!("  {}: {}", key, display_value);
+            }
+        }
+        tracing::info!("=== End Environment Variables ===");
+
         let config = Config::builder()
             // Default configuration
             .set_default("server.host", "0.0.0.0")?
@@ -176,6 +192,14 @@ impl AppConfig {
             .set_default("database.pool_size", 10)?
             .set_default("auth.cookie_domain", "localhost")?
             .set_default("auth.session_ttl_seconds", 60 * 60 * 24 * 30)?
+            // Initialize OAuth structure with empty defaults so env vars can populate it
+            .set_default("auth.oauth.google.client_id", "")?
+            .set_default("auth.oauth.google.client_secret", "")?
+            .set_default("auth.oauth.google.redirect_uri", "")?
+            .set_default("auth.oauth.azure.client_id", "")?
+            .set_default("auth.oauth.azure.client_secret", "")?
+            .set_default("auth.oauth.azure.redirect_uri", "")?
+            .set_default("auth.oauth.azure.tenant_id", "")?
             .set_default(
                 "cors.allowed_origins",
                 vec!["http://localhost:3000", "http://localhost:3001"],
