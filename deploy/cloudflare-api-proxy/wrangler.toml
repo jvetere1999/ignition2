@@ -1,0 +1,17 @@
+# Ignition API Proxy - Routes api.ecent.online to Fly.io backend
+# Deploy: cd deploy/cloudflare-api-proxy && npx wrangler deploy
+
+name = "ignition-api-proxy"
+compatibility_date = "2025-01-02"
+main = "src/index.ts"
+
+[vars]
+BACKEND_URL = "https://ignition-api.fly.dev"
+
+# Custom domain routing
+[[routes]]
+pattern = "api.ecent.online/*"
+zone_name = "ecent.online"
+
+[observability]
+enabled = true

@@ -1,64 +1,64 @@
 # Ignition Deployment Guide
 
-**Date:** January 7, 2026  
-**Branch:** `refactor/stack-split`  
-**Target:** Self-hosted, two-container deployment (Backend + Postgres)
+**Date:** January 10, 2026  
+**Branch:** `main`  
+**Target:** Fly.io (Backend) + Cloudflare (Frontend/R2)
 
 ---
 
 ## Overview
 
-Ignition is deployed as a two-container system:
-1. **ignition-api** - Rust backend (Axum + Tower)
-2. **ignition-postgres** - PostgreSQL 17 database
-
-Frontend and Admin are static builds served separately (e.g., CDN, nginx, or Cloudflare Pages).
+Ignition is deployed as a multi-platform system:
+1. **ignition-api** - Rust backend on Fly.io
+2. **ignition-api-proxy** - Cloudflare Worker routing `api.ecent.online` → Fly.io
+3. **ignition-frontend** - Next.js on Cloudflare Pages
+4. **ignition-admin** - Next.js on Cloudflare Pages
+5. **ignition-blobs** - R2 storage bucket
 
 ---
 
 ## Architecture
 
 ```
-                    ┌─────────────────┐
-                    │   Load Balancer │
-                    │  (nginx/traefik)│
-                    └────────┬────────┘
-                             │
-           ┌─────────────────┼─────────────────┐
-           │                 │                 │
-           ▼                 ▼                 ▼
-    ┌─────────────┐   ┌─────────────┐   ┌─────────────┐
-    │  Frontend   │   │  Admin UI   │   │   Backend   │
-    │  (Static)   │   │  (Static)   │   │   (Rust)    │
-    │ CDN/nginx   │   │ CDN/nginx   │   │  Container  │
-    └─────────────┘   └─────────────┘   └──────┬──────┘
-                                               │
-                                               ▼
-                                        ┌─────────────┐
-                                        │  PostgreSQL │
-                                        │  Container  │
-                                        └─────────────┘
+                    ┌─────────────────────────────────────┐
+                    │         Cloudflare Edge             │
+                    ├─────────────────────────────────────┤
+                    │                                     │
+        ┌───────────┼───────────┬───────────┬────────────┤
+        │           │           │           │            │
+        ▼           ▼           ▼           ▼            ▼
+ ┌───────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌──────────┐
+ │ Frontend  │ │ Admin   │ │  API    │ │   R2    │ │  Pages   │
+ │  Pages    │ │ Pages   │ │  Proxy  │ │ Storage │ │  Assets  │
+ └───────────┘ └─────────┘ └────┬────┘ └─────────┘ └──────────┘
+                                │
+                    ┌───────────▼────────────┐
+                    │       Fly.io           │
+                    ├────────────────────────┤
+                    │  ┌──────────────────┐  │
+                    │  │  ignition-api    │  │
+                    │  │  (Rust/Axum)     │  │
+                    │  └────────┬─────────┘  │
+                    │           │            │
+                    │  ┌────────▼─────────┐  │
+                    │  │   Fly Postgres   │  │
+                    │  │    (Optional)    │  │
+                    │  └──────────────────┘  │
+                    └────────────────────────┘
 ```
 
 ---
 
-## Prerequisites
-
-- Docker and Docker Compose v2+
-- PostgreSQL 17 (or use container)
-- R2 bucket configured (Cloudflare)
-- OAuth app credentials (Google, Azure)
-- Azure Key Vault (for production secrets)
-
----
-
-## Directory Structure
+## Deployment Structure
 
 ```
 deploy/
-├── README.md              # This file
-├── rollback.md           # Rollback procedures
-├── production/
+├── README.md                    # This file
+├── rollback.md                  # Rollback procedures
+├── routing.md                   # DNS and routing config
+├── cloudflare-admin/            # Admin Pages deployment
+├── cloudflare-api-proxy/        # API proxy Worker (→ Fly.io)
+├── production/                  # Production configs
 │   ├── docker-compose.yml
 │   └── .env.example
 └── scripts/
@@ -66,9 +66,57 @@ deploy/
     ├── rollback.sh
     └── health-check.sh
 
-infra/
-├── docker-compose.yml    # Local development
-└── .env.example          # Local env template
+app/backend/
+└── fly.toml                     # Fly.io configuration
+```
+
+---
+
+## Deployment Workflows
+
+### Backend (Fly.io)
+
+Triggered on changes to `app/backend/**`:
+- GitHub Action: `.github/workflows/deploy-backend.yml`
+- Deploys to: `ignition-api.fly.dev`
+- Health check: `https://ignition-api.fly.dev/health`
+
+### API Proxy (Cloudflare Worker)
+
+Triggered on changes to `deploy/cloudflare-api-proxy/**`:
+- GitHub Action: `.github/workflows/deploy-api-proxy.yml`
+- Routes: `api.ecent.online/*` → `ignition-api.fly.dev`
+
+### Frontend (Cloudflare Pages)
+
+Triggered on changes to `app/frontend/**`:
+- GitHub Action: `.github/workflows/deploy-frontend-worker.yml`
+- Deploys to: `ignition.ecent.online`
+
+---
+
+## Required Secrets
+
+### GitHub Actions Secrets
+
+| Secret | Description |
+|--------|-------------|
+| `FLY_API_TOKEN` | Fly.io API token for deployments |
+| `CLOUDFLARE_API_TOKEN` | Cloudflare API token |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account ID |
+
+### Fly.io Secrets
+
+Set via `flyctl secrets set`:
+
+```bash
+flyctl secrets set DATABASE_URL="postgres://..." --app ignition-api
+flyctl secrets set SESSION_SECRET="..." --app ignition-api
+flyctl secrets set AUTH_OAUTH_GOOGLE_CLIENT_ID="..." --app ignition-api
+flyctl secrets set AUTH_OAUTH_GOOGLE_CLIENT_SECRET="..." --app ignition-api
+flyctl secrets set AUTH_OAUTH_AZURE_CLIENT_ID="..." --app ignition-api
+flyctl secrets set AUTH_OAUTH_AZURE_CLIENT_SECRET="..." --app ignition-api
+flyctl secrets set AUTH_OAUTH_AZURE_TENANT_ID="..." --app ignition-api
 ```
 
 ---
