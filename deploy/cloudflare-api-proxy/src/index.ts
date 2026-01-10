@@ -11,7 +11,7 @@ export interface Env {
 
 const ALLOWED_ORIGINS = [
   "https://ignition.ecent.online",
-  "https://admin.ignition.ecent.online",
+  "https://admin.ecent.online",
   "http://localhost:3000",
   "http://localhost:3001",
 ];

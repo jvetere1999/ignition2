@@ -32,6 +32,7 @@ jobs:
         run: npm run build
         env:
           NEXT_PUBLIC_API_URL: https://api.ecent.online
+          NEXT_PUBLIC_MAIN_APP_URL: https://ignition.ecent.online
 
       - name: Build for Cloudflare with OpenNext
         working-directory: app/admin
