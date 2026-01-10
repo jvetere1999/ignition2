@@ -1,11 +1,11 @@
 /**
  * Planner Page
  * Calendar for time-targeted events (meetings, appointments, workouts)
+ * 
+ * Auth is handled by middleware
  */
 
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth/server";
-import { redirect } from "next/navigation";
 import { PlannerClient } from "./PlannerClient";
 
 export const metadata: Metadata = {
@@ -14,15 +14,6 @@ export const metadata: Metadata = {
 };
 
 export default async function PlannerPage() {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect("/auth/signin");
-  }
-
-  // TODO: Fetch events from database
-  // const events = await getCalendarEvents(session.user.id);
-
   return <PlannerClient initialEvents={[]} />;
 }
 

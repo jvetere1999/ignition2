@@ -1,10 +1,10 @@
 /**
  * Chord Quality Training Page
+ * 
+ * Auth is handled by middleware
  */
 
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth/server";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ChordGame } from "./ChordGame";
 import styles from "./page.module.css";
@@ -15,12 +15,6 @@ export const metadata: Metadata = {
 };
 
 export default async function ChordTrainingPage() {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect("/auth/signin?callbackUrl=/learn/ear-training/chords");
-  }
-
   return (
     <div className={styles.page}>
       <header className={styles.header}>

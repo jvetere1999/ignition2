@@ -5,11 +5,11 @@
  * Not tasks. Not plans. Just ways to start.
  *
  * This is used as a resolver fallback before Focus.
+ * 
+ * Auth is handled by middleware
  */
 
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth/server";
-import { redirect } from "next/navigation";
 import { IgnitionsClient } from "./IgnitionsClient";
 
 export const metadata: Metadata = {
@@ -18,12 +18,6 @@ export const metadata: Metadata = {
 };
 
 export default async function IgnitionsPage() {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect("/auth/signin");
-  }
-
   return <IgnitionsClient />;
 }
 

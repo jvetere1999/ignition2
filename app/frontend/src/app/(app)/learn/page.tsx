@@ -1,11 +1,11 @@
 /**
  * Learn Dashboard Page
  * Main entry point for the learning suite
+ * 
+ * Auth is handled by middleware
  */
 
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth/server";
-import { redirect } from "next/navigation";
 import { LearnDashboard } from "./LearnDashboard";
 
 export const metadata: Metadata = {
@@ -14,12 +14,6 @@ export const metadata: Metadata = {
 };
 
 export default async function LearnPage() {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect("/auth/signin?callbackUrl=/learn");
-  }
-
-  return <LearnDashboard userId={session.user.id || ""} />;
+  return <LearnDashboard />;
 }
 

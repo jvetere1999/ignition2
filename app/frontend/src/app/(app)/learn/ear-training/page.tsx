@@ -1,11 +1,11 @@
 /**
  * Ear Training Hub
  * Central hub for all ear training exercises
+ * 
+ * Auth is handled by middleware
  */
 
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth/server";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import styles from "./page.module.css";
 
@@ -72,12 +72,6 @@ const drillCategories = [
 ];
 
 export default async function EarTrainingPage() {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect("/auth/signin?callbackUrl=/learn/ear-training");
-  }
-
   return (
     <div className={styles.page}>
       <header className={styles.header}>

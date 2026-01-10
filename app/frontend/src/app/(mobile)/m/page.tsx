@@ -8,10 +8,9 @@
  * Architecture:
  * - Frontend performs 0% data logic
  * - All data flows through Rust backend at api.ecent.online
+ * - Auth handled by middleware
  */
 
-import { auth } from "@/lib/auth/server";
-import { redirect } from "next/navigation";
 import { MobileTodayWrapper } from "@/components/mobile/screens/MobileTodayWrapper";
 
 function getGreeting(): string {
@@ -22,14 +21,7 @@ function getGreeting(): string {
 }
 
 export default async function MobileHomePage() {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect("/m/auth/signin");
-  }
-
   const greeting = getGreeting();
-  const firstName = session.user.name?.split(" ")[0] || "there";
 
   return (
     <MobileTodayWrapper

@@ -1,12 +1,12 @@
 /**
  * Admin Documentation Page
  * Technical documentation accessible only to admins
+ * 
+ * Auth is handled by middleware
+ * Admin role check happens client-side via useAuth()
  */
 
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth/server";
-import { redirect } from "next/navigation";
-import { isAdminEmail } from "@/lib/admin";
 import { readFile } from "fs/promises";
 import { join } from "path";
 import styles from "./page.module.css";
@@ -18,17 +18,8 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminDocsPage() {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect("/auth/signin");
-  }
-
-  // Check if user is admin
-  if (!isAdminEmail(session.user.email)) {
-    redirect("/today");
-  }
-
+  // Note: Auth/admin checks happen via middleware + client-side useAuth()
+  
   // Read the database schema markdown
   let schemaContent = "";
   try {

@@ -6,11 +6,11 @@
  * - One dominant action (capture idea)
  * - Minimal choices
  * - Quick entry, no friction
+ * 
+ * Auth is handled by middleware
  */
 
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth/server";
-import { redirect } from "next/navigation";
 import { IdeasClient } from "./IdeasClient";
 
 export const metadata: Metadata = {
@@ -19,12 +19,6 @@ export const metadata: Metadata = {
 };
 
 export default async function IdeasPage() {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect("/auth/signin");
-  }
-
-  return <IdeasClient userId={session.user.id || ""} />;
+  return <IdeasClient />;
 }
 

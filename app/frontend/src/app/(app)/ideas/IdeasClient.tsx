@@ -34,7 +34,7 @@ interface Idea {
 }
 
 interface IdeasClientProps {
-  userId: string;
+  // No props needed - auth handled by middleware, API fetches user-specific data
 }
 
 const KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -42,7 +42,7 @@ const MODES = ["Major", "Minor"];
 const MOODS = ["Energetic", "Chill", "Dark", "Uplifting", "Melancholic", "Aggressive"];
 const BPM_PRESETS = [80, 100, 120, 140, 160];
 
-export function IdeasClient({ userId: _userId }: IdeasClientProps) {
+export function IdeasClient({}: IdeasClientProps = {}) {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [isRecording, setIsRecording] = useState(false);
   const [newIdea, setNewIdea] = useState("");

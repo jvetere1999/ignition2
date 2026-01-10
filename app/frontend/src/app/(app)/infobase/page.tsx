@@ -1,11 +1,11 @@
 /**
  * Infobase Page
  * Knowledge base and notes
+ * 
+ * Auth is handled by middleware
  */
 
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth/server";
-import { redirect } from "next/navigation";
 import { InfobaseClient } from "./InfobaseClient";
 
 export const metadata: Metadata = {
@@ -14,12 +14,6 @@ export const metadata: Metadata = {
 };
 
 export default async function InfobasePage() {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect("/auth/signin");
-  }
-
   return <InfobaseClient />;
 }
 

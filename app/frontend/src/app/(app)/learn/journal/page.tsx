@@ -1,11 +1,11 @@
 /**
  * Patch Journal Page
  * Log and track synthesis experiments
+ * 
+ * Auth is handled by middleware
  */
 
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth/server";
-import { redirect } from "next/navigation";
 import { JournalClient } from "./JournalClient";
 
 export const metadata: Metadata = {
@@ -14,12 +14,6 @@ export const metadata: Metadata = {
 };
 
 export default async function JournalPage() {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect("/auth/signin?callbackUrl=/learn/journal");
-  }
-
-  return <JournalClient userId={session.user.id || ""} />;
+  return <JournalClient />;
 }
 

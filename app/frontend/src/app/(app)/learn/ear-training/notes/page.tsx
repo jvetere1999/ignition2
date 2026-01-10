@@ -1,10 +1,10 @@
 /**
  * Note Recognition Training Page
+ * 
+ * Auth is handled by middleware
  */
 
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth/server";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { NoteGame } from "./NoteGame";
 import styles from "./page.module.css";
@@ -15,12 +15,6 @@ export const metadata: Metadata = {
 };
 
 export default async function NoteTrainingPage() {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect("/auth/signin?callbackUrl=/learn/ear-training/notes");
-  }
-
   return (
     <div className={styles.page}>
       <header className={styles.header}>

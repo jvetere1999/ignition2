@@ -1,11 +1,11 @@
 /**
  * Review Page
  * Spaced repetition flashcard review
+ * 
+ * Auth is handled by middleware
  */
 
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth/server";
-import { redirect } from "next/navigation";
 import { ReviewClient } from "./ReviewClient";
 
 export const metadata: Metadata = {
@@ -14,12 +14,6 @@ export const metadata: Metadata = {
 };
 
 export default async function ReviewPage() {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect("/auth/signin?callbackUrl=/learn/review");
-  }
-
-  return <ReviewClient userId={session.user.id || ""} />;
+  return <ReviewClient />;
 }
 

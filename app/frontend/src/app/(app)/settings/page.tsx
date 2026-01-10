@@ -1,11 +1,11 @@
 /**
  * Settings Page
  * User preferences and account settings
+ * 
+ * Auth is handled by middleware
  */
 
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth/server";
-import { redirect } from "next/navigation";
 import { SettingsClient } from "./SettingsClient";
 import styles from "./page.module.css";
 
@@ -15,12 +15,6 @@ export const metadata: Metadata = {
 };
 
 export default async function SettingsPage() {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect("/auth/signin");
-  }
-
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -30,7 +24,7 @@ export default async function SettingsPage() {
         </p>
       </header>
 
-      <SettingsClient user={session.user} />
+      <SettingsClient />
     </div>
   );
 }

@@ -1,11 +1,11 @@
 /**
  * Progress Page
  * Stats and analytics dashboard with Persona 5 style skill wheel
+ * 
+ * Auth is handled by middleware
  */
 
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth/server";
-import { redirect } from "next/navigation";
 import { ProgressClient } from "./ProgressClient";
 
 export const metadata: Metadata = {
@@ -14,11 +14,5 @@ export const metadata: Metadata = {
 };
 
 export default async function ProgressPage() {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect("/auth/signin");
-  }
-
   return <ProgressClient />;
 }

@@ -1,11 +1,11 @@
 /**
  * Focus Page
  * Focus timer and session management
+ * 
+ * Auth is handled by middleware - no server-side check needed
  */
 
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth/server";
-import { redirect } from "next/navigation";
 import { FocusClient } from "./FocusClient";
 
 export const metadata: Metadata = {
@@ -14,12 +14,6 @@ export const metadata: Metadata = {
 };
 
 export default async function FocusPage() {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect("/auth/signin");
-  }
-
   return <FocusClient />;
 }
 

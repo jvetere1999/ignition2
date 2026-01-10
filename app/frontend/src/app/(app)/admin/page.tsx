@@ -1,12 +1,11 @@
 /**
  * Admin Console Page
  * Only accessible to admin users defined in ADMIN_EMAILS env var
+ * 
+ * Auth is handled by middleware, admin role check in client component
  */
 
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth/server";
-import { redirect } from "next/navigation";
-import { isAdminEmail } from "@/lib/admin";
 import { AdminClient } from "./AdminClient";
 
 export const metadata: Metadata = {
@@ -15,17 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminPage() {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect("/auth/signin");
-  }
-
-  // Check if user is admin
-  if (!isAdminEmail(session.user.email)) {
-    redirect("/today");
-  }
-
-  return <AdminClient userEmail={session.user.email || ""} />;
+  // Note: Admin role verification happens in AdminClient using useAuth()
+  return <AdminClient />;
 }
 

@@ -3,11 +3,11 @@
  * Auto-logged proof that you started
  *
  * No streaks. No comparisons. Just proof that you started.
+ * 
+ * Auth is handled by middleware
  */
 
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth/server";
-import { redirect } from "next/navigation";
 import { WinsClient } from "./WinsClient";
 
 export const metadata: Metadata = {
@@ -16,12 +16,6 @@ export const metadata: Metadata = {
 };
 
 export default async function WinsPage() {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect("/auth/signin");
-  }
-
-  return <WinsClient userId={session.user.id || ""} />;
+  return <WinsClient />;
 }
 

@@ -1,11 +1,11 @@
 /**
  * Recipe Generator Page
  * Generate synthesis recipes/blueprints
+ * 
+ * Auth is handled by middleware
  */
 
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth/server";
-import { redirect } from "next/navigation";
 import { RecipeClient } from "./RecipeClient";
 
 export const metadata: Metadata = {
@@ -14,12 +14,6 @@ export const metadata: Metadata = {
 };
 
 export default async function RecipesPage() {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect("/auth/signin?callbackUrl=/learn/recipes");
-  }
-
-  return <RecipeClient userId={session.user.id || ""} />;
+  return <RecipeClient />;
 }
 
