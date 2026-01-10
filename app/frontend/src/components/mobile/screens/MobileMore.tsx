@@ -8,6 +8,7 @@
 import type { AuthUser } from "@/lib/auth/api-auth";
 import Link from "next/link";
 import { signOut } from "@/lib/auth/api-auth";
+import { useAuth } from "@/lib/hooks/useAuth";
 
 type User = AuthUser;
 import styles from "./MobileMore.module.css";
