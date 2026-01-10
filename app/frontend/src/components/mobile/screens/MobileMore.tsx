@@ -42,7 +42,10 @@ const MENU_SECTIONS = [
   },
 ];
 
-export function MobileMore({ user }: MobileMoreProps) {
+export function MobileMore({ user: propUser }: MobileMoreProps = {}) {
+  const { user: authUser } = useAuth();
+  const user = propUser || authUser;
+  
   const handleSignOut = async () => {
     await signOut();
     // signOut redirects to / automatically
@@ -53,15 +56,15 @@ export function MobileMore({ user }: MobileMoreProps) {
       {/* User Profile */}
       <div className={styles.profile}>
         <div className={styles.avatar}>
-          {user.image ? (
-            <img src={user.image} alt={user.name || "User"} />
+          {user?.image ? (
+            <img src={user.image} alt={user?.name || "User"} />
           ) : (
-            <span>{user.name?.charAt(0) || user.email?.charAt(0) || "?"}</span>
+            <span>{user?.name?.charAt(0) || user?.email?.charAt(0) || "?"}</span>
           )}
         </div>
         <div className={styles.userInfo}>
-          <span className={styles.userName}>{user.name || "User"}</span>
-          <span className={styles.userEmail}>{user.email}</span>
+          <span className={styles.userName}>{user?.name || "User"}</span>
+          <span className={styles.userEmail}>{user?.email || ""}</span>
         </div>
       </div>
 

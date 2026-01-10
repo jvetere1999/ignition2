@@ -92,7 +92,7 @@ export function MobileTodayWrapper({
       dynamicUIData={dynamicUIData}
       initialPlanSummary={planSummary}
       greeting={greeting}
-      firstName={firstName}
+      firstName={firstName || "there"}
     />
   );
 }

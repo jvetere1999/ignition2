@@ -8,6 +8,7 @@
 
 import Link from "next/link";
 import { signOut } from "@/lib/auth/api-auth";
+import { useAuth } from "@/lib/hooks/useAuth";
 import styles from "./MobileMe.module.css";
 
 interface MobileMeClientProps {
@@ -19,7 +20,11 @@ interface MobileMeClientProps {
   isAdmin?: boolean; // Optional - will check via useAuth() if not provided
 }
 
-export function MobileMeClient({ user, isAdmin }: MobileMeClientProps = {}) {
+export function MobileMeClient({ user: propUser, isAdmin: propIsAdmin }: MobileMeClientProps = {}) {
+  const { user: authUser } = useAuth();
+  const user = propUser || authUser;
+  const isAdmin = propIsAdmin ?? false; // TODO: Check admin status via API
+  
   const handleSignOut = async () => {
     await signOut();
     // signOut redirects to / automatically
@@ -30,17 +35,17 @@ export function MobileMeClient({ user, isAdmin }: MobileMeClientProps = {}) {
       {/* User Profile */}
       <header className={styles.profile}>
         <div className={styles.avatar}>
-          {user.image ? (
-            <img src={user.image} alt={user.name} className={styles.avatarImage} />
+          {user?.image ? (
+            <img src={user.image} alt={user?.name || "User"} className={styles.avatarImage} />
           ) : (
             <span className={styles.avatarInitial}>
-              {user.name.charAt(0).toUpperCase()}
+              {user?.name?.charAt(0).toUpperCase() || "?"}
             </span>
           )}
         </div>
         <div className={styles.userInfo}>
-          <h1 className={styles.userName}>{user.name}</h1>
-          <p className={styles.userEmail}>{user.email}</p>
+          <h1 className={styles.userName}>{user?.name || "User"}</h1>
+          <p className={styles.userEmail}>{user?.email || ""}</p>
         </div>
       </header>
 

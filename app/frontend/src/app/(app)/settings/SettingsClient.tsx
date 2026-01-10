@@ -8,6 +8,7 @@
 import { useState } from "react";
 import { signOut } from "@/lib/auth/api-auth";
 import { ThemeSelector } from "@/components/settings/ThemeSelector";
+import { useAuth } from "@/lib/hooks/useAuth";
 import styles from "./page.module.css";
 
 interface SettingsClientProps {
@@ -19,7 +20,10 @@ interface SettingsClientProps {
   }; // Optional - will use useAuth() if not provided
 }
 
-export function SettingsClient({ user }: SettingsClientProps = {}) {
+export function SettingsClient({ user: propUser }: SettingsClientProps = {}) {
+  const { user: authUser } = useAuth();
+  const user = propUser || authUser;
+  
   const [isDeleting, setIsDeleting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
@@ -84,11 +88,11 @@ export function SettingsClient({ user }: SettingsClientProps = {}) {
         <div className={styles.sectionContent}>
           <div className={styles.field}>
             <label className={styles.fieldLabel}>Name</label>
-            <div className={styles.fieldValue}>{user.name || "Not set"}</div>
+            <div className={styles.fieldValue}>{user?.name || "Not set"}</div>
           </div>
           <div className={styles.field}>
             <label className={styles.fieldLabel}>Email</label>
-            <div className={styles.fieldValue}>{user.email || "Not set"}</div>
+            <div className={styles.fieldValue}>{user?.email || "Not set"}</div>
           </div>
         </div>
       </section>
