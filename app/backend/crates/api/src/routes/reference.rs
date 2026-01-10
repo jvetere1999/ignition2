@@ -32,6 +32,8 @@ pub fn router() -> Router<Arc<AppState>> {
         .route("/tracks/{id}", get(get_track))
         .route("/tracks/{id}", patch(update_track))
         .route("/tracks/{id}", delete(delete_track))
+        // Cross-user track browsing
+        .route("/browse", get(browse_tracks_by_email))
         // Upload routes
         .route("/upload", post(upload_track))
         .route("/upload/init", post(init_upload))
@@ -64,6 +66,26 @@ pub struct ListTracksQuery {
     #[serde(default = "default_page")]
     pub page: i32,
     #[serde(default = "default_page_size")]
+    pub page_size: i32,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct BrowseTracksQuery {
+    /// Email of the user whose tracks to browse
+    pub email: String,
+    #[serde(default = "default_page")]
+    pub page: i32,
+    #[serde(default = "default_page_size")]
+    pub page_size: i32,
+}
+
+#[derive(Debug, Serialize)]
+pub struct BrowseTracksResponse {
+    pub user_email: String,
+    pub user_name: Option<String>,
+    pub tracks: Vec<ReferenceTrack>,
+    pub total: i64,
+    pub page: i32,
     pub page_size: i32,
 }
 
@@ -179,6 +201,38 @@ pub struct UpdateRegionRequest {
 // =============================================================================
 // Track handlers
 // =============================================================================
+
+/// Browse tracks by user email (cross-user viewing)
+async fn browse_tracks_by_email(
+    State(state): State<Arc<AppState>>,
+    Extension(_auth): Extension<AuthContext>,
+    Query(query): Query<BrowseTracksQuery>,
+) -> AppResult<Json<BrowseTracksResponse>> {
+    let result = ReferenceTrackRepo::list_by_user_email(
+        &state.db,
+        &query.email,
+        query.page,
+        query.page_size,
+    )
+    .await?;
+
+    match result {
+        Some((_user_id, user_email, user_name, tracks, total)) => {
+            Ok(Json(BrowseTracksResponse {
+                user_email,
+                user_name,
+                tracks,
+                total,
+                page: query.page,
+                page_size: query.page_size,
+            }))
+        }
+        None => Err(AppError::NotFound(format!(
+            "User with email '{}' not found",
+            query.email
+        ))),
+    }
+}
 
 /// List user's tracks
 async fn list_tracks(

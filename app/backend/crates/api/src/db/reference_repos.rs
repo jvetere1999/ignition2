@@ -121,6 +121,53 @@ impl ReferenceTrackRepo {
         Ok((tracks, total.0))
     }
 
+    /// List tracks for a user by their email (for cross-user browsing)
+    pub async fn list_by_user_email(
+        pool: &PgPool,
+        email: &str,
+        page: i32,
+        page_size: i32,
+    ) -> Result<Option<(Uuid, String, Option<String>, Vec<ReferenceTrack>, i64)>, AppError> {
+        // First find the user by email
+        let user: Option<(Uuid, String, Option<String>)> = sqlx::query_as(
+            "SELECT id, email, name FROM users WHERE email = $1",
+        )
+        .bind(email)
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| AppError::Database(e.to_string()))?;
+
+        let Some((user_id, user_email, user_name)) = user else {
+            return Ok(None);
+        };
+
+        let offset = (page - 1) * page_size;
+
+        let tracks = sqlx::query_as::<_, ReferenceTrack>(
+            r#"
+            SELECT * FROM reference_tracks
+            WHERE user_id = $1
+            ORDER BY created_at DESC
+            LIMIT $2 OFFSET $3
+            "#,
+        )
+        .bind(user_id)
+        .bind(page_size)
+        .bind(offset)
+        .fetch_all(pool)
+        .await
+        .map_err(|e| AppError::Database(e.to_string()))?;
+
+        let total: (i64,) =
+            sqlx::query_as("SELECT COUNT(*) FROM reference_tracks WHERE user_id = $1")
+                .bind(user_id)
+                .fetch_one(pool)
+                .await
+                .map_err(|e| AppError::Database(e.to_string()))?;
+
+        Ok(Some((user_id, user_email, user_name, tracks, total.0)))
+    }
+
     /// Update a track
     pub async fn update(
         pool: &PgPool,
