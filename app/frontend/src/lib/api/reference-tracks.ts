@@ -282,7 +282,24 @@ export const referenceTracksApi = {
   },
 
   async getTrack(id: string): Promise<ReferenceTrackResponse> {
-    return api.get<ReferenceTrackResponse>(`/reference/tracks/${id}`);
+    // Backend returns { track, annotation_count, region_count, latest_analysis }
+    // We unwrap to return just the track for backward compatibility
+    const response = await api.get<{
+      track: ReferenceTrackResponse;
+      annotation_count: number;
+      region_count: number;
+      latest_analysis: unknown;
+    }>(`/reference/tracks/${id}`);
+    return response.track;
+  },
+
+  async getTrackWithDetails(id: string): Promise<{
+    track: ReferenceTrackResponse;
+    annotation_count: number;
+    region_count: number;
+    latest_analysis: TrackAnalysisResponse | null;
+  }> {
+    return api.get(`/reference/tracks/${id}`);
   },
 
   async createTrack(input: CreateTrackInput): Promise<ReferenceTrackResponse> {

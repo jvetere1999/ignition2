@@ -311,7 +311,8 @@ pub struct PaginatedResponse<T> {
     pub total: i64,
     pub page: i32,
     pub page_size: i32,
-    pub total_pages: i32,
+    pub has_next: bool,
+    pub has_prev: bool,
 }
 
 impl<T> PaginatedResponse<T> {
@@ -322,7 +323,8 @@ impl<T> PaginatedResponse<T> {
             total,
             page,
             page_size,
-            total_pages,
+            has_next: page < total_pages,
+            has_prev: page > 1,
         }
     }
 }

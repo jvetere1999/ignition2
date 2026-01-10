@@ -173,6 +173,9 @@ pub struct SignedUrlResponse {
     pub url: String,
     pub expires_at: String,
     pub method: String,
+    /// The R2/S3 key (for upload URLs, this is the key to store in DB)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
 }
 
 /// Parsed blob key components

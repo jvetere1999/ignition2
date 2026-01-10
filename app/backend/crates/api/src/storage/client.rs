@@ -332,6 +332,7 @@ impl StorageClient {
             url,
             expires_at: expires_at.to_rfc3339(),
             method: "GET".to_string(),
+            key: None,
         }))
     }
 
@@ -373,6 +374,7 @@ impl StorageClient {
             url,
             expires_at: expires_at.to_rfc3339(),
             method: "PUT".to_string(),
+            key: Some(key),
         })
     }
 
@@ -434,6 +436,7 @@ impl StorageClient {
             url,
             expires_at: expires_at.to_rfc3339(),
             method: "GET".to_string(),
+            key: None,
         })
     }
 

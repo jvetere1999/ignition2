@@ -399,13 +399,10 @@ async fn init_upload(
         .generate_signed_upload_url(&auth.user_id, &request.mime_type, &request.filename)
         .await?;
 
-    // Extract r2_key from the URL or generate it
-    let r2_key = format!(
-        "{}/audio/{}.{}",
-        auth.user_id,
-        Uuid::new_v4(),
-        get_extension_from_mime(&request.mime_type)
-    );
+    // Use the key returned by storage (same as the presigned URL target)
+    let r2_key = response.key.clone().ok_or_else(|| {
+        AppError::Internal("Storage did not return upload key".to_string())
+    })?;
 
     Ok(Json(InitUploadResponse {
         upload_url: response.url,
@@ -608,12 +605,18 @@ async fn start_analysis(
 // Annotation handlers
 // =============================================================================
 
+/// Wrapper for annotations list response (frontend expects { annotations: [...] })
+#[derive(Debug, Serialize)]
+struct AnnotationsResponse {
+    annotations: Vec<TrackAnnotation>,
+}
+
 /// List annotations for a track
 async fn list_annotations(
     State(state): State<Arc<AppState>>,
     Extension(auth): Extension<AuthContext>,
     Path(id): Path<Uuid>,
-) -> AppResult<Json<Vec<TrackAnnotation>>> {
+) -> AppResult<Json<AnnotationsResponse>> {
     // Verify track exists and user has access
     let _track = ReferenceTrackRepo::find_by_id_for_user(&state.db, id, auth.user_id)
         .await?
@@ -621,7 +624,7 @@ async fn list_annotations(
 
     let annotations = TrackAnnotationRepo::list_for_track(&state.db, id, auth.user_id).await?;
 
-    Ok(Json(annotations))
+    Ok(Json(AnnotationsResponse { annotations }))
 }
 
 /// Create an annotation
@@ -730,12 +733,18 @@ async fn delete_annotation(
 // Region handlers
 // =============================================================================
 
+/// Wrapper for regions list response (frontend expects { regions: [...] })
+#[derive(Debug, Serialize)]
+struct RegionsResponse {
+    regions: Vec<TrackRegion>,
+}
+
 /// List regions for a track
 async fn list_regions(
     State(state): State<Arc<AppState>>,
     Extension(auth): Extension<AuthContext>,
     Path(id): Path<Uuid>,
-) -> AppResult<Json<Vec<TrackRegion>>> {
+) -> AppResult<Json<RegionsResponse>> {
     // Verify track ownership
     let _track = ReferenceTrackRepo::find_by_id_for_user(&state.db, id, auth.user_id)
         .await?
@@ -743,7 +752,7 @@ async fn list_regions(
 
     let regions = TrackRegionRepo::list_for_track(&state.db, id, auth.user_id).await?;
 
-    Ok(Json(regions))
+    Ok(Json(RegionsResponse { regions }))
 }
 
 /// Create a region

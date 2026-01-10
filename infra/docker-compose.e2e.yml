@@ -1,0 +1,137 @@
+# E2E Testing Infrastructure
+#
+# This compose file provides a test environment with:
+# - PostgreSQL with fresh migrations
+# - MinIO for S3-compatible storage
+# - Backend API with AUTH_DEV_BYPASS enabled
+#
+# Usage:
+#   Start:    docker compose -f infra/docker-compose.e2e.yml up -d
+#   Run tests: API_BASE_URL=http://localhost:8080 npx playwright test tests/api-e2e.spec.ts
+#   Cleanup:  docker compose -f infra/docker-compose.e2e.yml down -v
+#
+# IMPORTANT: This file has AUTH_DEV_BYPASS=true. NEVER use in production.
+
+services:
+  # ============================================================================
+  # PostgreSQL Database
+  # ============================================================================
+  postgres-e2e:
+    image: postgres:17-alpine
+    container_name: ignition-postgres-e2e
+    environment:
+      POSTGRES_USER: ignition
+      POSTGRES_PASSWORD: ignition_test
+      POSTGRES_DB: ignition_test
+    ports:
+      - "5433:5432"  # Different port to avoid conflicts
+    volumes:
+      # Mount migrations for initialization
+      - ../app/database/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ignition"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ignition-e2e-network
+
+  # ============================================================================
+  # MinIO (S3-compatible storage)
+  # ============================================================================
+  minio-e2e:
+    image: minio/minio:latest
+    container_name: ignition-minio-e2e
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9002:9000"   # S3 API (different port)
+      - "9003:9001"   # Console (different port)
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ignition-e2e-network
+
+  # ============================================================================
+  # MinIO Bucket Initialization
+  # ============================================================================
+  minio-init-e2e:
+    image: minio/mc:latest
+    container_name: ignition-minio-init-e2e
+    depends_on:
+      minio-e2e:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio-e2e:9000 minioadmin minioadmin;
+      mc mb local/ignition-test --ignore-existing;
+      mc anonymous set download local/ignition-test/public;
+      echo 'Test bucket initialized';
+      exit 0;
+      "
+    networks:
+      - ignition-e2e-network
+
+  # ============================================================================
+  # Backend API (with AUTH_DEV_BYPASS enabled)
+  # ============================================================================
+  api-e2e:
+    build:
+      context: ../app/backend
+      dockerfile: Dockerfile
+    image: ignition-api:e2e
+    container_name: ignition-api-e2e
+    depends_on:
+      postgres-e2e:
+        condition: service_healthy
+      minio-init-e2e:
+        condition: service_completed_successfully
+    environment:
+      # Database
+      DATABASE_URL: postgres://ignition:ignition_test@postgres-e2e:5432/ignition_test
+
+      # Server
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 8080
+      SERVER_ENVIRONMENT: development
+
+      # Auth - BYPASS ENABLED FOR TESTING
+      AUTH_COOKIE_DOMAIN: localhost
+      AUTH_DEV_BYPASS: "true"
+
+      # CORS - Allow test origins
+      CORS_ALLOWED_ORIGINS: http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000
+
+      # Storage (MinIO)
+      STORAGE_ENDPOINT: http://minio-e2e:9000
+      STORAGE_BUCKET: ignition-test
+      STORAGE_ACCESS_KEY_ID: minioadmin
+      STORAGE_SECRET_ACCESS_KEY: minioadmin
+      STORAGE_REGION: us-east-1
+
+      # Session
+      SESSION_SECRET: e2e-test-secret-not-for-production
+    ports:
+      - "8081:8080"  # Different port to avoid conflicts
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 3s
+      start_period: 15s
+      retries: 5
+    networks:
+      - ignition-e2e-network
+
+# ============================================================================
+# Networks
+# ============================================================================
+networks:
+  ignition-e2e-network:
+    driver: bridge
+    name: ignition-e2e-network
+
