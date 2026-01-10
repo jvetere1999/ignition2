@@ -66,10 +66,11 @@ pub struct AuthConfig {
     #[serde(default = "default_session_ttl")]
     pub session_ttl_seconds: u64,
     /// OAuth providers configuration
+    #[serde(default)]
     pub oauth: Option<OAuthConfig>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Default)]
 pub struct OAuthConfig {
     pub google: Option<OAuthProviderConfig>,
     pub azure: Option<OAuthProviderConfig>,
@@ -77,10 +78,13 @@ pub struct OAuthConfig {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct OAuthProviderConfig {
+    #[serde(default)]
     pub client_id: String,
+    #[serde(default)]
     pub client_secret: String,
     /// Redirect URI from config (may be overridden by computed value)
     #[allow(dead_code)]
+    #[serde(default)]
     pub redirect_uri: String,
     /// Tenant ID (required for Azure)
     pub tenant_id: Option<String>,
