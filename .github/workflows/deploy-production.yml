@@ -33,6 +33,7 @@ env:
   
 jobs:
   pre-deployment-checks:
+    if: contains(github.event.head_commit.modified, 'app/backend') || contains(github.event.head_commit.modified, 'app/database') || contains(github.event.head_commit.modified, 'tools/schema-generator') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -56,6 +57,7 @@ jobs:
           args: --manifest-path app/backend/Cargo.toml
 
   wipe-and-rebuild-neon:
+    if: contains(github.event.head_commit.modified, 'app/backend') || contains(github.event.head_commit.modified, 'app/database') || contains(github.event.head_commit.modified, 'tools/schema-generator') || github.event_name == 'workflow_dispatch'
     needs: pre-deployment-checks
     runs-on: ubuntu-latest
     environment:
@@ -118,6 +120,7 @@ jobs:
           retention-days: 30
 
   build-and-deploy-backend:
+    if: contains(github.event.head_commit.modified, 'app/backend') || contains(github.event.head_commit.modified, 'tools/schema-generator') || github.event_name == 'workflow_dispatch'
     needs: wipe-and-rebuild-neon
     runs-on: ubuntu-latest
     environment:
@@ -156,7 +159,8 @@ jobs:
         if: always()
         run: flyctl logs --app ignition-api -n 50
 
-  deploy-frontend:
+  deif: contains(github.event.head_commit.modified, 'app/frontend') || github.event_name == 'workflow_dispatch'
+    ploy-frontend:
     needs: build-and-deploy-backend
     runs-on: ubuntu-latest
     environment:
@@ -202,7 +206,8 @@ jobs:
           echo "✗ Frontend verification failed"
           exit 1
 
-  deploy-admin:
+  deif: contains(github.event.head_commit.modified, 'app/admin') || github.event_name == 'workflow_dispatch'
+    ploy-admin:
     needs: build-and-deploy-backend
     runs-on: ubuntu-latest
     environment:
