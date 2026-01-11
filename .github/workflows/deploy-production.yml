@@ -198,7 +198,7 @@ jobs:
       
       - name: Install dependencies
         working-directory: ./app/frontend
-        run: npm install --legacy-peer-deps
+        run: npm install
       
       - name: Build frontend for Workers
         working-directory: ./app/frontend
@@ -245,13 +245,13 @@ jobs:
       
       - name: Install dependencies
         working-directory: ./app/admin
-        run: npm install --legacy-peer-deps
+        run: npm install
       
       - name: Build admin for Workers
         working-directory: ./app/admin
         env:
           NEXT_PUBLIC_API_URL: https://api.ecent.online
-        run: npm run build:worker
+        run: npx @opennextjs/cloudflare build
       
       - name: Deploy to Cloudflare Workers
         working-directory: ./app/admin
