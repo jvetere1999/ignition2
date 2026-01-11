@@ -421,34 +421,4 @@ jobs:
           - Team Slack: #database
           EOF
 
-  notification:
-    if: always()
-    needs: [apply-migrations]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send Slack notification
-        if: ${{ secrets.SLACK_WEBHOOK }}
-        run: |
-          STATUS="${{ needs.apply-migrations.result }}"
-          if [ "$STATUS" = "success" ]; then
-            MESSAGE="✓ Database migrations applied successfully"
-            COLOR="good"
-          else
-            MESSAGE="✗ Database migration failed - review logs"
-            COLOR="danger"
-          fi
-          
-          curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
-            -H 'Content-Type: application/json' \
-            -d "{
-              \"attachments\": [{
-                \"color\": \"$COLOR\",
-                \"title\": \"Neon Database Update\",
-                \"text\": \"$MESSAGE\",
-                \"actions\": [{
-                  \"type\": \"button\",
-                  \"text\": \"View Logs\",
-                  \"url\": \"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"
-                }]
-              }]
-            }"
+

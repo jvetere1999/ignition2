@@ -278,39 +278,6 @@ jobs:
           
           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           EOF
-      
-      - name: Send Slack notification
-        if: secrets.SLACK_WEBHOOK != ''
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-        run: |
-          STATUS="${{ needs.post-deployment-tests.result }}"
-          if [ "$STATUS" = "success" ]; then
-            COLOR="good"
-            MESSAGE="✅ Deployment to production succeeded"
-          else
-            COLOR="danger"
-            MESSAGE="❌ Deployment to production failed"
-          fi
-          
-          curl -X POST "$SLACK_WEBHOOK" \
-            -H 'Content-Type: application/json' \
-            -d "{
-              \"attachments\": [{
-                \"color\": \"$COLOR\",
-                \"title\": \"Production Deployment\",
-                \"text\": \"$MESSAGE\",
-                \"fields\": [
-                  {\"title\": \"Branch\", \"value\": \"deploy\", \"short\": true},
-                  {\"title\": \"Commit\", \"value\": \"${{ github.sha }}\", \"short\": true}
-                ],
-                \"actions\": [{
-                  \"type\": \"button\",
-                  \"text\": \"View Logs\",
-                  \"url\": \"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"
-                }]
-              }]
-            }"
 
   rollback-plan:
     if: failure()
