@@ -200,11 +200,11 @@ jobs:
         working-directory: ./app/frontend
         run: npm install --legacy-peer-deps
       
-      - name: Build frontend
+      - name: Build frontend for Workers
         working-directory: ./app/frontend
         env:
           NEXT_PUBLIC_API_URL: https://api.ecent.online
-        run: npm run build
+        run: npm run build:worker
       
       - name: Deploy to Cloudflare Workers
         working-directory: ./app/frontend
@@ -247,11 +247,11 @@ jobs:
         working-directory: ./app/admin
         run: npm install --legacy-peer-deps
       
-      - name: Build admin
+      - name: Build admin for Workers
         working-directory: ./app/admin
         env:
           NEXT_PUBLIC_API_URL: https://api.ecent.online
-        run: npm run build
+        run: npm run build:worker
       
       - name: Deploy to Cloudflare Workers
         working-directory: ./app/admin
