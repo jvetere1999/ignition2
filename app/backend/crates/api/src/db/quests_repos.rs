@@ -196,7 +196,7 @@ impl QuestsRepo {
         let query = format!(
             r#"UPDATE user_quests
                SET status = 'completed', completed_at = NOW(),
-                   last_completed_date = $1, streak_count = $2
+                   last_completed_date = $1::date, streak_count = $2
                WHERE id = $3 AND user_id = $4
                RETURNING {}"#,
             QUEST_COLUMNS
