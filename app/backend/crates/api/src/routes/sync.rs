@@ -201,15 +201,17 @@ async fn get_plan_status(
 
 async fn fetch_progress(pool: &PgPool, user_id: Uuid) -> Result<ProgressData, AppError> {
     // Single query to get user progress
-    let row = sqlx::query_as::<_, (i32, i64, i64, i32)>(
+    let row = sqlx::query_as::<_, (i32, i64, i32, i32)>(
         r#"
         SELECT 
             COALESCE(up.current_level, 1) as level,
             COALESCE(up.total_xp, 0) as total_xp,
-            COALESCE(up.coins, 0) as coins,
-            COALESCE(up.streak_days, 0) as streak_days
+            COALESCE(uw.coins, 0) as coins,
+            COALESCE(us.current_streak, 0) as streak_days
         FROM users u
         LEFT JOIN user_progress up ON u.id = up.user_id
+        LEFT JOIN user_wallet uw ON u.id = uw.user_id
+        LEFT JOIN user_streaks us ON u.id = us.user_id AND us.streak_type = 'daily'
         WHERE u.id = $1
         "#
     )
@@ -237,7 +239,7 @@ async fn fetch_progress(pool: &PgPool, user_id: Uuid) -> Result<ProgressData, Ap
         current_xp: xp_in_current_level,
         xp_to_next_level: xp_needed_for_level - xp_in_current_level,
         xp_progress_percent,
-        coins,
+        coins: coins.into(),
         streak_days,
     })
 }
@@ -344,7 +346,7 @@ async fn fetch_plan_status(pool: &PgPool, user_id: Uuid) -> Result<PlanStatusDat
 
 async fn fetch_unread_inbox_count(pool: &PgPool, user_id: Uuid) -> Result<i32, AppError> {
     let count = sqlx::query_scalar::<_, i64>(
-        "SELECT COUNT(*) FROM inbox_items WHERE user_id = $1 AND read_at IS NULL"
+        "SELECT COUNT(*) FROM inbox_items WHERE user_id = $1 AND is_read = false"
     )
     .bind(user_id)
     .fetch_one(pool)

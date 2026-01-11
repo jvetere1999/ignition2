@@ -14,6 +14,8 @@ pub mod frames_models;
 pub mod frames_repos;
 pub mod gamification_models;
 pub mod gamification_repos;
+#[allow(dead_code)]
+pub mod generated;  // Schema-generated types - source of truth
 pub mod habits_goals_models;
 pub mod habits_goals_repos;
 pub mod inbox_models;

@@ -419,7 +419,7 @@ async fn fetch_dynamic_ui(pool: &PgPool, user_id: Uuid) -> Result<DynamicUIData,
     
     // Check unread inbox
     let unread_inbox = sqlx::query_scalar::<_, i64>(
-        "SELECT COUNT(*) FROM inbox_items WHERE user_id = $1 AND read_at IS NULL"
+        "SELECT COUNT(*) FROM inbox_items WHERE user_id = $1 AND is_read = false"
     )
     .bind(user_id)
     .fetch_one(pool)

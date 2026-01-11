@@ -1,48 +1,63 @@
 # Current State
 
 ## Context
-Comprehensive schema rebuild in progress. All 14 migration files created with up/down pairs.
-User confirmed all 12 architectural decisions. Schema now normalized and ready for application.
+Schema-first architecture established. Single source of truth (schema.json) generates all types.
 
-## Current Phase: SCHEMA REBUILD - Migrations Complete
+## Current Phase: SCHEMA INTEGRATION COMPLETE ✅
 
-### Immediate Next Steps
-1. **Apply migrations to Neon DB** - reset and run all 14 migrations
-2. **Fix backend naming mismatches**:
-   - `habit_logs` → `habit_completions`
-   - `user_inbox` → `inbox_items`
-3. **Add missing backend implementations** - new tables need repos/routes
-4. **Add missing frontend implementations** - API clients for new endpoints
-5. **Run full validation** - typecheck, lint, tests
+### What Was Done (January 10, 2026)
+1. **Created `schema.json`** - 77 tables from SCHEMA_SPEC, complete type definitions
+2. **Created `generate_all.py`** - Generator for Rust/TypeScript/SQL
+3. **Integrated Backend** - `app/backend/crates/api/src/db/generated.rs` (77 structs, compiles)
+4. **Integrated Frontend** - `app/frontend/src/lib/generated_types.ts` (77 interfaces, passes tsc)
+5. **Created Seeds** - `app/database/seeds/001_initial_seeds.sql` with:
+   - 6 skill definitions
+   - 15 achievements
+   - 5 roles + 13 entitlements
+   - 5 feature flags
+   - 9 universal quests
+   - 5 learn topics
+   - 10 market items
+
+## Architecture
+
+```
+schema.json (SOURCE OF TRUTH)
+    ↓ generate_all.py
+    ├── generated_models.rs → app/backend/crates/api/src/db/generated.rs
+    ├── generated_types.ts  → app/frontend/src/lib/generated_types.ts
+    └── generated_schema.sql (reference only)
+```
 
 ## Status
-- [x] Error Summary Created
-- [x] Comprehensive Rebuild Plan Created
-- [x] Decisions Required Documented (12 decisions)
-- [x] User Decisions Received (all 12)
-- [x] Schema Spec Complete (Part 1 & 2)
-- [x] 14 Migration Files Created (73 tables total)
-- [ ] Database Reset & Migrated
-- [ ] Backend Naming Fixes Applied
-- [ ] Missing Implementations Added
-- [ ] Full Validation Passed
-- [ ] E2E Tests Created
+- [x] Schema Spec Complete (SCHEMA_SPEC_PART1.md + PART2.md)
+- [x] schema.json with 77 tables
+- [x] Generator created and tested
+- [x] Backend types generated and integrated (cargo check passes)
+- [x] Frontend types generated and integrated (tsc passes)
+- [x] Seed data created
+- [ ] Deploy backend to production
+- [ ] Run seeds on production database
+- [ ] UI bug fixes from ERROR_SUMMARY.md
 
-## Migration Files Ready
-```
-app/database/migrations/
-├── 0001_auth.sql          (4 tables)
-├── 0002_rbac.sql          (4 tables + view)
-├── 0003_gamification.sql  (8 tables + triggers + seeds)
-├── 0004_focus.sql         (4 tables)
-├── 0005_habits_goals.sql  (4 tables)
-├── 0006_quests.sql        (3 tables + seeds)
-├── 0007_planning.sql      (3 tables)
-├── 0008_market.sql        (5 tables + seeds)
-├── 0009_books.sql         (2 tables)
-├── 0010_fitness.sql       (10 tables)
-├── 0011_learn.sql         (5 tables + seeds)
-├── 0012_reference.sql     (9 tables + seeds)
-├── 0013_platform.sql      (12 tables + seeds)
-└── 0014_seeds.sql         (additional seed data)
-```
+## Files Created/Modified
+
+### New Files
+- `/schema.json` - 77-table schema definition
+- `/scripts/build_schema.py` - Schema builder from definitions
+- `/generate_all.py` - Code generator
+- `/generated_models.rs` - Rust output
+- `/generated_types.ts` - TypeScript output
+- `/generated_schema.sql` - SQL output
+- `/app/backend/crates/api/src/db/generated.rs` - Integrated Rust module
+- `/app/frontend/src/lib/generated_types.ts` - Integrated TS types
+- `/app/database/seeds/001_initial_seeds.sql` - Initial seed data
+
+### Modified Files
+- `/app/backend/crates/api/src/db/mod.rs` - Added `pub mod generated`
+
+## Next Steps
+1. Deploy backend: `cd app/backend && flyctl deploy --remote-only`
+2. Run seeds: Apply 001_initial_seeds.sql to production
+3. Fix UI bugs: Work through ERROR_SUMMARY.md issues
+4. Migrate existing code to use generated types gradually

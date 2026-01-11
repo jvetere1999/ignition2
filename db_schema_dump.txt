@@ -1,0 +1,40 @@
+   table_name   |       column_name        |        data_type         
+----------------+--------------------------+--------------------------
+ focus_sessions | abandoned_at             | timestamp with time zone
+ focus_sessions | coins_awarded            | integer
+ focus_sessions | completed_at             | timestamp with time zone
+ focus_sessions | created_at               | timestamp with time zone
+ focus_sessions | duration_seconds         | integer
+ focus_sessions | expires_at               | timestamp with time zone
+ focus_sessions | id                       | uuid
+ focus_sessions | mode                     | text
+ focus_sessions | paused_at                | timestamp with time zone
+ focus_sessions | paused_remaining_seconds | integer
+ focus_sessions | started_at               | timestamp with time zone
+ focus_sessions | status                   | text
+ focus_sessions | task_id                  | uuid
+ focus_sessions | task_title               | text
+ focus_sessions | user_id                  | uuid
+ focus_sessions | xp_awarded               | integer
+ inbox_items    | action_data              | jsonb
+ inbox_items    | action_url               | text
+ inbox_items    | body                     | text
+ inbox_items    | created_at               | timestamp with time zone
+ inbox_items    | expires_at               | timestamp with time zone
+ inbox_items    | id                       | uuid
+ inbox_items    | is_archived              | boolean
+ inbox_items    | is_read                  | boolean
+ inbox_items    | item_type                | text
+ inbox_items    | priority                 | integer
+ inbox_items    | title                    | text
+ inbox_items    | user_id                  | uuid
+ user_progress  | created_at               | timestamp with time zone
+ user_progress  | current_level            | integer
+ user_progress  | id                       | uuid
+ user_progress  | total_skill_stars        | integer
+ user_progress  | total_xp                 | integer
+ user_progress  | updated_at               | timestamp with time zone
+ user_progress  | user_id                  | uuid
+ user_progress  | xp_to_next_level         | integer
+(36 rows)
+
