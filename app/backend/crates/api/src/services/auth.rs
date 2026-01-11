@@ -61,7 +61,7 @@ impl AuthService {
                     session_id: Some(session.id),
                     event_type: "login".to_string(),
                     resource_type: Some("session".to_string()),
-                    resource_id: Some(session.id.to_string()),
+                    resource_id: Some(session.id),
                     action: "create".to_string(),
                     status: "success".to_string(),
                     details: Some(serde_json::json!({
@@ -158,7 +158,7 @@ impl AuthService {
                         session_id: None,
                         event_type: "user_created".to_string(),
                         resource_type: Some("user".to_string()),
-                        resource_id: Some(new_user.id.to_string()),
+                        resource_id: Some(new_user.id),
                         action: "create".to_string(),
                         status: "success".to_string(),
                         details: Some(serde_json::json!({
@@ -195,7 +195,7 @@ impl AuthService {
                 session_id: Some(session.id),
                 event_type: "login".to_string(),
                 resource_type: Some("session".to_string()),
-                resource_id: Some(session.id.to_string()),
+                resource_id: Some(session.id),
                 action: "create".to_string(),
                 status: "success".to_string(),
                 details: Some(serde_json::json!({
@@ -229,7 +229,7 @@ impl AuthService {
                 session_id: Some(session_id),
                 event_type: "logout".to_string(),
                 resource_type: Some("session".to_string()),
-                resource_id: Some(session_id.to_string()),
+                resource_id: Some(session_id),
                 action: "delete".to_string(),
                 status: "success".to_string(),
                 details: None,
@@ -260,7 +260,7 @@ impl AuthService {
                 session_id: Some(new_session.id),
                 event_type: "session_rotated".to_string(),
                 resource_type: Some("session".to_string()),
-                resource_id: Some(new_session.id.to_string()),
+                resource_id: Some(new_session.id),
                 action: "update".to_string(),
                 status: "success".to_string(),
                 details: Some(serde_json::json!({

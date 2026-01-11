@@ -1061,7 +1061,7 @@ impl AdminAuditRepo {
                 u.email as user_email,
                 a.event_type,
                 a.resource_type,
-                a.resource_id,
+                a.resource_id::text as resource_id,
                 a.action,
                 a.status,
                 a.details,

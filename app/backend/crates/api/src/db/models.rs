@@ -186,7 +186,7 @@ pub struct AuditLogEntry {
     pub session_id: Option<Uuid>,
     pub event_type: String,
     pub resource_type: Option<String>,
-    pub resource_id: Option<String>,
+    pub resource_id: Option<Uuid>,
     pub action: String,
     pub status: String,
     pub details: Option<serde_json::Value>,
