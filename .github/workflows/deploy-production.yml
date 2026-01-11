@@ -198,7 +198,10 @@ jobs:
       
       - name: Install dependencies
         working-directory: ./app/frontend
-        run: npm install
+        run: |
+          rm -rf node_modules
+          npm cache clean --force
+          npm install
       
       - name: Build frontend for Workers
         working-directory: ./app/frontend
@@ -245,7 +248,10 @@ jobs:
       
       - name: Install dependencies
         working-directory: ./app/admin
-        run: npm install
+        run: |
+          rm -rf node_modules
+          npm cache clean --force
+          npm install
       
       - name: Build admin for Workers
         working-directory: ./app/admin
