@@ -165,7 +165,7 @@ describe('API Client', () => {
       });
 
       const response = await fetch('/api/resources?page=1&page_size=20');
-      const data = await response.json();
+      const data = await response.json() as { data: unknown[]; total: number; has_next: boolean };
 
       expect(data.data).toHaveLength(2);
       expect(data.total).toBe(100);
@@ -188,7 +188,7 @@ describe('API Client', () => {
       });
 
       const response = await fetch('/api/resource');
-      const errorData = await response.json();
+      const errorData = await response.json() as { error: { code: string; message: string } };
 
       expect(errorData.error.code).toBe('INVALID_INPUT');
       expect(errorData.error.message).toBeDefined();

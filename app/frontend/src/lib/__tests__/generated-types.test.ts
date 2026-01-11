@@ -101,7 +101,6 @@ describe('Generated Types', () => {
         token: 'session-token',
         expires_at: '2025-12-31T23:59:59Z',
         created_at: '2025-01-01T00:00:00Z',
-        updated_at: '2025-01-01T00:00:00Z',
       };
 
       expect(session.token).toBeDefined();
@@ -114,20 +113,17 @@ describe('Generated Types', () => {
       const progress: UserProgress = {
         id: 'uuid',
         user_id: 'user-uuid',
-        level: 5,
-        xp: 2500,
         total_xp: 10000,
-        streak_days: 7,
-        longest_streak: 30,
-        focus_minutes_today: 45,
-        focus_minutes_week: 300,
+        current_level: 5,
+        xp_to_next_level: 500,
+        total_skill_stars: 25,
         created_at: '2025-01-01T00:00:00Z',
         updated_at: '2025-01-01T00:00:00Z',
       };
 
-      expect(progress.level).toBe(5);
-      expect(progress.xp).toBe(2500);
-      expect(typeof progress.streak_days).toBe('number');
+      expect(progress.current_level).toBe(5);
+      expect(progress.total_xp).toBe(10000);
+      expect(typeof progress.xp_to_next_level).toBe('number');
     });
 
     it('UserWallet interface has currency fields', () => {
@@ -135,13 +131,14 @@ describe('Generated Types', () => {
         id: 'uuid',
         user_id: 'user-uuid',
         coins: 500,
-        lifetime_coins: 1000,
+        total_earned: 1000,
+        total_spent: 500,
         created_at: '2025-01-01T00:00:00Z',
         updated_at: '2025-01-01T00:00:00Z',
       };
 
       expect(wallet.coins).toBe(500);
-      expect(typeof wallet.lifetime_coins).toBe('number');
+      expect(typeof wallet.total_earned).toBe('number');
     });
 
     it('SkillDefinitions interface is correct', () => {
@@ -223,7 +220,10 @@ describe('Generated Types', () => {
         user_id: 'user-uuid',
         name: 'Morning Exercise',
         frequency: 'daily',
+        target_count: 1,
         is_active: true,
+        current_streak: 0,
+        longest_streak: 0,
         sort_order: 1,
         created_at: '2025-01-01T00:00:00Z',
         updated_at: '2025-01-01T00:00:00Z',
@@ -239,7 +239,9 @@ describe('Generated Types', () => {
         user_id: 'user-uuid',
         title: 'Learn Rust',
         status: 'active',
-        priority: 'high',
+        progress: 0,
+        priority: 1,
+        sort_order: 0,
         created_at: '2025-01-01T00:00:00Z',
         updated_at: '2025-01-01T00:00:00Z',
       };
