@@ -2,6 +2,9 @@
  * Database module barrel export
  */
 
+// Generated types from schema.json - source of truth
+export * from "../generated_types";
+
 // Client utilities (DEPRECATED - D1 no longer used)
 export { type D1Result } from "./client"; // Type-only export for migration
 

@@ -99,31 +99,46 @@ fn default_page_size() -> i32 {
 
 #[derive(Debug, Deserialize)]
 pub struct CreateTrackRequest {
-    pub name: String,
-    pub description: Option<String>,
+    pub title: String,
     pub r2_key: String,
-    pub file_size_bytes: i64,
-    pub mime_type: String,
-    pub duration_seconds: Option<f32>,
     pub artist: Option<String>,
     pub album: Option<String>,
     pub genre: Option<String>,
     pub bpm: Option<f32>,
-    pub key_signature: Option<String>,
-    pub tags: Option<Vec<String>>,
+    pub key: Option<String>,
+    pub duration_seconds: Option<f32>,
+    pub waveform_r2_key: Option<String>,
+    pub thumbnail_r2_key: Option<String>,
+    pub file_format: Option<String>,
+    pub sample_rate: Option<i32>,
+    pub bit_depth: Option<i32>,
+    pub channels: Option<i32>,
+    pub is_reference: Option<bool>,
+    pub is_user_upload: Option<bool>,
+    pub source: Option<String>,
+    pub source_url: Option<String>,
+    pub metadata: Option<serde_json::Value>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct UpdateTrackRequest {
-    pub name: Option<String>,
-    pub description: Option<String>,
-    pub duration_seconds: Option<f32>,
+    pub title: Option<String>,
     pub artist: Option<String>,
     pub album: Option<String>,
     pub genre: Option<String>,
     pub bpm: Option<f32>,
-    pub key_signature: Option<String>,
-    pub tags: Option<Vec<String>>,
+    pub key: Option<String>,
+    pub duration_seconds: Option<f32>,
+    pub waveform_r2_key: Option<String>,
+    pub thumbnail_r2_key: Option<String>,
+    pub file_format: Option<String>,
+    pub sample_rate: Option<i32>,
+    pub bit_depth: Option<i32>,
+    pub channels: Option<i32>,
+    pub is_reference: Option<bool>,
+    pub source: Option<String>,
+    pub source_url: Option<String>,
+    pub metadata: Option<serde_json::Value>,
 }
 
 #[derive(Debug, Serialize)]
@@ -156,46 +171,49 @@ pub struct StartAnalysisRequest {
 
 #[derive(Debug, Deserialize)]
 pub struct CreateAnnotationRequest {
-    pub start_time_ms: i32,
-    pub end_time_ms: Option<i32>,
-    pub title: String,
+    pub start_time_seconds: f32,
+    pub end_time_seconds: Option<f32>,
+    pub annotation_type: String,
+    pub title: Option<String>,
     pub content: Option<String>,
-    pub category: Option<String>,
     pub color: Option<String>,
+    pub tags: Option<Vec<String>>,
     pub is_private: Option<bool>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct UpdateAnnotationRequest {
-    pub start_time_ms: Option<i32>,
-    pub end_time_ms: Option<i32>,
+    pub start_time_seconds: Option<f32>,
+    pub end_time_seconds: Option<f32>,
+    pub annotation_type: Option<String>,
     pub title: Option<String>,
     pub content: Option<String>,
-    pub category: Option<String>,
     pub color: Option<String>,
+    pub tags: Option<Vec<String>>,
     pub is_private: Option<bool>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct CreateRegionRequest {
-    pub start_time_ms: i32,
-    pub end_time_ms: i32,
     pub name: String,
-    pub description: Option<String>,
-    pub section_type: Option<String>,
+    pub start_time_seconds: f32,
+    pub end_time_seconds: f32,
     pub color: Option<String>,
-    pub display_order: Option<i32>,
+    pub region_type: Option<String>,
+    pub notes: Option<String>,
+    pub is_favorite: Option<bool>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct UpdateRegionRequest {
-    pub start_time_ms: Option<i32>,
-    pub end_time_ms: Option<i32>,
     pub name: Option<String>,
-    pub description: Option<String>,
-    pub section_type: Option<String>,
+    pub start_time_seconds: Option<f32>,
+    pub end_time_seconds: Option<f32>,
     pub color: Option<String>,
-    pub display_order: Option<i32>,
+    pub region_type: Option<String>,
+    pub notes: Option<String>,
+    pub loop_count: Option<i32>,
+    pub is_favorite: Option<bool>,
 }
 
 // =============================================================================
@@ -258,26 +276,26 @@ async fn create_track(
     Extension(auth): Extension<AuthContext>,
     Json(request): Json<CreateTrackRequest>,
 ) -> AppResult<Json<ReferenceTrack>> {
-    // Validate MIME type is audio
-    if !request.mime_type.starts_with("audio/") {
-        return Err(AppError::Validation(
-            "Only audio files are allowed for reference tracks".to_string(),
-        ));
-    }
-
     let input = CreateTrackInput {
-        name: request.name,
-        description: request.description,
+        title: request.title,
         r2_key: request.r2_key,
-        file_size_bytes: request.file_size_bytes,
-        mime_type: request.mime_type,
-        duration_seconds: request.duration_seconds,
         artist: request.artist,
         album: request.album,
         genre: request.genre,
         bpm: request.bpm,
-        key_signature: request.key_signature,
-        tags: request.tags,
+        key: request.key,
+        duration_seconds: request.duration_seconds,
+        waveform_r2_key: request.waveform_r2_key,
+        thumbnail_r2_key: request.thumbnail_r2_key,
+        file_format: request.file_format,
+        sample_rate: request.sample_rate,
+        bit_depth: request.bit_depth,
+        channels: request.channels,
+        is_reference: request.is_reference,
+        is_user_upload: request.is_user_upload,
+        source: request.source,
+        source_url: request.source_url,
+        metadata: request.metadata,
     };
 
     let track = ReferenceTrackRepo::create(&state.db, auth.user_id, input).await?;
@@ -304,9 +322,8 @@ async fn get_track(
     let latest_analysis = analysis.map(|a| AnalysisSummary {
         id: a.id,
         analysis_type: a.analysis_type,
-        version: a.version,
         status: a.status,
-        summary: a.summary,
+        parameters: a.parameters,
         completed_at: a.completed_at,
     });
 
@@ -326,15 +343,23 @@ async fn update_track(
     Json(request): Json<UpdateTrackRequest>,
 ) -> AppResult<Json<ReferenceTrack>> {
     let input = UpdateTrackInput {
-        name: request.name,
-        description: request.description,
-        duration_seconds: request.duration_seconds,
+        title: request.title,
         artist: request.artist,
         album: request.album,
         genre: request.genre,
         bpm: request.bpm,
-        key_signature: request.key_signature,
-        tags: request.tags,
+        key: request.key,
+        duration_seconds: request.duration_seconds,
+        waveform_r2_key: request.waveform_r2_key,
+        thumbnail_r2_key: request.thumbnail_r2_key,
+        file_format: request.file_format,
+        sample_rate: request.sample_rate,
+        bit_depth: request.bit_depth,
+        channels: request.channels,
+        is_reference: request.is_reference,
+        source: request.source,
+        source_url: request.source_url,
+        metadata: request.metadata,
     };
 
     let track = ReferenceTrackRepo::update(&state.db, id, auth.user_id, input)
@@ -495,18 +520,25 @@ async fn upload_track(
 
     // Create track record
     let input = CreateTrackInput {
-        name: track_name,
-        description,
+        title: track_name,
         r2_key: upload_response.key,
-        file_size_bytes: file_size,
-        mime_type,
-        duration_seconds: None, // Will be set after analysis
         artist: None,
         album: None,
         genre: None,
         bpm: None,
-        key_signature: None,
-        tags: None,
+        key: None,
+        duration_seconds: None, // Will be set after analysis
+        waveform_r2_key: None,
+        thumbnail_r2_key: None,
+        file_format: Some(mime_type),
+        sample_rate: None,
+        bit_depth: None,
+        channels: None,
+        is_reference: Some(true),
+        is_user_upload: Some(true),
+        source: None,
+        source_url: None,
+        metadata: None,
     };
 
     let track = ReferenceTrackRepo::create(&state.db, auth.user_id, input).await?;
@@ -577,9 +609,9 @@ async fn start_analysis(
     // For now, we just mark it as pending and it would be processed by a worker
     TrackAnalysisRepo::mark_started(&state.db, analysis.id).await?;
 
-    // Stub: immediately complete with dummy summary
+    // Stub: immediately complete with dummy results
     // In production, a background worker would do this
-    let summary = serde_json::json!({
+    let results = serde_json::json!({
         "status": "stub",
         "message": "Analysis processing is a stub in v1"
     });
@@ -587,8 +619,7 @@ async fn start_analysis(
         &state.db,
         analysis.id,
         "completed",
-        Some(summary),
-        None,
+        Some(results),
         None,
     )
     .await?;
@@ -640,26 +671,27 @@ async fn create_annotation(
         .ok_or_else(|| AppError::NotFound("Track not found".to_string()))?;
 
     // Validate times
-    if request.start_time_ms < 0 {
+    if request.start_time_seconds < 0.0 {
         return Err(AppError::Validation(
-            "start_time_ms must be non-negative".to_string(),
+            "start_time_seconds must be non-negative".to_string(),
         ));
     }
-    if let Some(end) = request.end_time_ms {
-        if end <= request.start_time_ms {
+    if let Some(end) = request.end_time_seconds {
+        if end <= request.start_time_seconds {
             return Err(AppError::Validation(
-                "end_time_ms must be greater than start_time_ms".to_string(),
+                "end_time_seconds must be greater than start_time_seconds".to_string(),
             ));
         }
     }
 
     let input = CreateAnnotationInput {
-        start_time_ms: request.start_time_ms,
-        end_time_ms: request.end_time_ms,
+        start_time_seconds: request.start_time_seconds,
+        end_time_seconds: request.end_time_seconds,
+        annotation_type: request.annotation_type,
         title: request.title,
         content: request.content,
-        category: request.category,
         color: request.color,
+        tags: request.tags,
         is_private: request.is_private,
     };
 
@@ -689,21 +721,22 @@ async fn update_annotation(
     Json(request): Json<UpdateAnnotationRequest>,
 ) -> AppResult<Json<TrackAnnotation>> {
     // Validate times if provided
-    if let (Some(start), Some(end)) = (request.start_time_ms, request.end_time_ms) {
+    if let (Some(start), Some(end)) = (request.start_time_seconds, request.end_time_seconds) {
         if end <= start {
             return Err(AppError::Validation(
-                "end_time_ms must be greater than start_time_ms".to_string(),
+                "end_time_seconds must be greater than start_time_seconds".to_string(),
             ));
         }
     }
 
     let input = UpdateAnnotationInput {
-        start_time_ms: request.start_time_ms,
-        end_time_ms: request.end_time_ms,
+        start_time_seconds: request.start_time_seconds,
+        end_time_seconds: request.end_time_seconds,
+        annotation_type: request.annotation_type,
         title: request.title,
         content: request.content,
-        category: request.category,
         color: request.color,
+        tags: request.tags,
         is_private: request.is_private,
     };
 
@@ -768,25 +801,25 @@ async fn create_region(
         .ok_or_else(|| AppError::NotFound("Track not found".to_string()))?;
 
     // Validate times
-    if request.start_time_ms < 0 {
+    if request.start_time_seconds < 0.0 {
         return Err(AppError::Validation(
-            "start_time_ms must be non-negative".to_string(),
+            "start_time_seconds must be non-negative".to_string(),
         ));
     }
-    if request.end_time_ms <= request.start_time_ms {
+    if request.end_time_seconds <= request.start_time_seconds {
         return Err(AppError::Validation(
-            "end_time_ms must be greater than start_time_ms".to_string(),
+            "end_time_seconds must be greater than start_time_seconds".to_string(),
         ));
     }
 
     let input = CreateRegionInput {
-        start_time_ms: request.start_time_ms,
-        end_time_ms: request.end_time_ms,
         name: request.name,
-        description: request.description,
-        section_type: request.section_type,
+        start_time_seconds: request.start_time_seconds,
+        end_time_seconds: request.end_time_seconds,
         color: request.color,
-        display_order: request.display_order,
+        region_type: request.region_type,
+        notes: request.notes,
+        is_favorite: request.is_favorite,
     };
 
     let region = TrackRegionRepo::create(&state.db, track_id, auth.user_id, input).await?;
@@ -815,22 +848,23 @@ async fn update_region(
     Json(request): Json<UpdateRegionRequest>,
 ) -> AppResult<Json<TrackRegion>> {
     // Validate times if provided
-    if let (Some(start), Some(end)) = (request.start_time_ms, request.end_time_ms) {
+    if let (Some(start), Some(end)) = (request.start_time_seconds, request.end_time_seconds) {
         if end <= start {
             return Err(AppError::Validation(
-                "end_time_ms must be greater than start_time_ms".to_string(),
+                "end_time_seconds must be greater than start_time_seconds".to_string(),
             ));
         }
     }
 
     let input = UpdateRegionInput {
-        start_time_ms: request.start_time_ms,
-        end_time_ms: request.end_time_ms,
         name: request.name,
-        description: request.description,
-        section_type: request.section_type,
+        start_time_seconds: request.start_time_seconds,
+        end_time_seconds: request.end_time_seconds,
         color: request.color,
-        display_order: request.display_order,
+        region_type: request.region_type,
+        notes: request.notes,
+        loop_count: request.loop_count,
+        is_favorite: request.is_favorite,
     };
 
     let region = TrackRegionRepo::update(&state.db, id, auth.user_id, input)

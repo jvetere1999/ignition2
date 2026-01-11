@@ -6122,5 +6122,121 @@
       "rust": "Vec<u8>",
       "typescript": "Uint8Array"
     }
+  },
+  "seeds": {
+    "skill_definitions": {
+      "unique_key": "key",
+      "records": [
+        {"key": "focus", "name": "Focus", "description": "Your ability to concentrate and complete deep work sessions", "category": "mental", "icon": "brain", "max_level": 100, "stars_per_level": 10, "sort_order": 1},
+        {"key": "discipline", "name": "Discipline", "description": "Consistency in maintaining habits and routines", "category": "mental", "icon": "target", "max_level": 100, "stars_per_level": 10, "sort_order": 2},
+        {"key": "strength", "name": "Strength", "description": "Physical power and resistance training progress", "category": "physical", "icon": "dumbbell", "max_level": 100, "stars_per_level": 10, "sort_order": 3},
+        {"key": "endurance", "name": "Endurance", "description": "Cardiovascular fitness and stamina", "category": "physical", "icon": "heart", "max_level": 100, "stars_per_level": 10, "sort_order": 4},
+        {"key": "creativity", "name": "Creativity", "description": "Artistic expression and creative problem solving", "category": "creative", "icon": "palette", "max_level": 100, "stars_per_level": 10, "sort_order": 5},
+        {"key": "knowledge", "name": "Knowledge", "description": "Learning and intellectual growth", "category": "mental", "icon": "book", "max_level": 100, "stars_per_level": 10, "sort_order": 6}
+      ]
+    },
+    "achievement_definitions": {
+      "unique_key": "key",
+      "records": [
+        {"key": "first_focus", "name": "First Focus", "description": "Complete your first focus session", "category": "focus", "icon": "zap", "trigger_type": "event", "trigger_config": {"event": "focus_complete", "count": 1}, "reward_coins": 10, "reward_xp": 25, "is_hidden": false, "sort_order": 1},
+        {"key": "focus_10", "name": "Focus Beginner", "description": "Complete 10 focus sessions", "category": "focus", "icon": "zap", "trigger_type": "threshold", "trigger_config": {"event": "focus_complete", "count": 10}, "reward_coins": 25, "reward_xp": 100, "is_hidden": false, "sort_order": 2},
+        {"key": "focus_100", "name": "Focus Master", "description": "Complete 100 focus sessions", "category": "focus", "icon": "crown", "trigger_type": "threshold", "trigger_config": {"event": "focus_complete", "count": 100}, "reward_coins": 100, "reward_xp": 500, "is_hidden": false, "sort_order": 3},
+        {"key": "deep_work", "name": "Deep Worker", "description": "Complete a 60+ minute focus session", "category": "focus", "icon": "clock", "trigger_type": "event", "trigger_config": {"event": "focus_complete", "min_duration": 3600}, "reward_coins": 50, "reward_xp": 100, "is_hidden": false, "sort_order": 4},
+        {"key": "streak_3", "name": "Getting Started", "description": "Maintain a 3-day streak", "category": "streak", "icon": "flame", "trigger_type": "threshold", "trigger_config": {"streak_type": "daily", "count": 3}, "reward_coins": 15, "reward_xp": 50, "is_hidden": false, "sort_order": 10},
+        {"key": "streak_7", "name": "Week Warrior", "description": "Maintain a 7-day streak", "category": "streak", "icon": "flame", "trigger_type": "threshold", "trigger_config": {"streak_type": "daily", "count": 7}, "reward_coins": 35, "reward_xp": 150, "is_hidden": false, "sort_order": 11},
+        {"key": "streak_30", "name": "Monthly Master", "description": "Maintain a 30-day streak", "category": "streak", "icon": "fire", "trigger_type": "threshold", "trigger_config": {"streak_type": "daily", "count": 30}, "reward_coins": 150, "reward_xp": 500, "is_hidden": false, "sort_order": 12},
+        {"key": "streak_100", "name": "Legendary Streak", "description": "Maintain a 100-day streak", "category": "streak", "icon": "trophy", "trigger_type": "threshold", "trigger_config": {"streak_type": "daily", "count": 100}, "reward_coins": 500, "reward_xp": 2000, "is_hidden": true, "sort_order": 13},
+        {"key": "first_habit", "name": "Habit Formed", "description": "Complete a habit for the first time", "category": "habit", "icon": "check", "trigger_type": "event", "trigger_config": {"event": "habit_complete", "count": 1}, "reward_coins": 10, "reward_xp": 25, "is_hidden": false, "sort_order": 20},
+        {"key": "habit_streak_7", "name": "Habit Builder", "description": "Complete a habit 7 days in a row", "category": "habit", "icon": "repeat", "trigger_type": "threshold", "trigger_config": {"event": "habit_streak", "count": 7}, "reward_coins": 50, "reward_xp": 150, "is_hidden": false, "sort_order": 21},
+        {"key": "first_book", "name": "Bookworm", "description": "Finish your first book", "category": "reading", "icon": "book", "trigger_type": "event", "trigger_config": {"event": "book_complete", "count": 1}, "reward_coins": 50, "reward_xp": 200, "is_hidden": false, "sort_order": 30},
+        {"key": "books_10", "name": "Library Builder", "description": "Finish 10 books", "category": "reading", "icon": "library", "trigger_type": "threshold", "trigger_config": {"event": "book_complete", "count": 10}, "reward_coins": 200, "reward_xp": 1000, "is_hidden": false, "sort_order": 31},
+        {"key": "first_workout", "name": "Gym Rat", "description": "Complete your first workout", "category": "fitness", "icon": "dumbbell", "trigger_type": "event", "trigger_config": {"event": "workout_complete", "count": 1}, "reward_coins": 25, "reward_xp": 50, "is_hidden": false, "sort_order": 40},
+        {"key": "first_pr", "name": "Personal Best", "description": "Set your first personal record", "category": "fitness", "icon": "medal", "trigger_type": "event", "trigger_config": {"event": "personal_record", "count": 1}, "reward_coins": 50, "reward_xp": 100, "is_hidden": false, "sort_order": 41},
+        {"key": "first_lesson", "name": "Student", "description": "Complete your first lesson", "category": "learning", "icon": "graduation", "trigger_type": "event", "trigger_config": {"event": "lesson_complete", "count": 1}, "reward_coins": 15, "reward_xp": 50, "is_hidden": false, "sort_order": 50}
+      ]
+    },
+    "roles": {
+      "unique_key": "name",
+      "records": [
+        {"name": "user", "description": "Standard user with basic access", "parent_role_id": null},
+        {"name": "premium", "description": "Premium user with additional features", "parent_role_id": null},
+        {"name": "moderator", "description": "Community moderator", "parent_role_id": null},
+        {"name": "admin", "description": "Full administrative access", "parent_role_id": null},
+        {"name": "super_admin", "description": "Super administrator with all permissions", "parent_role_id": null}
+      ]
+    },
+    "entitlements": {
+      "unique_key": "name",
+      "records": [
+        {"name": "users:read", "description": "View user profiles", "resource": "users", "action": "read"},
+        {"name": "users:update", "description": "Update user profiles", "resource": "users", "action": "update"},
+        {"name": "users:delete", "description": "Delete users", "resource": "users", "action": "delete"},
+        {"name": "users:manage", "description": "Full user management", "resource": "users", "action": "manage"},
+        {"name": "content:create", "description": "Create content", "resource": "content", "action": "create"},
+        {"name": "content:update", "description": "Update content", "resource": "content", "action": "update"},
+        {"name": "content:delete", "description": "Delete content", "resource": "content", "action": "delete"},
+        {"name": "content:moderate", "description": "Moderate user content", "resource": "content", "action": "moderate"},
+        {"name": "market:manage", "description": "Manage shop items", "resource": "market", "action": "manage"},
+        {"name": "market:create_items", "description": "Create new shop items", "resource": "market", "action": "create"},
+        {"name": "system:admin", "description": "System administration", "resource": "system", "action": "admin"},
+        {"name": "system:config", "description": "Modify system configuration", "resource": "system", "action": "config"},
+        {"name": "analytics:view", "description": "View analytics dashboards", "resource": "analytics", "action": "read"}
+      ]
+    },
+    "feature_flags": {
+      "unique_key": "flag_name",
+      "records": [
+        {"flag_name": "social_features", "enabled": false, "description": "Enable social/community features", "metadata": {"rollout_percentage": 0}},
+        {"flag_name": "ai_coach", "enabled": false, "description": "Enable AI coaching features", "metadata": {"model": "gpt-4"}},
+        {"flag_name": "premium_content", "enabled": true, "description": "Enable premium content access", "metadata": null},
+        {"flag_name": "beta_fitness", "enabled": false, "description": "Beta fitness tracking features", "metadata": {"min_version": "2.0.0"}},
+        {"flag_name": "music_analysis", "enabled": true, "description": "Enable music analysis features", "metadata": null}
+      ]
+    },
+    "universal_quests": {
+      "unique_key": null,
+      "records": [
+        {"title": "Daily Focus", "description": "Complete 25 minutes of focused work", "type": "daily", "xp_reward": 50, "coin_reward": 10, "target": 25, "target_type": "focus_minutes", "target_config": null, "skill_key": "focus", "is_active": true, "sort_order": 1},
+        {"title": "Habit Check", "description": "Complete at least one habit today", "type": "daily", "xp_reward": 25, "coin_reward": 5, "target": 1, "target_type": "habits_completed", "target_config": null, "skill_key": "discipline", "is_active": true, "sort_order": 2},
+        {"title": "Active Minutes", "description": "Log 15 minutes of exercise", "type": "daily", "xp_reward": 40, "coin_reward": 8, "target": 15, "target_type": "exercise_minutes", "target_config": null, "skill_key": "endurance", "is_active": true, "sort_order": 3},
+        {"title": "Focus Champion", "description": "Complete 3 hours of focused work this week", "type": "weekly", "xp_reward": 200, "coin_reward": 50, "target": 180, "target_type": "focus_minutes", "target_config": null, "skill_key": "focus", "is_active": true, "sort_order": 10},
+        {"title": "Habit Warrior", "description": "Complete all habits for 5 days", "type": "weekly", "xp_reward": 150, "coin_reward": 35, "target": 5, "target_type": "perfect_habit_days", "target_config": null, "skill_key": "discipline", "is_active": true, "sort_order": 11},
+        {"title": "Workout Week", "description": "Complete 3 workouts this week", "type": "weekly", "xp_reward": 175, "coin_reward": 40, "target": 3, "target_type": "workouts_completed", "target_config": null, "skill_key": "strength", "is_active": true, "sort_order": 12},
+        {"title": "Bookworm", "description": "Read for 60 minutes this week", "type": "weekly", "xp_reward": 100, "coin_reward": 25, "target": 60, "target_type": "reading_minutes", "target_config": null, "skill_key": "knowledge", "is_active": true, "sort_order": 13},
+        {"title": "Marathon Focus", "description": "Complete 20 hours of focused work this month", "type": "monthly", "xp_reward": 500, "coin_reward": 150, "target": 1200, "target_type": "focus_minutes", "target_config": null, "skill_key": "focus", "is_active": true, "sort_order": 20},
+        {"title": "Perfect Month", "description": "Maintain a 30-day streak", "type": "monthly", "xp_reward": 750, "coin_reward": 200, "target": 30, "target_type": "streak_days", "target_config": null, "skill_key": "discipline", "is_active": true, "sort_order": 21}
+      ]
+    },
+    "learn_topics": {
+      "unique_key": "key",
+      "records": [
+        {"key": "productivity", "name": "Productivity", "description": "Master time management and deep work techniques", "category": "theory", "icon": "clock", "color": "#3B82F6", "sort_order": 1, "is_active": true},
+        {"key": "habits", "name": "Habit Science", "description": "Understand the science of habit formation", "category": "theory", "icon": "repeat", "color": "#10B981", "sort_order": 2, "is_active": true},
+        {"key": "fitness_basics", "name": "Fitness Fundamentals", "description": "Learn proper form and training principles", "category": "practice", "icon": "dumbbell", "color": "#EF4444", "sort_order": 3, "is_active": true},
+        {"key": "mindfulness", "name": "Mindfulness", "description": "Develop focus and mental clarity", "category": "practice", "icon": "brain", "color": "#8B5CF6", "sort_order": 4, "is_active": true},
+        {"key": "music_theory", "name": "Music Theory", "description": "Understand the building blocks of music", "category": "theory", "icon": "music", "color": "#F59E0B", "sort_order": 5, "is_active": true}
+      ]
+    },
+    "onboarding_flows": {
+      "unique_key": "name",
+      "records": [
+        {"name": "welcome", "description": "New user welcome and setup flow", "is_active": true, "total_steps": 5}
+      ]
+    },
+    "market_items": {
+      "unique_key": "key",
+      "records": [
+        {"key": "theme_dark", "name": "Dark Mode Theme", "description": "A sleek dark interface theme", "category": "theme", "cost_coins": 0, "rarity": "common", "icon": "moon", "is_global": true, "is_available": true, "is_active": true, "is_consumable": false, "sort_order": 1},
+        {"key": "theme_ocean", "name": "Ocean Theme", "description": "Calm blue tones inspired by the sea", "category": "theme", "cost_coins": 50, "rarity": "common", "icon": "waves", "is_global": true, "is_available": true, "is_active": true, "is_consumable": false, "sort_order": 2},
+        {"key": "theme_forest", "name": "Forest Theme", "description": "Earthy greens for a natural feel", "category": "theme", "cost_coins": 50, "rarity": "common", "icon": "tree", "is_global": true, "is_available": true, "is_active": true, "is_consumable": false, "sort_order": 3},
+        {"key": "theme_sunset", "name": "Sunset Theme", "description": "Warm oranges and purples", "category": "theme", "cost_coins": 100, "rarity": "rare", "icon": "sunset", "is_global": true, "is_available": true, "is_active": true, "is_consumable": false, "sort_order": 4},
+        {"key": "xp_boost_1h", "name": "1-Hour XP Boost", "description": "Double XP for 1 hour", "category": "boost", "cost_coins": 25, "rarity": "common", "icon": "zap", "is_global": true, "is_available": true, "is_active": true, "is_consumable": true, "sort_order": 10},
+        {"key": "xp_boost_24h", "name": "24-Hour XP Boost", "description": "Double XP for 24 hours", "category": "boost", "cost_coins": 100, "rarity": "rare", "icon": "zap", "is_global": true, "is_available": true, "is_active": true, "is_consumable": true, "sort_order": 11},
+        {"key": "streak_shield", "name": "Streak Shield", "description": "Protect your streak for one missed day", "category": "boost", "cost_coins": 150, "rarity": "rare", "icon": "shield", "is_global": true, "is_available": true, "is_active": true, "is_consumable": true, "sort_order": 12},
+        {"key": "avatar_crown", "name": "Golden Crown", "description": "A crown fit for royalty", "category": "avatar", "cost_coins": 500, "rarity": "epic", "icon": "crown", "is_global": true, "is_available": true, "is_active": true, "is_consumable": false, "sort_order": 20},
+        {"key": "avatar_wings", "name": "Angel Wings", "description": "Majestic feathered wings", "category": "avatar", "cost_coins": 750, "rarity": "epic", "icon": "feather", "is_global": true, "is_available": true, "is_active": true, "is_consumable": false, "sort_order": 21},
+        {"key": "avatar_halo", "name": "Golden Halo", "description": "A glowing halo of achievement", "category": "avatar", "cost_coins": 1000, "rarity": "legendary", "icon": "star", "is_global": true, "is_available": true, "is_active": true, "is_consumable": false, "sort_order": 22}
+      ]
+    }
   }
 }

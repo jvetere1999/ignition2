@@ -114,75 +114,84 @@ impl Default for SectionType {
 }
 
 /// Reference track database model
+/// Schema from migration 0012_reference.sql
 #[derive(Debug, Clone, FromRow, Serialize)]
 pub struct ReferenceTrack {
     pub id: Uuid,
     pub user_id: Uuid,
-    pub name: String,
-    pub description: Option<String>,
-    pub r2_key: String,
-    pub file_size_bytes: i64,
-    pub mime_type: String,
-    pub duration_seconds: Option<f32>,
+    pub title: String,
     pub artist: Option<String>,
     pub album: Option<String>,
     pub genre: Option<String>,
     pub bpm: Option<f32>,
-    pub key_signature: Option<String>,
-    pub tags: serde_json::Value,
-    pub status: String,
-    pub error_message: Option<String>,
+    pub key: Option<String>,
+    pub duration_seconds: Option<f32>,
+    pub r2_key: String,
+    pub waveform_r2_key: Option<String>,
+    pub thumbnail_r2_key: Option<String>,
+    pub file_format: Option<String>,
+    pub sample_rate: Option<i32>,
+    pub bit_depth: Option<i32>,
+    pub channels: Option<i32>,
+    pub is_reference: bool,
+    pub is_user_upload: bool,
+    pub source: Option<String>,
+    pub source_url: Option<String>,
+    pub metadata: Option<serde_json::Value>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
 
 /// Track analysis database model
+/// Schema from migration 0012_reference.sql
 #[derive(Debug, Clone, FromRow, Serialize)]
 pub struct TrackAnalysis {
     pub id: Uuid,
     pub track_id: Uuid,
     pub analysis_type: String,
-    pub version: String,
     pub status: String,
+    pub parameters: Option<serde_json::Value>,
+    pub results: Option<serde_json::Value>,
+    pub error_message: Option<String>,
     pub started_at: Option<DateTime<Utc>>,
     pub completed_at: Option<DateTime<Utc>>,
-    pub error_message: Option<String>,
-    pub summary: serde_json::Value,
-    pub manifest: serde_json::Value,
     pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
 }
 
 /// Track annotation database model
+/// Schema from migration 0012_reference.sql
 #[derive(Debug, Clone, FromRow, Serialize)]
 pub struct TrackAnnotation {
     pub id: Uuid,
     pub track_id: Uuid,
     pub user_id: Uuid,
-    pub start_time_ms: i32,
-    pub end_time_ms: Option<i32>,
-    pub title: String,
+    pub start_time_seconds: f32,
+    pub end_time_seconds: Option<f32>,
+    pub annotation_type: String,
+    pub title: Option<String>,
     pub content: Option<String>,
-    pub category: String,
-    pub color: String,
+    pub color: Option<String>,
+    pub tags: Option<Vec<String>>,
     pub is_private: bool,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
 
 /// Track region database model
+/// Schema from migration 0012_reference.sql
 #[derive(Debug, Clone, FromRow, Serialize)]
 pub struct TrackRegion {
     pub id: Uuid,
     pub track_id: Uuid,
     pub user_id: Uuid,
-    pub start_time_ms: i32,
-    pub end_time_ms: i32,
     pub name: String,
-    pub description: Option<String>,
-    pub section_type: String,
-    pub color: String,
-    pub display_order: i32,
+    pub start_time_seconds: f32,
+    pub end_time_seconds: f32,
+    pub color: Option<String>,
+    pub region_type: Option<String>,
+    pub notes: Option<String>,
+    pub loop_count: i32,
+    pub is_favorite: bool,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -192,82 +201,106 @@ pub struct TrackRegion {
 // =============================================================================
 
 /// Input for creating a reference track
+/// Aligned with migration 0012_reference.sql
 #[derive(Debug, Clone, Deserialize)]
 pub struct CreateTrackInput {
-    pub name: String,
-    pub description: Option<String>,
+    pub title: String,
     pub r2_key: String,
-    pub file_size_bytes: i64,
-    pub mime_type: String,
-    pub duration_seconds: Option<f32>,
     pub artist: Option<String>,
     pub album: Option<String>,
     pub genre: Option<String>,
     pub bpm: Option<f32>,
-    pub key_signature: Option<String>,
-    pub tags: Option<Vec<String>>,
+    pub key: Option<String>,
+    pub duration_seconds: Option<f32>,
+    pub waveform_r2_key: Option<String>,
+    pub thumbnail_r2_key: Option<String>,
+    pub file_format: Option<String>,
+    pub sample_rate: Option<i32>,
+    pub bit_depth: Option<i32>,
+    pub channels: Option<i32>,
+    pub is_reference: Option<bool>,
+    pub is_user_upload: Option<bool>,
+    pub source: Option<String>,
+    pub source_url: Option<String>,
+    pub metadata: Option<serde_json::Value>,
 }
 
 /// Input for updating a reference track
+/// Aligned with migration 0012_reference.sql
 #[derive(Debug, Clone, Deserialize)]
 pub struct UpdateTrackInput {
-    pub name: Option<String>,
-    pub description: Option<String>,
-    pub duration_seconds: Option<f32>,
+    pub title: Option<String>,
     pub artist: Option<String>,
     pub album: Option<String>,
     pub genre: Option<String>,
     pub bpm: Option<f32>,
-    pub key_signature: Option<String>,
-    pub tags: Option<Vec<String>>,
+    pub key: Option<String>,
+    pub duration_seconds: Option<f32>,
+    pub waveform_r2_key: Option<String>,
+    pub thumbnail_r2_key: Option<String>,
+    pub file_format: Option<String>,
+    pub sample_rate: Option<i32>,
+    pub bit_depth: Option<i32>,
+    pub channels: Option<i32>,
+    pub is_reference: Option<bool>,
+    pub source: Option<String>,
+    pub source_url: Option<String>,
+    pub metadata: Option<serde_json::Value>,
 }
 
 /// Input for creating an annotation
+/// Aligned with migration 0012_reference.sql - uses seconds not milliseconds
 #[derive(Debug, Clone, Deserialize)]
 pub struct CreateAnnotationInput {
-    pub start_time_ms: i32,
-    pub end_time_ms: Option<i32>,
-    pub title: String,
+    pub start_time_seconds: f32,
+    pub end_time_seconds: Option<f32>,
+    pub annotation_type: String,
+    pub title: Option<String>,
     pub content: Option<String>,
-    pub category: Option<String>,
     pub color: Option<String>,
+    pub tags: Option<Vec<String>>,
     pub is_private: Option<bool>,
 }
 
 /// Input for updating an annotation
+/// Aligned with migration 0012_reference.sql
 #[derive(Debug, Clone, Deserialize)]
 pub struct UpdateAnnotationInput {
-    pub start_time_ms: Option<i32>,
-    pub end_time_ms: Option<i32>,
+    pub start_time_seconds: Option<f32>,
+    pub end_time_seconds: Option<f32>,
+    pub annotation_type: Option<String>,
     pub title: Option<String>,
     pub content: Option<String>,
-    pub category: Option<String>,
     pub color: Option<String>,
+    pub tags: Option<Vec<String>>,
     pub is_private: Option<bool>,
 }
 
 /// Input for creating a region
+/// Aligned with migration 0012_reference.sql - uses seconds not milliseconds
 #[derive(Debug, Clone, Deserialize)]
 pub struct CreateRegionInput {
-    pub start_time_ms: i32,
-    pub end_time_ms: i32,
     pub name: String,
-    pub description: Option<String>,
-    pub section_type: Option<String>,
+    pub start_time_seconds: f32,
+    pub end_time_seconds: f32,
     pub color: Option<String>,
-    pub display_order: Option<i32>,
+    pub region_type: Option<String>,
+    pub notes: Option<String>,
+    pub is_favorite: Option<bool>,
 }
 
 /// Input for updating a region
+/// Aligned with migration 0012_reference.sql
 #[derive(Debug, Clone, Deserialize)]
 pub struct UpdateRegionInput {
-    pub start_time_ms: Option<i32>,
-    pub end_time_ms: Option<i32>,
     pub name: Option<String>,
-    pub description: Option<String>,
-    pub section_type: Option<String>,
+    pub start_time_seconds: Option<f32>,
+    pub end_time_seconds: Option<f32>,
     pub color: Option<String>,
-    pub display_order: Option<i32>,
+    pub region_type: Option<String>,
+    pub notes: Option<String>,
+    pub loop_count: Option<i32>,
+    pub is_favorite: Option<bool>,
 }
 
 /// Input for starting an analysis
@@ -293,14 +326,14 @@ pub struct TrackWithSummary {
     pub latest_analysis: Option<AnalysisSummary>,
 }
 
-/// Analysis summary (without full manifest)
+/// Analysis summary (without full results)
+/// Aligned with migration 0012_reference.sql
 #[derive(Debug, Clone, Serialize)]
 pub struct AnalysisSummary {
     pub id: Uuid,
     pub analysis_type: String,
-    pub version: String,
     pub status: String,
-    pub summary: serde_json::Value,
+    pub parameters: Option<serde_json::Value>,
     pub completed_at: Option<DateTime<Utc>>,
 }
 
