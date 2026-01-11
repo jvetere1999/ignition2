@@ -1,4 +1,6 @@
 //! Error types and handling
+//!
+//! Centralized error handling with structured logging and observability.
 
 use axum::{
     http::StatusCode,
@@ -6,6 +8,7 @@ use axum::{
     Json,
 };
 use serde::Serialize;
+use uuid::Uuid;
 
 /// Application error type
 #[derive(Debug, thiserror::Error)]
@@ -41,11 +44,25 @@ pub enum AppError {
     #[error("Database error: {0}")]
     Database(String),
 
+    /// Enhanced database error with context for better observability
+    #[error("Database error in {operation} on {table}: {message}")]
+    DatabaseWithContext {
+        operation: String,
+        table: String,
+        message: String,
+        user_id: Option<Uuid>,
+        entity_id: Option<Uuid>,
+    },
+
     #[error("Internal error: {0}")]
     Internal(String),
 
     #[error("Configuration error: {0}")]
     Config(String),
+
+    /// Storage/R2 errors
+    #[error("Storage error: {0}")]
+    Storage(String),
 }
 
 // Manual implementation to avoid conflicts
@@ -112,15 +129,46 @@ impl IntoResponse for AppError {
                 "Session has expired".to_string(),
             ),
             AppError::Database(e) => {
-                tracing::error!("Database error: {}", e);
+                tracing::error!(
+                    error.type = "database",
+                    error.message = %e,
+                    "Database error (legacy)"
+                );
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "database_error",
                     "Database error".to_string(),
                 )
             }
+            AppError::DatabaseWithContext {
+                operation,
+                table,
+                message,
+                user_id,
+                entity_id,
+            } => {
+                // Structured error logging for observability
+                tracing::error!(
+                    error.type = "database",
+                    db.operation = %operation,
+                    db.table = %table,
+                    db.user_id = ?user_id,
+                    db.entity_id = ?entity_id,
+                    error.message = %message,
+                    "Database query failed"
+                );
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "database_error",
+                    format!("Database error in {} on {}", operation, table),
+                )
+            }
             AppError::Internal(e) => {
-                tracing::error!("Internal error: {}", e);
+                tracing::error!(
+                    error.type = "internal",
+                    error.message = %e,
+                    "Internal error"
+                );
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "internal_error",
@@ -128,11 +176,27 @@ impl IntoResponse for AppError {
                 )
             }
             AppError::Config(msg) => {
-                tracing::error!("Configuration error: {}", msg);
+                tracing::error!(
+                    error.type = "config",
+                    error.message = %msg,
+                    "Configuration error"
+                );
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "config_error",
                     "Configuration error".to_string(),
+                )
+            }
+            AppError::Storage(e) => {
+                tracing::error!(
+                    error.type = "storage",
+                    error.message = %e,
+                    "Storage error"
+                );
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "storage_error",
+                    "Storage error".to_string(),
                 )
             }
         };

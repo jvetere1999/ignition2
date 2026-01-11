@@ -1,12 +1,14 @@
 //! Reference tracks repository
 //!
 //! Database operations for reference tracks, analyses, annotations, and regions.
+//! Uses centralized observability layer for structured logging.
 
 #![allow(dead_code)]
 
 use sqlx::PgPool;
 use uuid::Uuid;
 
+use super::core::{QueryContext, db_error};
 use super::reference_models::*;
 use crate::error::AppError;
 
@@ -18,40 +20,50 @@ pub struct ReferenceTrackRepo;
 
 impl ReferenceTrackRepo {
     /// Create a new reference track
+    /// Aligned with migration 0012_reference.sql
     pub async fn create(
         pool: &PgPool,
         user_id: Uuid,
         input: CreateTrackInput,
     ) -> Result<ReferenceTrack, AppError> {
-        let tags = serde_json::to_value(input.tags.unwrap_or_default())
-            .map_err(|e| AppError::Internal(e.to_string()))?;
-
+        let ctx = QueryContext::new("INSERT", "reference_tracks")
+            .with_user(user_id);
+        
         let track = sqlx::query_as::<_, ReferenceTrack>(
             r#"
             INSERT INTO reference_tracks (
-                user_id, name, description, r2_key, file_size_bytes, mime_type,
-                duration_seconds, artist, album, genre, bpm, key_signature, tags
+                user_id, title, r2_key, artist, album, genre, bpm, key,
+                duration_seconds, waveform_r2_key, thumbnail_r2_key,
+                file_format, sample_rate, bit_depth, channels,
+                is_reference, is_user_upload, source, source_url, metadata
             )
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
             RETURNING *
             "#,
         )
         .bind(user_id)
-        .bind(&input.name)
-        .bind(&input.description)
+        .bind(&input.title)
         .bind(&input.r2_key)
-        .bind(input.file_size_bytes)
-        .bind(&input.mime_type)
-        .bind(input.duration_seconds)
         .bind(&input.artist)
         .bind(&input.album)
         .bind(&input.genre)
         .bind(input.bpm)
-        .bind(&input.key_signature)
-        .bind(&tags)
+        .bind(&input.key)
+        .bind(input.duration_seconds)
+        .bind(&input.waveform_r2_key)
+        .bind(&input.thumbnail_r2_key)
+        .bind(&input.file_format)
+        .bind(input.sample_rate)
+        .bind(input.bit_depth)
+        .bind(input.channels)
+        .bind(input.is_reference.unwrap_or(true))
+        .bind(input.is_user_upload.unwrap_or(false))
+        .bind(&input.source)
+        .bind(&input.source_url)
+        .bind(&input.metadata)
         .fetch_one(pool)
         .await
-        .map_err(|e| AppError::Database(e.to_string()))?;
+        .map_err(|e| db_error(&ctx, e))?;
 
         Ok(track)
     }
@@ -59,12 +71,15 @@ impl ReferenceTrackRepo {
     /// Find track by ID (no ownership check - use for internal lookups)
     #[allow(dead_code)]
     pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<ReferenceTrack>, AppError> {
+        let ctx = QueryContext::new("SELECT", "reference_tracks")
+            .with_entity(id);
+        
         let track =
             sqlx::query_as::<_, ReferenceTrack>("SELECT * FROM reference_tracks WHERE id = $1")
                 .bind(id)
                 .fetch_optional(pool)
                 .await
-                .map_err(|e| AppError::Database(e.to_string()))?;
+                .map_err(|e| db_error(&ctx, e))?;
 
         Ok(track)
     }
@@ -75,6 +90,10 @@ impl ReferenceTrackRepo {
         id: Uuid,
         user_id: Uuid,
     ) -> Result<Option<ReferenceTrack>, AppError> {
+        let ctx = QueryContext::new("SELECT", "reference_tracks")
+            .with_user(user_id)
+            .with_entity(id);
+        
         let track = sqlx::query_as::<_, ReferenceTrack>(
             "SELECT * FROM reference_tracks WHERE id = $1 AND user_id = $2",
         )
@@ -82,7 +101,7 @@ impl ReferenceTrackRepo {
         .bind(user_id)
         .fetch_optional(pool)
         .await
-        .map_err(|e| AppError::Database(e.to_string()))?;
+        .map_err(|e| db_error(&ctx, e))?;
 
         Ok(track)
     }
@@ -94,6 +113,9 @@ impl ReferenceTrackRepo {
         page: i32,
         page_size: i32,
     ) -> Result<(Vec<ReferenceTrack>, i64), AppError> {
+        let ctx = QueryContext::new("SELECT", "reference_tracks")
+            .with_user(user_id);
+        
         let offset = (page - 1) * page_size;
 
         let tracks = sqlx::query_as::<_, ReferenceTrack>(
@@ -109,14 +131,14 @@ impl ReferenceTrackRepo {
         .bind(offset)
         .fetch_all(pool)
         .await
-        .map_err(|e| AppError::Database(e.to_string()))?;
+        .map_err(|e| db_error(&ctx, e))?;
 
         let total: (i64,) =
             sqlx::query_as("SELECT COUNT(*) FROM reference_tracks WHERE user_id = $1")
                 .bind(user_id)
                 .fetch_one(pool)
                 .await
-                .map_err(|e| AppError::Database(e.to_string()))?;
+                .map_err(|e| db_error(&ctx, e))?;
 
         Ok((tracks, total.0))
     }
@@ -128,6 +150,8 @@ impl ReferenceTrackRepo {
         page: i32,
         page_size: i32,
     ) -> Result<Option<(Uuid, String, Option<String>, Vec<ReferenceTrack>, i64)>, AppError> {
+        let ctx = QueryContext::new("SELECT", "reference_tracks");
+        
         // First find the user by email
         let user: Option<(Uuid, String, Option<String>)> = sqlx::query_as(
             "SELECT id, email, name FROM users WHERE email = $1",
@@ -135,12 +159,13 @@ impl ReferenceTrackRepo {
         .bind(email)
         .fetch_optional(pool)
         .await
-        .map_err(|e| AppError::Database(e.to_string()))?;
+        .map_err(|e| db_error(&QueryContext::new("SELECT", "users"), e))?;
 
         let Some((user_id, user_email, user_name)) = user else {
             return Ok(None);
         };
 
+        let ctx = ctx.with_user(user_id);
         let offset = (page - 1) * page_size;
 
         let tracks = sqlx::query_as::<_, ReferenceTrack>(
@@ -156,19 +181,20 @@ impl ReferenceTrackRepo {
         .bind(offset)
         .fetch_all(pool)
         .await
-        .map_err(|e| AppError::Database(e.to_string()))?;
+        .map_err(|e| db_error(&ctx, e))?;
 
         let total: (i64,) =
             sqlx::query_as("SELECT COUNT(*) FROM reference_tracks WHERE user_id = $1")
                 .bind(user_id)
                 .fetch_one(pool)
                 .await
-                .map_err(|e| AppError::Database(e.to_string()))?;
+                .map_err(|e| db_error(&ctx, e))?;
 
         Ok(Some((user_id, user_email, user_name, tracks, total.0)))
     }
 
     /// Update a track
+    /// Aligned with migration 0012_reference.sql
     pub async fn update(
         pool: &PgPool,
         id: Uuid,
@@ -179,16 +205,8 @@ impl ReferenceTrackRepo {
         let mut updates = Vec::new();
         let mut idx = 3;
 
-        if input.name.is_some() {
-            updates.push(format!("name = ${}", idx));
-            idx += 1;
-        }
-        if input.description.is_some() {
-            updates.push(format!("description = ${}", idx));
-            idx += 1;
-        }
-        if input.duration_seconds.is_some() {
-            updates.push(format!("duration_seconds = ${}", idx));
+        if input.title.is_some() {
+            updates.push(format!("title = ${}", idx));
             idx += 1;
         }
         if input.artist.is_some() {
@@ -207,12 +225,53 @@ impl ReferenceTrackRepo {
             updates.push(format!("bpm = ${}", idx));
             idx += 1;
         }
-        if input.key_signature.is_some() {
-            updates.push(format!("key_signature = ${}", idx));
+        if input.key.is_some() {
+            updates.push(format!("key = ${}", idx));
             idx += 1;
         }
-        if input.tags.is_some() {
-            updates.push(format!("tags = ${}", idx));
+        if input.duration_seconds.is_some() {
+            updates.push(format!("duration_seconds = ${}", idx));
+            idx += 1;
+        }
+        if input.waveform_r2_key.is_some() {
+            updates.push(format!("waveform_r2_key = ${}", idx));
+            idx += 1;
+        }
+        if input.thumbnail_r2_key.is_some() {
+            updates.push(format!("thumbnail_r2_key = ${}", idx));
+            idx += 1;
+        }
+        if input.file_format.is_some() {
+            updates.push(format!("file_format = ${}", idx));
+            idx += 1;
+        }
+        if input.sample_rate.is_some() {
+            updates.push(format!("sample_rate = ${}", idx));
+            idx += 1;
+        }
+        if input.bit_depth.is_some() {
+            updates.push(format!("bit_depth = ${}", idx));
+            idx += 1;
+        }
+        if input.channels.is_some() {
+            updates.push(format!("channels = ${}", idx));
+            idx += 1;
+        }
+        if input.is_reference.is_some() {
+            updates.push(format!("is_reference = ${}", idx));
+            idx += 1;
+        }
+        if input.source.is_some() {
+            updates.push(format!("source = ${}", idx));
+            idx += 1;
+        }
+        if input.source_url.is_some() {
+            updates.push(format!("source_url = ${}", idx));
+            idx += 1;
+        }
+        if input.metadata.is_some() {
+            updates.push(format!("metadata = ${}", idx));
+            let _ = idx; // suppress unused warning
         }
 
         if updates.is_empty() {
@@ -232,14 +291,8 @@ impl ReferenceTrackRepo {
             .bind(id)
             .bind(user_id);
 
-        if let Some(ref name) = input.name {
-            q = q.bind(name);
-        }
-        if let Some(ref desc) = input.description {
-            q = q.bind(desc);
-        }
-        if let Some(dur) = input.duration_seconds {
-            q = q.bind(dur);
+        if let Some(ref title) = input.title {
+            q = q.bind(title);
         }
         if let Some(ref artist) = input.artist {
             q = q.bind(artist);
@@ -253,58 +306,69 @@ impl ReferenceTrackRepo {
         if let Some(bpm) = input.bpm {
             q = q.bind(bpm);
         }
-        if let Some(ref key_sig) = input.key_signature {
-            q = q.bind(key_sig);
+        if let Some(ref key) = input.key {
+            q = q.bind(key);
         }
-        if let Some(ref tags) = input.tags {
-            let tags_json =
-                serde_json::to_value(tags).map_err(|e| AppError::Internal(e.to_string()))?;
-            q = q.bind(tags_json);
+        if let Some(dur) = input.duration_seconds {
+            q = q.bind(dur);
         }
+        if let Some(ref waveform) = input.waveform_r2_key {
+            q = q.bind(waveform);
+        }
+        if let Some(ref thumb) = input.thumbnail_r2_key {
+            q = q.bind(thumb);
+        }
+        if let Some(ref fmt) = input.file_format {
+            q = q.bind(fmt);
+        }
+        if let Some(sr) = input.sample_rate {
+            q = q.bind(sr);
+        }
+        if let Some(bd) = input.bit_depth {
+            q = q.bind(bd);
+        }
+        if let Some(ch) = input.channels {
+            q = q.bind(ch);
+        }
+        if let Some(is_ref) = input.is_reference {
+            q = q.bind(is_ref);
+        }
+        if let Some(ref src) = input.source {
+            q = q.bind(src);
+        }
+        if let Some(ref src_url) = input.source_url {
+            q = q.bind(src_url);
+        }
+        if let Some(ref meta) = input.metadata {
+            q = q.bind(meta);
+        }
+
+        let ctx = QueryContext::new("UPDATE", "reference_tracks")
+            .with_user(user_id)
+            .with_entity(id);
 
         let track = q
             .fetch_optional(pool)
             .await
-            .map_err(|e| AppError::Database(e.to_string()))?;
+            .map_err(|e| db_error(&ctx, e))?;
 
         Ok(track)
     }
 
     /// Delete a track (and cascade to analyses/annotations/regions)
     pub async fn delete(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<bool, AppError> {
+        let ctx = QueryContext::new("DELETE", "reference_tracks")
+            .with_user(user_id)
+            .with_entity(id);
+
         let result = sqlx::query("DELETE FROM reference_tracks WHERE id = $1 AND user_id = $2")
             .bind(id)
             .bind(user_id)
             .execute(pool)
             .await
-            .map_err(|e| AppError::Database(e.to_string()))?;
+            .map_err(|e| db_error(&ctx, e))?;
 
         Ok(result.rows_affected() > 0)
-    }
-
-    /// Update track status
-    #[allow(dead_code)]
-    pub async fn update_status(
-        pool: &PgPool,
-        id: Uuid,
-        status: &str,
-        error_message: Option<&str>,
-    ) -> Result<(), AppError> {
-        sqlx::query(
-            r#"
-            UPDATE reference_tracks
-            SET status = $2, error_message = $3, updated_at = NOW()
-            WHERE id = $1
-            "#,
-        )
-        .bind(id)
-        .bind(status)
-        .bind(error_message)
-        .execute(pool)
-        .await
-        .map_err(|e| AppError::Database(e.to_string()))?;
-
-        Ok(())
     }
 }
 
@@ -317,12 +381,15 @@ pub struct TrackAnalysisRepo;
 impl TrackAnalysisRepo {
     /// Get analysis by ID
     pub async fn get_by_id(pool: &PgPool, id: Uuid) -> Result<Option<TrackAnalysis>, AppError> {
+        let ctx = QueryContext::new("SELECT", "track_analyses")
+            .with_entity(id);
+
         let analysis =
             sqlx::query_as::<_, TrackAnalysis>("SELECT * FROM track_analyses WHERE id = $1")
                 .bind(id)
                 .fetch_optional(pool)
                 .await
-                .map_err(|e| AppError::Database(e.to_string()))?;
+                .map_err(|e| db_error(&ctx, e))?;
 
         Ok(analysis)
     }
@@ -333,6 +400,9 @@ impl TrackAnalysisRepo {
         track_id: Uuid,
         analysis_type: &str,
     ) -> Result<TrackAnalysis, AppError> {
+        let ctx = QueryContext::new("INSERT", "track_analyses")
+            .with_entity(track_id);
+
         let analysis = sqlx::query_as::<_, TrackAnalysis>(
             r#"
             INSERT INTO track_analyses (track_id, analysis_type, status)
@@ -344,7 +414,7 @@ impl TrackAnalysisRepo {
         .bind(analysis_type)
         .fetch_one(pool)
         .await
-        .map_err(|e| AppError::Database(e.to_string()))?;
+        .map_err(|e| db_error(&ctx, e))?;
 
         Ok(analysis)
     }
@@ -355,6 +425,9 @@ impl TrackAnalysisRepo {
         track_id: Uuid,
         analysis_type: Option<&str>,
     ) -> Result<Option<TrackAnalysis>, AppError> {
+        let ctx = QueryContext::new("SELECT", "track_analyses")
+            .with_entity(track_id);
+
         let analysis = if let Some(atype) = analysis_type {
             sqlx::query_as::<_, TrackAnalysis>(
                 r#"
@@ -381,20 +454,23 @@ impl TrackAnalysisRepo {
             .fetch_optional(pool)
             .await
         }
-        .map_err(|e| AppError::Database(e.to_string()))?;
+        .map_err(|e| db_error(&ctx, e))?;
 
         Ok(analysis)
     }
 
     /// Update analysis status and results
+    /// Aligned with migration 0012_reference.sql
     pub async fn update_status(
         pool: &PgPool,
         id: Uuid,
         status: &str,
-        summary: Option<serde_json::Value>,
-        manifest: Option<serde_json::Value>,
+        results: Option<serde_json::Value>,
         error_message: Option<&str>,
     ) -> Result<(), AppError> {
+        let ctx = QueryContext::new("UPDATE", "track_analyses")
+            .with_entity(id);
+
         let completed_at = if status == "completed" {
             Some(chrono::Utc::now())
         } else {
@@ -405,40 +481,40 @@ impl TrackAnalysisRepo {
             r#"
             UPDATE track_analyses
             SET status = $2,
-                summary = COALESCE($3, summary),
-                manifest = COALESCE($4, manifest),
-                error_message = $5,
-                completed_at = COALESCE($6, completed_at),
-                updated_at = NOW()
+                results = COALESCE($3, results),
+                error_message = $4,
+                completed_at = COALESCE($5, completed_at)
             WHERE id = $1
             "#,
         )
         .bind(id)
         .bind(status)
-        .bind(summary)
-        .bind(manifest)
+        .bind(results)
         .bind(error_message)
         .bind(completed_at)
         .execute(pool)
         .await
-        .map_err(|e| AppError::Database(e.to_string()))?;
+        .map_err(|e| db_error(&ctx, e))?;
 
         Ok(())
     }
 
     /// Mark analysis as started
     pub async fn mark_started(pool: &PgPool, id: Uuid) -> Result<(), AppError> {
+        let ctx = QueryContext::new("UPDATE", "track_analyses")
+            .with_entity(id);
+
         sqlx::query(
             r#"
             UPDATE track_analyses
-            SET status = 'running', started_at = NOW(), updated_at = NOW()
+            SET status = 'running', started_at = NOW()
             WHERE id = $1
             "#,
         )
         .bind(id)
         .execute(pool)
         .await
-        .map_err(|e| AppError::Database(e.to_string()))?;
+        .map_err(|e| db_error(&ctx, e))?;
 
         Ok(())
     }
@@ -452,34 +528,40 @@ pub struct TrackAnnotationRepo;
 
 impl TrackAnnotationRepo {
     /// Create a new annotation
+    /// Aligned with migration 0012_reference.sql - uses seconds not ms
     pub async fn create(
         pool: &PgPool,
         track_id: Uuid,
         user_id: Uuid,
         input: CreateAnnotationInput,
     ) -> Result<TrackAnnotation, AppError> {
+        let ctx = QueryContext::new("INSERT", "track_annotations")
+            .with_user(user_id)
+            .with_entity(track_id);
+
         let annotation = sqlx::query_as::<_, TrackAnnotation>(
             r#"
             INSERT INTO track_annotations (
-                track_id, user_id, start_time_ms, end_time_ms,
-                title, content, category, color, is_private
+                track_id, user_id, start_time_seconds, end_time_seconds,
+                annotation_type, title, content, color, tags, is_private
             )
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             RETURNING *
             "#,
         )
         .bind(track_id)
         .bind(user_id)
-        .bind(input.start_time_ms)
-        .bind(input.end_time_ms)
+        .bind(input.start_time_seconds)
+        .bind(input.end_time_seconds)
+        .bind(&input.annotation_type)
         .bind(&input.title)
         .bind(&input.content)
-        .bind(input.category.unwrap_or_else(|| "general".to_string()))
-        .bind(input.color.unwrap_or_else(|| "#3b82f6".to_string()))
+        .bind(&input.color)
+        .bind(&input.tags)
         .bind(input.is_private.unwrap_or(true))
         .fetch_one(pool)
         .await
-        .map_err(|e| AppError::Database(e.to_string()))?;
+        .map_err(|e| db_error(&ctx, e))?;
 
         Ok(annotation)
     }
@@ -490,18 +572,22 @@ impl TrackAnnotationRepo {
         track_id: Uuid,
         user_id: Uuid,
     ) -> Result<Vec<TrackAnnotation>, AppError> {
+        let ctx = QueryContext::new("SELECT", "track_annotations")
+            .with_user(user_id)
+            .with_entity(track_id);
+
         let annotations = sqlx::query_as::<_, TrackAnnotation>(
             r#"
             SELECT * FROM track_annotations
             WHERE track_id = $1 AND (user_id = $2 OR is_private = false)
-            ORDER BY start_time_ms ASC
+            ORDER BY start_time_seconds ASC
             "#,
         )
         .bind(track_id)
         .bind(user_id)
         .fetch_all(pool)
         .await
-        .map_err(|e| AppError::Database(e.to_string()))?;
+        .map_err(|e| db_error(&ctx, e))?;
 
         Ok(annotations)
     }
@@ -512,6 +598,10 @@ impl TrackAnnotationRepo {
         id: Uuid,
         user_id: Uuid,
     ) -> Result<Option<TrackAnnotation>, AppError> {
+        let ctx = QueryContext::new("SELECT", "track_annotations")
+            .with_user(user_id)
+            .with_entity(id);
+
         let annotation = sqlx::query_as::<_, TrackAnnotation>(
             "SELECT * FROM track_annotations WHERE id = $1 AND user_id = $2",
         )
@@ -519,28 +609,34 @@ impl TrackAnnotationRepo {
         .bind(user_id)
         .fetch_optional(pool)
         .await
-        .map_err(|e| AppError::Database(e.to_string()))?;
+        .map_err(|e| db_error(&ctx, e))?;
 
         Ok(annotation)
     }
 
     /// Update an annotation
+    /// Aligned with migration 0012_reference.sql
     pub async fn update(
         pool: &PgPool,
         id: Uuid,
         user_id: Uuid,
         input: UpdateAnnotationInput,
     ) -> Result<Option<TrackAnnotation>, AppError> {
+        let ctx = QueryContext::new("UPDATE", "track_annotations")
+            .with_user(user_id)
+            .with_entity(id);
+
         let annotation = sqlx::query_as::<_, TrackAnnotation>(
             r#"
             UPDATE track_annotations SET
-                start_time_ms = COALESCE($3, start_time_ms),
-                end_time_ms = COALESCE($4, end_time_ms),
-                title = COALESCE($5, title),
-                content = COALESCE($6, content),
-                category = COALESCE($7, category),
+                start_time_seconds = COALESCE($3, start_time_seconds),
+                end_time_seconds = COALESCE($4, end_time_seconds),
+                annotation_type = COALESCE($5, annotation_type),
+                title = COALESCE($6, title),
+                content = COALESCE($7, content),
                 color = COALESCE($8, color),
-                is_private = COALESCE($9, is_private),
+                tags = COALESCE($9, tags),
+                is_private = COALESCE($10, is_private),
                 updated_at = NOW()
             WHERE id = $1 AND user_id = $2
             RETURNING *
@@ -548,28 +644,33 @@ impl TrackAnnotationRepo {
         )
         .bind(id)
         .bind(user_id)
-        .bind(input.start_time_ms)
-        .bind(input.end_time_ms)
+        .bind(input.start_time_seconds)
+        .bind(input.end_time_seconds)
+        .bind(&input.annotation_type)
         .bind(&input.title)
         .bind(&input.content)
-        .bind(&input.category)
         .bind(&input.color)
+        .bind(&input.tags)
         .bind(input.is_private)
         .fetch_optional(pool)
         .await
-        .map_err(|e| AppError::Database(e.to_string()))?;
+        .map_err(|e| db_error(&ctx, e))?;
 
         Ok(annotation)
     }
 
     /// Delete an annotation
     pub async fn delete(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<bool, AppError> {
+        let ctx = QueryContext::new("DELETE", "track_annotations")
+            .with_user(user_id)
+            .with_entity(id);
+
         let result = sqlx::query("DELETE FROM track_annotations WHERE id = $1 AND user_id = $2")
             .bind(id)
             .bind(user_id)
             .execute(pool)
             .await
-            .map_err(|e| AppError::Database(e.to_string()))?;
+            .map_err(|e| db_error(&ctx, e))?;
 
         Ok(result.rows_affected() > 0)
     }
@@ -583,17 +684,22 @@ pub struct TrackRegionRepo;
 
 impl TrackRegionRepo {
     /// Create a new region
+    /// Aligned with migration 0012_reference.sql - uses seconds not ms
     pub async fn create(
         pool: &PgPool,
         track_id: Uuid,
         user_id: Uuid,
         input: CreateRegionInput,
     ) -> Result<TrackRegion, AppError> {
+        let ctx = QueryContext::new("INSERT", "track_regions")
+            .with_user(user_id)
+            .with_entity(track_id);
+
         let region = sqlx::query_as::<_, TrackRegion>(
             r#"
             INSERT INTO track_regions (
-                track_id, user_id, start_time_ms, end_time_ms,
-                name, description, section_type, color, display_order
+                track_id, user_id, name, start_time_seconds, end_time_seconds,
+                color, region_type, notes, is_favorite
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             RETURNING *
@@ -601,16 +707,16 @@ impl TrackRegionRepo {
         )
         .bind(track_id)
         .bind(user_id)
-        .bind(input.start_time_ms)
-        .bind(input.end_time_ms)
         .bind(&input.name)
-        .bind(&input.description)
-        .bind(input.section_type.unwrap_or_else(|| "custom".to_string()))
-        .bind(input.color.unwrap_or_else(|| "#10b981".to_string()))
-        .bind(input.display_order.unwrap_or(0))
+        .bind(input.start_time_seconds)
+        .bind(input.end_time_seconds)
+        .bind(&input.color)
+        .bind(&input.region_type)
+        .bind(&input.notes)
+        .bind(input.is_favorite.unwrap_or(false))
         .fetch_one(pool)
         .await
-        .map_err(|e| AppError::Database(e.to_string()))?;
+        .map_err(|e| db_error(&ctx, e))?;
 
         Ok(region)
     }
@@ -621,18 +727,22 @@ impl TrackRegionRepo {
         track_id: Uuid,
         user_id: Uuid,
     ) -> Result<Vec<TrackRegion>, AppError> {
+        let ctx = QueryContext::new("SELECT", "track_regions")
+            .with_user(user_id)
+            .with_entity(track_id);
+
         let regions = sqlx::query_as::<_, TrackRegion>(
             r#"
             SELECT * FROM track_regions
             WHERE track_id = $1 AND user_id = $2
-            ORDER BY start_time_ms ASC, display_order ASC
+            ORDER BY start_time_seconds ASC
             "#,
         )
         .bind(track_id)
         .bind(user_id)
         .fetch_all(pool)
         .await
-        .map_err(|e| AppError::Database(e.to_string()))?;
+        .map_err(|e| db_error(&ctx, e))?;
 
         Ok(regions)
     }
@@ -643,6 +753,10 @@ impl TrackRegionRepo {
         id: Uuid,
         user_id: Uuid,
     ) -> Result<Option<TrackRegion>, AppError> {
+        let ctx = QueryContext::new("SELECT", "track_regions")
+            .with_user(user_id)
+            .with_entity(id);
+
         let region = sqlx::query_as::<_, TrackRegion>(
             "SELECT * FROM track_regions WHERE id = $1 AND user_id = $2",
         )
@@ -650,28 +764,34 @@ impl TrackRegionRepo {
         .bind(user_id)
         .fetch_optional(pool)
         .await
-        .map_err(|e| AppError::Database(e.to_string()))?;
+        .map_err(|e| db_error(&ctx, e))?;
 
         Ok(region)
     }
 
     /// Update a region
+    /// Aligned with migration 0012_reference.sql
     pub async fn update(
         pool: &PgPool,
         id: Uuid,
         user_id: Uuid,
         input: UpdateRegionInput,
     ) -> Result<Option<TrackRegion>, AppError> {
+        let ctx = QueryContext::new("UPDATE", "track_regions")
+            .with_user(user_id)
+            .with_entity(id);
+
         let region = sqlx::query_as::<_, TrackRegion>(
             r#"
             UPDATE track_regions SET
-                start_time_ms = COALESCE($3, start_time_ms),
-                end_time_ms = COALESCE($4, end_time_ms),
-                name = COALESCE($5, name),
-                description = COALESCE($6, description),
-                section_type = COALESCE($7, section_type),
-                color = COALESCE($8, color),
-                display_order = COALESCE($9, display_order),
+                name = COALESCE($3, name),
+                start_time_seconds = COALESCE($4, start_time_seconds),
+                end_time_seconds = COALESCE($5, end_time_seconds),
+                color = COALESCE($6, color),
+                region_type = COALESCE($7, region_type),
+                notes = COALESCE($8, notes),
+                loop_count = COALESCE($9, loop_count),
+                is_favorite = COALESCE($10, is_favorite),
                 updated_at = NOW()
             WHERE id = $1 AND user_id = $2
             RETURNING *
@@ -679,28 +799,33 @@ impl TrackRegionRepo {
         )
         .bind(id)
         .bind(user_id)
-        .bind(input.start_time_ms)
-        .bind(input.end_time_ms)
         .bind(&input.name)
-        .bind(&input.description)
-        .bind(&input.section_type)
+        .bind(input.start_time_seconds)
+        .bind(input.end_time_seconds)
         .bind(&input.color)
-        .bind(input.display_order)
+        .bind(&input.region_type)
+        .bind(&input.notes)
+        .bind(input.loop_count)
+        .bind(input.is_favorite)
         .fetch_optional(pool)
         .await
-        .map_err(|e| AppError::Database(e.to_string()))?;
+        .map_err(|e| db_error(&ctx, e))?;
 
         Ok(region)
     }
 
     /// Delete a region
     pub async fn delete(pool: &PgPool, id: Uuid, user_id: Uuid) -> Result<bool, AppError> {
+        let ctx = QueryContext::new("DELETE", "track_regions")
+            .with_user(user_id)
+            .with_entity(id);
+
         let result = sqlx::query("DELETE FROM track_regions WHERE id = $1 AND user_id = $2")
             .bind(id)
             .bind(user_id)
             .execute(pool)
             .await
-            .map_err(|e| AppError::Database(e.to_string()))?;
+            .map_err(|e| db_error(&ctx, e))?;
 
         Ok(result.rows_affected() > 0)
     }

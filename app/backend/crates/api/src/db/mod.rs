@@ -1,7 +1,14 @@
 //! Database module
 //!
 //! Contains models and repositories for database operations.
+//! 
+//! ## Architecture
+//! 
+//! - `core`: Centralized database utilities with observability
+//! - `*_models`: Database entity structs (FromRow)
+//! - `*_repos`: Repository pattern for CRUD operations
 
+pub mod core;  // Centralized DB utilities with observability
 pub mod admin_models;
 pub mod admin_repos;
 pub mod books_models;
@@ -38,3 +45,6 @@ pub mod references_repos;
 pub mod repos;
 pub mod template_models;
 pub mod template_repos;
+
+// Re-export core utilities for convenience
+pub use core::{QueryContext, db_error, execute_query, fetch_optional, fetch_all};

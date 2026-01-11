@@ -151,7 +151,6 @@ pub async fn extract_session(
 }
 
 /// Require authenticated user
-#[allow(dead_code)]
 pub async fn require_auth(req: Request, next: Next) -> Result<Response, AppError> {
     // Check if AuthContext is present in extensions
     if req.extensions().get::<AuthContext>().is_none() {

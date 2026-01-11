@@ -82,6 +82,7 @@ fn build_router(state: Arc<AppState>) -> Router {
         .nest(
             "/api",
             routes::api::router()
+                .layer(axum::middleware::from_fn(middleware::auth::require_auth))
                 .layer(axum::middleware::from_fn(middleware::csrf::csrf_check))
                 .layer(axum::middleware::from_fn_with_state(
                     state.clone(),
@@ -92,6 +93,7 @@ fn build_router(state: Arc<AppState>) -> Router {
         .nest(
             "/reference",
             routes::reference::router()
+                .layer(axum::middleware::from_fn(middleware::auth::require_auth))
                 .layer(axum::middleware::from_fn(middleware::csrf::csrf_check))
                 .layer(axum::middleware::from_fn_with_state(
                     state.clone(),
@@ -101,15 +103,18 @@ fn build_router(state: Arc<AppState>) -> Router {
         // Frames routes (requires auth, GET only so no CSRF needed)
         .nest(
             "/frames",
-            routes::frames::router().layer(axum::middleware::from_fn_with_state(
-                state.clone(),
-                middleware::auth::extract_session,
-            )),
+            routes::frames::router()
+                .layer(axum::middleware::from_fn(middleware::auth::require_auth))
+                .layer(axum::middleware::from_fn_with_state(
+                    state.clone(),
+                    middleware::auth::extract_session,
+                )),
         )
         // Blob storage routes (requires auth + CSRF)
         .nest(
             "/blobs",
             routes::blobs::router()
+                .layer(axum::middleware::from_fn(middleware::auth::require_auth))
                 .layer(axum::middleware::from_fn(middleware::csrf::csrf_check))
                 .layer(axum::middleware::from_fn_with_state(
                     state.clone(),
@@ -120,6 +125,7 @@ fn build_router(state: Arc<AppState>) -> Router {
         .nest(
             "/admin-access",
             routes::admin::claiming_router()
+                .layer(axum::middleware::from_fn(middleware::auth::require_auth))
                 .layer(axum::middleware::from_fn_with_state(
                     state.clone(),
                     middleware::auth::extract_session,
