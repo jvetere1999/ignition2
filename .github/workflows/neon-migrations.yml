@@ -3,12 +3,12 @@ name: Schema Validation & Migration to Neon
 on:
   pull_request:
     paths:
-      - 'tools/schema-generator/schema.json'
+      - 'tools/tmp-schema.json'
       - 'app/backend/migrations/**'
   push:
     branches: [main]
     paths:
-      - 'tools/schema-generator/schema.json'
+      - 'tools/tmp-schema.json'
       - 'app/backend/migrations/**'
 
 env:

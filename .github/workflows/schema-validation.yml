@@ -3,12 +3,12 @@ name: Schema Validation & Database Assertions
 on:
   pull_request:
     paths:
-      - 'tools/schema-generator/schema.json'
+      - 'tools/tmp-schema.json'
       - 'app/backend/migrations/**'
   push:
     branches: [main]
     paths:
-      - 'tools/schema-generator/schema.json'
+      - 'tools/tmp-schema.json'
       - 'app/backend/migrations/**'
 
 jobs:
@@ -40,13 +40,13 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Validate schema.json syntax
+      - name: Validate tmp-schema.json syntax
         run: |
           python3 -c "
           import json
-          with open('tools/schema-generator/schema.json', 'r') as f:
+          with open('tools/tmp-schema.json', 'r') as f:
               schema = json.load(f)
-          print(f'✓ schema.json is valid JSON')
+          print(f'✓ tmp-schema.json is valid JSON')
           print(f'✓ {len(schema[\"tables\"])} tables defined')
           "
 
@@ -54,7 +54,7 @@ jobs:
         run: |
           python3 -c "
           import json
-          with open('tools/schema-generator/schema.json', 'r') as f:
+          with open('tools/tmp-schema.json', 'r') as f:
               schema = json.load(f)
           version = schema.get('version', 'unknown')
           print(f'Schema version: {version}')
@@ -140,7 +140,7 @@ jobs:
           cursor = conn.cursor()
           
           # Load schema to find ON CONFLICT tables
-          with open('tools/schema-generator/schema.json') as f:
+          with open('tools/tmp-schema.json') as f:
               schema = json.load(f)
           
           test_cases = [
