@@ -620,7 +620,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",

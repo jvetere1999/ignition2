@@ -697,7 +697,7 @@ CREATE TABLE onboarding_steps (
 -- =============================================================================
 
 CREATE TABLE audit_log (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID,
     session_id UUID,
     event_type TEXT NOT NULL,

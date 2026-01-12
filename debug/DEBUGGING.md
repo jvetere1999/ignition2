@@ -1,103 +1,76 @@
-# DEBUGGING - Phase 6 Schema Sync Fix COMPLETE ✅
+# DEBUGGING - Active Issues
 
-**Status**: ✅ **PHASE 6: COMPLETE - READY FOR PRODUCTION**  
-**Last Update**: 2026-01-11 19:35 UTC  
-**Summary**: Schema sync alignment complete. Database migration added. All workflows corrected.
-**Next**: User commits and pushes to production
-
----
-
-## COMPLETED: Phase 6 - Schema Sync Fix
-
-See [PHASE_6_SCHEMA_SYNC_FIX.md](PHASE_6_SCHEMA_SYNC_FIX.md) for complete details.
-
-**All Changes**:
-- ✅ Migration created: `2025-01-11-add-theme-to-users.sql`
-- ✅ Schema alignment verified
-- ✅ Tool refactoring complete (tmp-schema.json naming convention)
-- ✅ Workflows corrected
-- ✅ All validations passing
+**Status**: 🔴 **NEW CRITICAL ISSUE DETECTED**  
+**Last Update**: 2026-01-12 02:44 UTC  
+**Current Priority**: P0 - OAuth flow broken
 
 ---
 
-## 🔴 PHASE 7: Production Runtime Errors
+## 🔴 PRIORITY P0: OAuth Callback - Audit Log Constraint Violation
 
 ### Phase 1: ISSUE (Discovery & Validation)
 
 **Error Report**:
-- User reported: "Errors upon loading into internal site after login - loading stuck, sync state failing"
-- Environment: Production (api.ecent.online, ignition.ecent.online)
-- Time: 2026-01-12 01:09 UTC (after P0-P5 deployment)
-- Deployment Status: Frontend & Admin deployed ✅, Backend deployed (TBD)
+- User action: Google OAuth login attempt
+- Error Code: `OAuthCallback`
+- Provider: Google
+- Time: 2026-01-12 02:44:24.713Z
+- Environment: Production (api.ecent.online)
 
-**Errors Captured**:
+**Error Message**:
 ```
-500 - /api/onboarding (Database error)
-500 - /api/sync/poll (Database error - recurring every 30s)
-500 - /api/today (Database error)
-404 - /api/focus/active (Not Found)
+Database error: error returned from database: null value in column "id" 
+of relation "audit_log" violates not-null constraint
 ```
 
-**Evidence**: Browser console logs show:
-- `[2026-01-12T01:09:16.657Z] API error: 500 Object { endpoint: "/api/onboarding", method: "GET", status: 500, type: "error"}`
-- `[2026-01-12T01:09:16.800Z] Database error Object { endpoint: "/api/sync/poll", method: "GET", status: 500, type: "error"}`
-- `[2026-01-12T01:09:17.189Z] Database error Object { endpoint: "/api/today", method: "GET", status: 500, type: "error"}`
-- `[2026-01-12T01:09:47.014Z] Database error - repeating every 30s poll cycle`
-
-**Severity**: 🔴 CRITICAL
-- App completely stuck after login
-- SyncState polling failing (blocks entire app state)
-- Multiple endpoints returning database errors
-- Prevents any user action
+**Severity**: 🔴 **CRITICAL**
+- OAuth login completely broken
+- Users cannot authenticate via Google
+- Blocks all new user signup/login flow
 
 ---
 
 ### Phase 2: DOCUMENT (Detailed Analysis)
 
-#### Error 1: 500 - `/api/onboarding` (Database Error)
+**Root Cause Analysis**: The `audit_log` table has:
+- Column `id` with NOT NULL constraint
+- No DEFAULT value defined
+- Insert code not providing an explicit id value
 
-**Location**: `app/backend/crates/api/src/routes/onboarding.rs` (line 66-72)
+**Schema Definition** (schema.json):
+```json
+"audit_log": {
+  "fields": {
+    "id": {
+      "type": "UUID",
+      "primary": true,
+      "nullable": false,
+      "default": "gen_random_uuid()"  // ← Should have default
+    }
+  }
+}
+```
 
-**Root Cause**: Calls `OnboardingRepo::get_full_state()` which likely queries user_settings (schema mismatch)
+**Migration Definition** (0001_schema.sql audit_log CREATE TABLE):
+- Need to verify if `DEFAULT gen_random_uuid()` is present
+- If missing, insert into audit_log will fail
 
-**Status**: 🔴 **WILL BE FIXED** when schema.json is regenerated and deployed
+**Affected Code Path**:
+- OAuth callback handler (likely in auth.rs)
+- Inserts record into audit_log
+- Fails because id is null
 
 ---
 
-#### Error 2: 500 - `/api/sync/poll` (Database Error - CRITICAL)
+### Phase 3: EXPLORER (Discovery Work)
 
-**Location**: `app/backend/crates/api/src/routes/sync.rs` (line 217-235)
+**Search needed**:
+- [ ] Verify audit_log table has DEFAULT gen_random_uuid() on id
+- [ ] Find OAuth callback code that inserts into audit_log
+- [ ] Check if id parameter is being passed or auto-generated
+- [ ] Look for other tables with this pattern (identity columns without defaults)
 
-**Root Cause**: `fetch_progress()` function queries `user_settings` table, expecting `theme` column that doesn't exist in old schema
-
-**Exact Error**:
-```
-error returned from database: column "theme" does not exist
-```
-
-**Query (sync.rs:222-235)**:
-```sql
-SELECT 
-    COALESCE(up.current_level, 1) as level,
-    COALESCE(up.total_xp, 0) as total_xp,
-    COALESCE(uw.coins, 0) as coins,
-    COALESCE(us.current_streak, 0) as streak_days
-FROM users u
-LEFT JOIN user_progress up ON u.id = up.user_id
-LEFT JOIN user_wallet uw ON u.id = uw.user_id
-LEFT JOIN user_streaks us ON u.id = us.user_id AND us.streak_type = 'daily'
-WHERE u.id = $1
-```
-
-**Status**: 🔴 **WILL BE FIXED** when schema.json is regenerated with correct `user_settings` columns
-
----
-
-#### Error 3: 500 - `/api/today` (Database Error)
-
-**Location**: `app/backend/crates/api/src/routes/today.rs`
-
-**Root Cause Analysis**:
+**Status**: 🔴 **BLOCKED - awaiting investigation**
 - ✅ Route exists and is registered in api.rs (line 69)
 - ✅ Handler is implemented
 - ❌ Database query in today.rs failing with 500
