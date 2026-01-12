@@ -101,19 +101,25 @@ export function getSignInUrl(provider: 'google' | 'azure', redirectPath?: string
 
 /**
  * Sign out - destroy session on backend
+ * 
+ * @param redirect - Whether to redirect to home page after sign out (default: true)
+ *                   Set to false when called from handle401() to avoid double redirect
  */
-export async function signOut(): Promise<void> {
+export async function signOut(redirect: boolean = true): Promise<void> {
   try {
     await fetch(`${API_BASE_URL}/auth/signout`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
     });
-  } catch {
-    // Ignore errors - redirect anyway
+    console.log('[Auth] Backend session destroyed');
+  } catch (error) {
+    console.error('[Auth] Error calling signout:', error);
+    // Continue anyway - we may still redirect
   }
-  // Redirect to home page
-  if (typeof window !== 'undefined') {
+  
+  // Only redirect if requested (e.g., user-initiated logout)
+  if (redirect && typeof window !== 'undefined') {
     window.location.href = '/';
   }
 }

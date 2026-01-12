@@ -54,9 +54,12 @@ export class ApiError extends Error {
 /**
  * Clear all client data on session expiry (401)
  * This function handles cleanup when backend session is invalid
+ * 
+ * CRITICAL: Cookie deletion must happen BEFORE any subsequent API calls
+ * to prevent sync operations from restoring stale session data.
  */
 async function clearAllClientData(): Promise<void> {
-  // Clear any localStorage data that might contain session info
+  // 1. FIRST: Clear localStorage (synchronous, immediate)
   if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
     try {
       const keysToRemove: string[] = [];
@@ -67,33 +70,42 @@ async function clearAllClientData(): Promise<void> {
         }
       }
       keysToRemove.forEach(key => localStorage.removeItem(key));
+      console.log('[API] Cleared localStorage session data');
     } catch (error) {
       console.error('[API] Error clearing localStorage:', error);
     }
   }
 
-  // Try to call signOut from API (this will clear server-side session)
+  // 2. SECOND: Call backend signOut to destroy server session
+  // This must complete before redirect to ensure cookies are deleted server-side
   if (typeof window !== 'undefined') {
     try {
       const { signOut: apiSignOut } = await import('@/lib/auth/api-auth');
-      await apiSignOut();
+      // Pass false to prevent double redirect (handle401 will redirect)
+      await apiSignOut(false);
+      console.log('[API] Backend session destroyed');
     } catch (error) {
       console.error('[API] Error calling API signOut:', error);
-      // Continue anyway - we'll redirect
+      // Continue anyway - we'll redirect to landing page
     }
   }
 }
 
 /**
  * Handle 401 Unauthorized response - session expired or invalid
+ * 
+ * Flow:
+ * 1. Clear all client data (localStorage + backend session)
+ * 2. Show user notification
+ * 3. Redirect to main landing page (NOT /login which doesn't exist)
  */
 async function handle401(): Promise<void> {
   console.warn('[API] 401 Unauthorized - Session expired, clearing client data');
 
-  // Clear all client-side session data
+  // STEP 1: Clear all session data FIRST (prevents sync from restoring)
   await clearAllClientData();
 
-  // Show error notification
+  // STEP 2: Show error notification
   if (typeof window !== 'undefined') {
     try {
       const { useErrorStore } = await import('@/lib/hooks/useErrorNotification');
@@ -102,7 +114,7 @@ async function handle401(): Promise<void> {
         id: `session-expired-${Date.now()}`,
         timestamp: new Date(),
         message: 'Your session has expired. Please log in again.',
-        endpoint: '/login',
+        endpoint: '/',
         method: 'REDIRECT',
         status: 401,
         type: 'error',
@@ -112,10 +124,11 @@ async function handle401(): Promise<void> {
       console.error('[API] Error showing notification:', error);
     }
 
-    // Redirect to login after brief delay to allow notification to display
-    setTimeout(() => {
-      window.location.href = '/login?session_expired=true';
-    }, 1000);
+    // STEP 3: Redirect to main landing page (clean slate)
+    // Note: No delay needed - clearAllClientData already completed
+    // Redirecting to '/' (not '/login') per user requirement
+    console.log('[API] Redirecting to main landing page');
+    window.location.href = '/';
   }
 }
 

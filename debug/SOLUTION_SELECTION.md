@@ -1,11 +1,58 @@
 # SOLUTION SELECTION - Updated Decision Status
 
 **Generated**: 2026-01-11  
-**Updated**: 2026-01-12 21:40 UTC  
-**Status**: 🟢 **P0 SCHEMA MISMATCH FIX IMPLEMENTED & VALIDATED**  
-**Current Gate**: Ready for user to push  
+**Updated**: 2026-01-12 21:45 UTC  
+**Status**: 🟠 **P0 COMPLETE, P1 DECISION PENDING**  
+**Current Gate**: P1 Auth Redirect Target (Option A or B)  
 **Purpose**: Document all decisions made and PENDING decisions  
-**Production Status**: Fixes ready to deploy
+**Production Status**: Schema fixes ready to deploy, auth redirect issue discovered
+
+---
+
+## 🟠 CURRENT DECISION: P1 Auth Redirect Target
+
+**Issue**: When session expires (401), code redirects to `/login` which doesn't exist, causing endless redirect loop.
+
+**Evidence**: 
+- User report: "clearing cookies locks you into endless cycle"
+- Code analysis: client.ts:117 redirects to non-existent `/login` page
+- Frontend structure: Main landing is `/`, signin is `/auth/signin`, no `/login`
+
+### Option A: Redirect to Main Landing Page `/` ⭐ RECOMMENDED
+```typescript
+// Change in client.ts:117
+window.location.href = '/';
+```
+
+**Rationale**:
+- Clean slate after session clear
+- User lands on public page, can see features
+- Can choose to sign in or browse
+- No redirect loop (/ is public route)
+- Natural user experience
+
+**Trade-offs**:
+- Loses context of original destination
+- User must manually click "Start Ignition" to sign in again
+- But notification still shows "session expired" message
+
+### Option B: Redirect to Signin Page `/auth/signin`
+```typescript
+// Change in client.ts:117
+window.location.href = '/auth/signin';
+```
+
+**Rationale**:
+- Direct path to re-authenticate
+- Clear what user needs to do next
+- Faster to regain access
+
+**Trade-offs**:
+- More aggressive (forces login choice)
+- Less friendly after clearing cookies
+- Doesn't let user just browse first
+
+**AWAITING USER DECISION**: Reply with "Option A" or "Option B"
 
 ---
 

@@ -1,10 +1,86 @@
 # DEBUGGING - Active Issues
 
-**Status**: 🔴 **PRODUCTION DEPLOYMENT FAILED - FIXES INCOMPLETE**  
-**Last Update**: 2026-01-12 03:36 UTC  
-**Current Priority**: P0 - All three original errors still occurring in production + NEW error
+**Status**: � **NEW PRIORITY ISSUES DISCOVERED**  
+**Last Update**: 2026-01-12 21:45 UTC  
+**Current Priority**: P1 - Auth redirect loop + incorrect redirect target
 
 ---
+
+## 🟠 P1: Auth Redirect Issues - Phase 3 EXPLORER COMPLETE
+
+### Issue 1: Clearing Cookies Causes Endless Redirect Loop
+**Location**: [app/frontend/src/lib/api/client.ts#L117](app/frontend/src/lib/api/client.ts#L117)  
+**Problem**: When 401 occurs, code redirects to `/login` which **doesn't exist**
+```typescript
+// Line 117 - WRONG
+window.location.href = '/login?session_expired=true';
+```
+**Impact**: User stuck in redirect loop, can't access any page
+
+### Issue 2: Should Redirect to Landing Page, Not Signin
+**Location**: [app/frontend/src/lib/api/client.ts#L117](app/frontend/src/lib/api/client.ts#L117)  
+**Problem**: After clearing cookies, should go to main landing page `/`, not auth page  
+**Expected**: Redirect to `/` (main landing) where user can see features and choose to sign in  
+**Actual**: Tries to redirect to non-existent `/login` page  
+
+### Root Cause Analysis (Phase 3 Complete)
+1. `handle401()` in client.ts redirects to `/login`
+2. Frontend routing structure:
+   - `/` = Main landing page (public)
+   - `/auth/signin` = Actual sign-in page
+   - `/login` = **DOES NOT EXIST**
+3. When session expires:
+   - Middleware catches protected route access
+   - Redirects to `/auth/signin?callbackUrl=/original-route`
+   - But `handle401()` tries `/login` first, causing 404 or loop
+
+### Evidence
+**Middleware (correct)**:
+- Lines 150-157: Unauthenticated users → `/auth/signin?callbackUrl=...`
+
+**Client.ts (incorrect)**:
+- Line 117: Hardcoded `/login` instead of `/` or `/auth/signin`
+
+### Status
+- **Phase 1: ISSUE** ✅ COMPLETE (from user report)
+- **Phase 2: DOCUMENT** ✅ COMPLETE (documented above)
+- **Phase 3: EXPLORER** ✅ COMPLETE (found root cause in client.ts:117)
+- **Phase 4: DECISION** ⏳ User input needed
+- **Phase 5: FIX** ⏹️ Blocked
+- **Phase 6: USER PUSHES** ⏹️ Blocked
+
+### Decision Required
+
+**What should happen when user clears cookies or session expires?**
+
+**Option A** (Recommended): Redirect to main landing page `/`
+- **Change**: `window.location.href = '/'` (no query params)
+- **Pros**: 
+  - Clean slate - user sees landing page
+  - Can choose to sign in or browse features
+  - No endless loop (/ is public)
+  - Natural user flow
+- **Cons**: 
+  - Loses context of where they were trying to go
+  - No "session expired" message visible (but notification shows it)
+- **Effort**: 5 min (1 line change)
+
+**Option B**: Redirect to signin with clear state
+- **Change**: `window.location.href = '/auth/signin'` (no callbackUrl)
+- **Pros**: 
+  - Direct path to re-authenticate
+  - User knows what to do next
+- **Cons**: 
+  - Less friendly (forces login)
+  - Doesn't give option to just browse
+  - Still has notification from handle401
+- **Effort**: 5 min (1 line change)
+
+**AWAITING USER DECISION** - Which option? (A or B)
+
+---
+
+## 🟢 P0: SCHEMA MISMATCH FIX - Phase 5 COMPLETE (PREVIOUS)
 
 ## 🔴 P0: PRODUCTION ERRORS - DISCOVERY COMPLETE, FIX INCOMPLETE
 
