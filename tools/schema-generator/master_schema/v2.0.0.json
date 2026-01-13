@@ -1,0 +1,7174 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Passion OS Complete Schema",
+  "description": "Generated from SCHEMA_SPEC_PART1.md and SCHEMA_SPEC_PART2.md",
+  "version": "2.0.0",
+  "generated_at": "2026-01-10",
+  "tables": {
+    "users": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "email": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": true,
+          "foreign_key": false
+        },
+        "email_verified": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "image": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "role": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "approved": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "age_verified": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "tos_accepted": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "tos_accepted_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "tos_version": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_admin": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "FALSE"
+        },
+        "last_activity_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "theme": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "'dark'"
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "Users",
+      "ts_type": "Users"
+    },
+    "accounts": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "provider": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "provider_account_id": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "refresh_token": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "access_token": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "expires_at": {
+          "type": "BIGINT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "token_type": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "scope": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "id_token": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "session_state": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "Accounts",
+      "ts_type": "Accounts"
+    },
+    "sessions": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "token": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": true,
+          "foreign_key": false
+        },
+        "expires_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "last_activity_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "user_agent": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "ip_address": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "rotated_from": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        }
+      },
+      "rust_type": "Sessions",
+      "ts_type": "Sessions"
+    },
+    "verification_tokens": {
+      "fields": {
+        "identifier": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "token": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": true,
+          "foreign_key": false
+        },
+        "expires": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "VerificationTokens",
+      "ts_type": "VerificationTokens"
+    },
+    "authenticators": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "credential_id": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": true,
+          "foreign_key": false
+        },
+        "provider_account_id": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "credential_public_key": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "counter": {
+          "type": "BIGINT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "credential_device_type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "credential_backed_up": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "transports": {
+          "type": "TEXT[]",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "Authenticators",
+      "ts_type": "Authenticators"
+    },
+    "oauth_states": {
+      "fields": {
+        "state_key": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": true,
+          "unique": true,
+          "foreign_key": false
+        },
+        "pkce_verifier": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "redirect_uri": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "expires_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        }
+      },
+      "rust_type": "OauthStates",
+      "ts_type": "OauthStates"
+    },
+    "roles": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": true,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "parent_role_id": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "Roles",
+      "ts_type": "Roles"
+    },
+    "entitlements": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": true,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "resource": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "action": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "Entitlements",
+      "ts_type": "Entitlements"
+    },
+    "role_entitlements": {
+      "fields": {
+        "role_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "entitlement_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "RoleEntitlements",
+      "ts_type": "RoleEntitlements"
+    },
+    "user_roles": {
+      "fields": {
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "role_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "granted_by": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "granted_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "expires_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        }
+      },
+      "rust_type": "UserRoles",
+      "ts_type": "UserRoles"
+    },
+    "audit_log": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "session_id": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "event_type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "resource_type": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "resource_id": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "action": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "status": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "details": {
+          "type": "JSONB",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "ip_address": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "user_agent": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "request_id": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "AuditLog",
+      "ts_type": "AuditLog"
+    },
+    "activity_events": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "event_type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "category": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "metadata": {
+          "type": "JSONB",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "xp_earned": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "coins_earned": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "ActivityEvents",
+      "ts_type": "ActivityEvents"
+    },
+    "skill_definitions": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "key": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": true,
+          "foreign_key": false
+        },
+        "name": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "category": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "icon": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "max_level": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "stars_per_level": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "sort_order": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "SkillDefinitions",
+      "ts_type": "SkillDefinitions"
+    },
+    "user_skills": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "skill_key": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "current_stars": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "current_level": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "UserSkills",
+      "ts_type": "UserSkills"
+    },
+    "achievement_definitions": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "key": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": true,
+          "foreign_key": false
+        },
+        "name": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "category": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "icon": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "trigger_type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "trigger_config": {
+          "type": "JSONB",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "reward_coins": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "reward_xp": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_hidden": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "sort_order": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "AchievementDefinitions",
+      "ts_type": "AchievementDefinitions"
+    },
+    "user_achievements": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "achievement_key": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "earned_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "notified": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        }
+      },
+      "rust_type": "UserAchievements",
+      "ts_type": "UserAchievements"
+    },
+    "user_progress": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "total_xp": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "current_level": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "xp_to_next_level": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "total_skill_stars": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "UserProgress",
+      "ts_type": "UserProgress"
+    },
+    "user_wallet": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "coins": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "total_earned": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "total_spent": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "UserWallet",
+      "ts_type": "UserWallet"
+    },
+    "points_ledger": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "event_type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "event_id": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "coins": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "xp": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "skill_stars": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "0"
+        },
+        "skill_key": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "reason": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "idempotency_key": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "PointsLedger",
+      "ts_type": "PointsLedger"
+    },
+    "user_streaks": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "streak_type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "current_streak": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "longest_streak": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "last_activity_date": {
+          "type": "DATE",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "UserStreaks",
+      "ts_type": "UserStreaks"
+    },
+    "focus_sessions": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "mode": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "duration_seconds": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "started_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "completed_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "abandoned_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "expires_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "status": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "xp_awarded": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "0"
+        },
+        "coins_awarded": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "0"
+        },
+        "task_id": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "task_title": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "paused_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "paused_remaining_seconds": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "FocusSessions",
+      "ts_type": "FocusSessions"
+    },
+    "focus_pause_state": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "session_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "mode": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_paused": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "time_remaining_seconds": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "paused_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "resumed_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "FocusPauseState",
+      "ts_type": "FocusPauseState"
+    },
+    "focus_libraries": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "name": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "library_type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "tracks_count": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_favorite": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "FocusLibraries",
+      "ts_type": "FocusLibraries"
+    },
+    "focus_library_tracks": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "library_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "track_id": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "track_title": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "track_url": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "duration_seconds": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "sort_order": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "added_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "FocusLibraryTracks",
+      "ts_type": "FocusLibraryTracks"
+    },
+    "habits": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "name": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "frequency": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "target_count": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "custom_days": {
+          "type": "INTEGER[]",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "icon": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "color": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_active": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "TRUE"
+        },
+        "current_streak": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "0"
+        },
+        "longest_streak": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "0"
+        },
+        "last_completed_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "sort_order": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "0"
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "Habits",
+      "ts_type": "Habits"
+    },
+    "habit_completions": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "habit_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "completed_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "completed_date": {
+          "type": "DATE",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "notes": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        }
+      },
+      "rust_type": "HabitCompletions",
+      "ts_type": "HabitCompletions"
+    },
+    "goals": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "title": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "category": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "target_date": {
+          "type": "DATE",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "started_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "completed_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "status": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "progress": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "priority": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "sort_order": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "Goals",
+      "ts_type": "Goals"
+    },
+    "goal_milestones": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "goal_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "title": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_completed": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "completed_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "sort_order": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        }
+      },
+      "rust_type": "GoalMilestones",
+      "ts_type": "GoalMilestones"
+    },
+    "universal_quests": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "title": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "xp_reward": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "coin_reward": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "target": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "target_type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "target_config": {
+          "type": "JSONB",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "skill_key": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_active": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_by": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "sort_order": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "UniversalQuests",
+      "ts_type": "UniversalQuests"
+    },
+    "user_quests": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "source_quest_id": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "title": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "category": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "difficulty": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "xp_reward": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "coin_reward": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "status": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "progress": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "0"
+        },
+        "target": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_active": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "true"
+        },
+        "is_repeatable": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "false"
+        },
+        "repeat_frequency": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "accepted_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "completed_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "claimed_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "expires_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "last_completed_date": {
+          "type": "DATE",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "streak_count": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "0"
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "UserQuests",
+      "ts_type": "UserQuests"
+    },
+    "user_quest_progress": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "quest_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "status": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "progress": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "accepted_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "completed_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "claimed_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "last_reset_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "times_completed": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "UserQuestProgress",
+      "ts_type": "UserQuestProgress"
+    },
+    "calendar_events": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "title": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "event_type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "start_time": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "end_time": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "all_day": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "timezone": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "location": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "workout_id": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "habit_id": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "goal_id": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "recurrence_rule": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "recurrence_end": {
+          "type": "DATE",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "parent_event_id": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "color": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "reminder_minutes": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "metadata": {
+          "type": "JSONB",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "CalendarEvents",
+      "ts_type": "CalendarEvents"
+    },
+    "daily_plans": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "date": {
+          "type": "DATE",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "items": {
+          "type": "JSONB",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "notes": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "DailyPlans",
+      "ts_type": "DailyPlans"
+    },
+    "plan_templates": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "name": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "items": {
+          "type": "JSONB",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_public": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "category": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "use_count": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "PlanTemplates",
+      "ts_type": "PlanTemplates"
+    },
+    "market_items": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "key": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": true,
+          "foreign_key": false
+        },
+        "name": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "category": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "cost_coins": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "rarity": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "icon": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "image_url": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_global": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_available": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_active": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_consumable": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "uses_per_purchase": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "total_stock": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "remaining_stock": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_by_user_id": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "sort_order": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "MarketItems",
+      "ts_type": "MarketItems"
+    },
+    "user_purchases": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "item_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "cost_coins": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "quantity": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "purchased_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "redeemed_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "uses_remaining": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "status": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "refunded_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "refund_reason": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        }
+      },
+      "rust_type": "UserPurchases",
+      "ts_type": "UserPurchases"
+    },
+    "market_transactions": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "transaction_type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "coins_amount": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "item_id": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "reason": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "MarketTransactions",
+      "ts_type": "MarketTransactions"
+    },
+    "user_rewards": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "reward_type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "source_id": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "coins_earned": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "xp_earned": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "claimed": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "claimed_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "expires_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "UserRewards",
+      "ts_type": "UserRewards"
+    },
+    "market_recommendations": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "item_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "score": {
+          "type": "REAL",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "reason": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "computed_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "MarketRecommendations",
+      "ts_type": "MarketRecommendations"
+    },
+    "books": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "title": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "author": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "total_pages": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "current_page": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "0"
+        },
+        "status": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "started_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "completed_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "rating": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "notes": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "cover_blob_id": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "Books",
+      "ts_type": "Books"
+    },
+    "reading_sessions": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "book_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "pages_read": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "start_page": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "end_page": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "duration_minutes": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "started_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "notes": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "xp_awarded": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "coins_awarded": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        }
+      },
+      "rust_type": "ReadingSessions",
+      "ts_type": "ReadingSessions"
+    },
+    "exercises": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "category": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "muscle_groups": {
+          "type": "TEXT[]",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "equipment": {
+          "type": "TEXT[]",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "instructions": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "video_url": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_custom": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_builtin": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "Exercises",
+      "ts_type": "Exercises"
+    },
+    "workouts": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "name": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "estimated_duration": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "difficulty": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "category": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_template": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "false"
+        },
+        "is_public": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "false"
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "Workouts",
+      "ts_type": "Workouts"
+    },
+    "workout_sections": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "workout_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "name": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "section_type": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "sort_order": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        }
+      },
+      "rust_type": "WorkoutSections",
+      "ts_type": "WorkoutSections"
+    },
+    "workout_exercises": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "workout_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "section_id": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "exercise_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "sets": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "reps": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "weight": {
+          "type": "REAL",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "duration": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "rest_seconds": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "notes": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "sort_order": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        }
+      },
+      "rust_type": "WorkoutExercises",
+      "ts_type": "WorkoutExercises"
+    },
+    "workout_sessions": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "workout_id": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "started_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "completed_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "duration_seconds": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "notes": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "rating": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "xp_awarded": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "coins_awarded": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        }
+      },
+      "rust_type": "WorkoutSessions",
+      "ts_type": "WorkoutSessions"
+    },
+    "exercise_sets": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "session_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "exercise_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "set_number": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "reps": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "weight": {
+          "type": "REAL",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "duration": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_warmup": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_dropset": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "rpe": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "notes": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "completed_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "ExerciseSets",
+      "ts_type": "ExerciseSets"
+    },
+    "personal_records": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "exercise_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "record_type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "value": {
+          "type": "REAL",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "reps": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "achieved_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "exercise_set_id": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "previous_value": {
+          "type": "REAL",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "PersonalRecords",
+      "ts_type": "PersonalRecords"
+    },
+    "training_programs": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "name": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "duration_weeks": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "goal": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "difficulty": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_active": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "current_week": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "started_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "completed_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "TrainingPrograms",
+      "ts_type": "TrainingPrograms"
+    },
+    "program_weeks": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "program_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "week_number": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "name": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_deload": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "notes": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        }
+      },
+      "rust_type": "ProgramWeeks",
+      "ts_type": "ProgramWeeks"
+    },
+    "program_workouts": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "program_week_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "workout_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "day_of_week": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "order_index": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "intensity_modifier": {
+          "type": "REAL",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        }
+      },
+      "rust_type": "ProgramWorkouts",
+      "ts_type": "ProgramWorkouts"
+    },
+    "learn_topics": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "key": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": true,
+          "foreign_key": false
+        },
+        "name": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "category": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "icon": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "color": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "sort_order": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_active": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "LearnTopics",
+      "ts_type": "LearnTopics"
+    },
+    "learn_lessons": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "topic_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "key": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": true,
+          "foreign_key": false
+        },
+        "title": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "content_markdown": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "duration_minutes": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "difficulty": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "quiz_json": {
+          "type": "JSONB",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "xp_reward": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "coin_reward": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "skill_key": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "skill_star_reward": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "audio_r2_key": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "video_url": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "sort_order": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_active": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "LearnLessons",
+      "ts_type": "LearnLessons"
+    },
+    "learn_drills": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "topic_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "key": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": true,
+          "foreign_key": false
+        },
+        "title": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "drill_type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "config_json": {
+          "type": "JSONB",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "difficulty": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "duration_seconds": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "xp_reward": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "sort_order": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_active": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "LearnDrills",
+      "ts_type": "LearnDrills"
+    },
+    "user_lesson_progress": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "lesson_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "status": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "started_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "completed_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "quiz_score": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "attempts": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        }
+      },
+      "rust_type": "UserLessonProgress",
+      "ts_type": "UserLessonProgress"
+    },
+    "user_drill_stats": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "drill_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "total_attempts": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "correct_answers": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "best_score": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "average_score": {
+          "type": "REAL",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "current_streak": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "best_streak": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "last_attempt_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "total_time_seconds": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        }
+      },
+      "rust_type": "UserDrillStats",
+      "ts_type": "UserDrillStats"
+    },
+    "reference_tracks": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "name": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "r2_key": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "file_size_bytes": {
+          "type": "BIGINT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "mime_type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "duration_seconds": {
+          "type": "REAL",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "artist": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "album": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "genre": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "bpm": {
+          "type": "REAL",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "key_signature": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "tags": {
+          "type": "TEXT[]",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "status": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "error_message": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "ReferenceTracks",
+      "ts_type": "ReferenceTracks"
+    },
+    "track_analyses": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "track_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "analysis_type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "version": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "status": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "started_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "completed_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "error_message": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "summary": {
+          "type": "JSONB",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "manifest": {
+          "type": "JSONB",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "TrackAnalyses",
+      "ts_type": "TrackAnalyses"
+    },
+    "track_annotations": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "track_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "start_time_ms": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "end_time_ms": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "title": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "content": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "category": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "color": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_private": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "TrackAnnotations",
+      "ts_type": "TrackAnnotations"
+    },
+    "track_regions": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "track_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "start_time_ms": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "end_time_ms": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "name": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "section_type": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "color": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "display_order": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "TrackRegions",
+      "ts_type": "TrackRegions"
+    },
+    "analysis_frame_manifests": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "analysis_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "manifest_version": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "hop_ms": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "frame_count": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "duration_ms": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "sample_rate": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "bands": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "bytes_per_frame": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "frame_layout": {
+          "type": "JSONB",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "events": {
+          "type": "JSONB",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "fingerprint": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "analyzer_version": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "chunk_size_frames": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "total_chunks": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "AnalysisFrameManifests",
+      "ts_type": "AnalysisFrameManifests"
+    },
+    "analysis_frame_data": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "manifest_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "chunk_index": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "start_frame": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "end_frame": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "start_time_ms": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "end_time_ms": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "frame_data": {
+          "type": "BYTEA",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "frame_count": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "compressed": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "compression_type": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "AnalysisFrameData",
+      "ts_type": "AnalysisFrameData"
+    },
+    "analysis_events": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "analysis_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "time_ms": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "duration_ms": {
+          "type": "INTEGER",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "event_type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "event_data": {
+          "type": "JSONB",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "confidence": {
+          "type": "REAL",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "AnalysisEvents",
+      "ts_type": "AnalysisEvents"
+    },
+    "listening_prompt_templates": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "category": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "difficulty": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "prompt_text": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "hints": {
+          "type": "JSONB",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "expected_observations": {
+          "type": "JSONB",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "tags": {
+          "type": "TEXT[]",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "display_order": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_active": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_by": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "ListeningPromptTemplates",
+      "ts_type": "ListeningPromptTemplates"
+    },
+    "listening_prompt_presets": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "template_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "preset_type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "config": {
+          "type": "JSONB",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_active": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_by": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "ListeningPromptPresets",
+      "ts_type": "ListeningPromptPresets"
+    },
+    "feedback": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "feedback_type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "title": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "status": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "priority": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "admin_response": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "resolved_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "metadata": {
+          "type": "JSONB",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "Feedback",
+      "ts_type": "Feedback"
+    },
+    "ideas": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "title": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "content": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "category": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "tags": {
+          "type": "TEXT[]",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_pinned": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "Ideas",
+      "ts_type": "Ideas"
+    },
+    "infobase_entries": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "title": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "content": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "category": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "tags": {
+          "type": "TEXT[]",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_pinned": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "InfobaseEntries",
+      "ts_type": "InfobaseEntries"
+    },
+    "onboarding_flows": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": true,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_active": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "total_steps": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "OnboardingFlows",
+      "ts_type": "OnboardingFlows"
+    },
+    "onboarding_steps": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "flow_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "step_order": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "step_type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "title": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "target_selector": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "target_route": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "fallback_content": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "options": {
+          "type": "JSONB",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "allows_multiple": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "required": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "action_type": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "action_config": {
+          "type": "JSONB",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "OnboardingSteps",
+      "ts_type": "OnboardingSteps"
+    },
+    "user_onboarding_state": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "flow_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "current_step_id": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "status": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "can_resume": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "started_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "completed_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "skipped_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "UserOnboardingState",
+      "ts_type": "UserOnboardingState"
+    },
+    "user_onboarding_responses": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "step_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "response": {
+          "type": "JSONB",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "UserOnboardingResponses",
+      "ts_type": "UserOnboardingResponses"
+    },
+    "user_interests": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "interest_key": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "interest_label": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "UserInterests",
+      "ts_type": "UserInterests"
+    },
+    "user_settings": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": true,
+          "foreign_key": true
+        },
+        "notifications_enabled": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "email_notifications": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "push_notifications": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "theme": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "'light'"
+        },
+        "timezone": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "locale": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "'en-US'"
+        },
+        "profile_public": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "show_activity": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "daily_reminder_time": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "soft_landing_until": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "UserSettings",
+      "ts_type": "UserSettings"
+    },
+    "inbox_items": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "title": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "item_type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "tags": {
+          "type": "TEXT[]",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_processed": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "processed_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "InboxItems",
+      "ts_type": "InboxItems"
+    },
+    "user_references": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "title": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "content": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "url": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "category": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "tags": {
+          "type": "TEXT[]",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_pinned": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "is_archived": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "UserReferences",
+      "ts_type": "UserReferences"
+    },
+    "feature_flags": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "flag_name": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": true,
+          "foreign_key": false
+        },
+        "enabled": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "metadata": {
+          "type": "JSONB",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "FeatureFlags",
+      "ts_type": "FeatureFlags"
+    }
+  },
+  "type_mappings": {
+    "UUID": {
+      "postgres": "UUID",
+      "rust": "Uuid",
+      "typescript": "string"
+    },
+    "TEXT": {
+      "postgres": "TEXT",
+      "rust": "String",
+      "typescript": "string"
+    },
+    "INTEGER": {
+      "postgres": "INTEGER",
+      "rust": "i32",
+      "typescript": "number"
+    },
+    "BIGINT": {
+      "postgres": "BIGINT",
+      "rust": "i64",
+      "typescript": "number"
+    },
+    "REAL": {
+      "postgres": "REAL",
+      "rust": "f32",
+      "typescript": "number"
+    },
+    "BOOLEAN": {
+      "postgres": "BOOLEAN",
+      "rust": "bool",
+      "typescript": "boolean"
+    },
+    "TIMESTAMPTZ": {
+      "postgres": "TIMESTAMPTZ",
+      "rust": "chrono::DateTime<chrono::Utc>",
+      "typescript": "string"
+    },
+    "DATE": {
+      "postgres": "DATE",
+      "rust": "chrono::NaiveDate",
+      "typescript": "string"
+    },
+    "JSONB": {
+      "postgres": "JSONB",
+      "rust": "serde_json::Value",
+      "typescript": "Record<string, unknown>"
+    },
+    "TEXT[]": {
+      "postgres": "TEXT[]",
+      "rust": "Vec<String>",
+      "typescript": "string[]"
+    },
+    "INTEGER[]": {
+      "postgres": "INTEGER[]",
+      "rust": "Vec<i32>",
+      "typescript": "number[]"
+    },
+    "BYTEA": {
+      "postgres": "BYTEA",
+      "rust": "Vec<u8>",
+      "typescript": "Uint8Array"
+    }
+  },
+  "seeds": {
+    "skill_definitions": {
+      "unique_key": "key",
+      "records": [
+        {
+          "key": "focus",
+          "name": "Focus",
+          "description": "Your ability to concentrate and complete deep work sessions",
+          "category": "mental",
+          "icon": "brain",
+          "max_level": 100,
+          "stars_per_level": 10,
+          "sort_order": 1
+        },
+        {
+          "key": "discipline",
+          "name": "Discipline",
+          "description": "Consistency in maintaining habits and routines",
+          "category": "mental",
+          "icon": "target",
+          "max_level": 100,
+          "stars_per_level": 10,
+          "sort_order": 2
+        },
+        {
+          "key": "strength",
+          "name": "Strength",
+          "description": "Physical power and resistance training progress",
+          "category": "physical",
+          "icon": "dumbbell",
+          "max_level": 100,
+          "stars_per_level": 10,
+          "sort_order": 3
+        },
+        {
+          "key": "endurance",
+          "name": "Endurance",
+          "description": "Cardiovascular fitness and stamina",
+          "category": "physical",
+          "icon": "heart",
+          "max_level": 100,
+          "stars_per_level": 10,
+          "sort_order": 4
+        },
+        {
+          "key": "creativity",
+          "name": "Creativity",
+          "description": "Artistic expression and creative problem solving",
+          "category": "creative",
+          "icon": "palette",
+          "max_level": 100,
+          "stars_per_level": 10,
+          "sort_order": 5
+        },
+        {
+          "key": "knowledge",
+          "name": "Knowledge",
+          "description": "Learning and intellectual growth",
+          "category": "mental",
+          "icon": "book",
+          "max_level": 100,
+          "stars_per_level": 10,
+          "sort_order": 6
+        }
+      ]
+    },
+    "achievement_definitions": {
+      "unique_key": "key",
+      "records": [
+        {
+          "key": "first_focus",
+          "name": "First Focus",
+          "description": "Complete your first focus session",
+          "category": "focus",
+          "icon": "zap",
+          "trigger_type": "event",
+          "trigger_config": {
+            "event": "focus_complete",
+            "count": 1
+          },
+          "reward_coins": 10,
+          "reward_xp": 25,
+          "is_hidden": false,
+          "sort_order": 1
+        },
+        {
+          "key": "focus_10",
+          "name": "Focus Beginner",
+          "description": "Complete 10 focus sessions",
+          "category": "focus",
+          "icon": "zap",
+          "trigger_type": "threshold",
+          "trigger_config": {
+            "event": "focus_complete",
+            "count": 10
+          },
+          "reward_coins": 25,
+          "reward_xp": 100,
+          "is_hidden": false,
+          "sort_order": 2
+        },
+        {
+          "key": "focus_100",
+          "name": "Focus Master",
+          "description": "Complete 100 focus sessions",
+          "category": "focus",
+          "icon": "crown",
+          "trigger_type": "threshold",
+          "trigger_config": {
+            "event": "focus_complete",
+            "count": 100
+          },
+          "reward_coins": 100,
+          "reward_xp": 500,
+          "is_hidden": false,
+          "sort_order": 3
+        },
+        {
+          "key": "deep_work",
+          "name": "Deep Worker",
+          "description": "Complete a 60+ minute focus session",
+          "category": "focus",
+          "icon": "clock",
+          "trigger_type": "event",
+          "trigger_config": {
+            "event": "focus_complete",
+            "min_duration": 3600
+          },
+          "reward_coins": 50,
+          "reward_xp": 100,
+          "is_hidden": false,
+          "sort_order": 4
+        },
+        {
+          "key": "streak_3",
+          "name": "Getting Started",
+          "description": "Maintain a 3-day streak",
+          "category": "streak",
+          "icon": "flame",
+          "trigger_type": "threshold",
+          "trigger_config": {
+            "streak_type": "daily",
+            "count": 3
+          },
+          "reward_coins": 15,
+          "reward_xp": 50,
+          "is_hidden": false,
+          "sort_order": 10
+        },
+        {
+          "key": "streak_7",
+          "name": "Week Warrior",
+          "description": "Maintain a 7-day streak",
+          "category": "streak",
+          "icon": "flame",
+          "trigger_type": "threshold",
+          "trigger_config": {
+            "streak_type": "daily",
+            "count": 7
+          },
+          "reward_coins": 35,
+          "reward_xp": 150,
+          "is_hidden": false,
+          "sort_order": 11
+        },
+        {
+          "key": "streak_30",
+          "name": "Monthly Master",
+          "description": "Maintain a 30-day streak",
+          "category": "streak",
+          "icon": "fire",
+          "trigger_type": "threshold",
+          "trigger_config": {
+            "streak_type": "daily",
+            "count": 30
+          },
+          "reward_coins": 150,
+          "reward_xp": 500,
+          "is_hidden": false,
+          "sort_order": 12
+        },
+        {
+          "key": "streak_100",
+          "name": "Legendary Streak",
+          "description": "Maintain a 100-day streak",
+          "category": "streak",
+          "icon": "trophy",
+          "trigger_type": "threshold",
+          "trigger_config": {
+            "streak_type": "daily",
+            "count": 100
+          },
+          "reward_coins": 500,
+          "reward_xp": 2000,
+          "is_hidden": true,
+          "sort_order": 13
+        },
+        {
+          "key": "first_habit",
+          "name": "Habit Formed",
+          "description": "Complete a habit for the first time",
+          "category": "habit",
+          "icon": "check",
+          "trigger_type": "event",
+          "trigger_config": {
+            "event": "habit_complete",
+            "count": 1
+          },
+          "reward_coins": 10,
+          "reward_xp": 25,
+          "is_hidden": false,
+          "sort_order": 20
+        },
+        {
+          "key": "habit_streak_7",
+          "name": "Habit Builder",
+          "description": "Complete a habit 7 days in a row",
+          "category": "habit",
+          "icon": "repeat",
+          "trigger_type": "threshold",
+          "trigger_config": {
+            "event": "habit_streak",
+            "count": 7
+          },
+          "reward_coins": 50,
+          "reward_xp": 150,
+          "is_hidden": false,
+          "sort_order": 21
+        },
+        {
+          "key": "first_book",
+          "name": "Bookworm",
+          "description": "Finish your first book",
+          "category": "reading",
+          "icon": "book",
+          "trigger_type": "event",
+          "trigger_config": {
+            "event": "book_complete",
+            "count": 1
+          },
+          "reward_coins": 50,
+          "reward_xp": 200,
+          "is_hidden": false,
+          "sort_order": 30
+        },
+        {
+          "key": "books_10",
+          "name": "Library Builder",
+          "description": "Finish 10 books",
+          "category": "reading",
+          "icon": "library",
+          "trigger_type": "threshold",
+          "trigger_config": {
+            "event": "book_complete",
+            "count": 10
+          },
+          "reward_coins": 200,
+          "reward_xp": 1000,
+          "is_hidden": false,
+          "sort_order": 31
+        },
+        {
+          "key": "first_workout",
+          "name": "Gym Rat",
+          "description": "Complete your first workout",
+          "category": "fitness",
+          "icon": "dumbbell",
+          "trigger_type": "event",
+          "trigger_config": {
+            "event": "workout_complete",
+            "count": 1
+          },
+          "reward_coins": 25,
+          "reward_xp": 50,
+          "is_hidden": false,
+          "sort_order": 40
+        },
+        {
+          "key": "first_pr",
+          "name": "Personal Best",
+          "description": "Set your first personal record",
+          "category": "fitness",
+          "icon": "medal",
+          "trigger_type": "event",
+          "trigger_config": {
+            "event": "personal_record",
+            "count": 1
+          },
+          "reward_coins": 50,
+          "reward_xp": 100,
+          "is_hidden": false,
+          "sort_order": 41
+        },
+        {
+          "key": "first_lesson",
+          "name": "Student",
+          "description": "Complete your first lesson",
+          "category": "learning",
+          "icon": "graduation",
+          "trigger_type": "event",
+          "trigger_config": {
+            "event": "lesson_complete",
+            "count": 1
+          },
+          "reward_coins": 15,
+          "reward_xp": 50,
+          "is_hidden": false,
+          "sort_order": 50
+        }
+      ]
+    },
+    "roles": {
+      "unique_key": "name",
+      "records": [
+        {
+          "name": "user",
+          "description": "Standard user with basic access",
+          "parent_role_id": null
+        },
+        {
+          "name": "premium",
+          "description": "Premium user with additional features",
+          "parent_role_id": null
+        },
+        {
+          "name": "moderator",
+          "description": "Community moderator",
+          "parent_role_id": null
+        },
+        {
+          "name": "admin",
+          "description": "Full administrative access",
+          "parent_role_id": null
+        },
+        {
+          "name": "super_admin",
+          "description": "Super administrator with all permissions",
+          "parent_role_id": null
+        }
+      ]
+    },
+    "entitlements": {
+      "unique_key": "name",
+      "records": [
+        {
+          "name": "users:read",
+          "description": "View user profiles",
+          "resource": "users",
+          "action": "read"
+        },
+        {
+          "name": "users:update",
+          "description": "Update user profiles",
+          "resource": "users",
+          "action": "update"
+        },
+        {
+          "name": "users:delete",
+          "description": "Delete users",
+          "resource": "users",
+          "action": "delete"
+        },
+        {
+          "name": "users:manage",
+          "description": "Full user management",
+          "resource": "users",
+          "action": "manage"
+        },
+        {
+          "name": "content:create",
+          "description": "Create content",
+          "resource": "content",
+          "action": "create"
+        },
+        {
+          "name": "content:update",
+          "description": "Update content",
+          "resource": "content",
+          "action": "update"
+        },
+        {
+          "name": "content:delete",
+          "description": "Delete content",
+          "resource": "content",
+          "action": "delete"
+        },
+        {
+          "name": "content:moderate",
+          "description": "Moderate user content",
+          "resource": "content",
+          "action": "moderate"
+        },
+        {
+          "name": "market:manage",
+          "description": "Manage shop items",
+          "resource": "market",
+          "action": "manage"
+        },
+        {
+          "name": "market:create_items",
+          "description": "Create new shop items",
+          "resource": "market",
+          "action": "create"
+        },
+        {
+          "name": "system:admin",
+          "description": "System administration",
+          "resource": "system",
+          "action": "admin"
+        },
+        {
+          "name": "system:config",
+          "description": "Modify system configuration",
+          "resource": "system",
+          "action": "config"
+        },
+        {
+          "name": "analytics:view",
+          "description": "View analytics dashboards",
+          "resource": "analytics",
+          "action": "read"
+        }
+      ]
+    },
+    "feature_flags": {
+      "unique_key": "flag_name",
+      "records": [
+        {
+          "flag_name": "social_features",
+          "enabled": false,
+          "description": "Enable social/community features",
+          "metadata": {
+            "rollout_percentage": 0
+          }
+        },
+        {
+          "flag_name": "ai_coach",
+          "enabled": false,
+          "description": "Enable AI coaching features",
+          "metadata": {
+            "model": "gpt-4"
+          }
+        },
+        {
+          "flag_name": "premium_content",
+          "enabled": true,
+          "description": "Enable premium content access",
+          "metadata": null
+        },
+        {
+          "flag_name": "beta_fitness",
+          "enabled": false,
+          "description": "Beta fitness tracking features",
+          "metadata": {
+            "min_version": "2.0.0"
+          }
+        },
+        {
+          "flag_name": "music_analysis",
+          "enabled": true,
+          "description": "Enable music analysis features",
+          "metadata": null
+        }
+      ]
+    },
+    "universal_quests": {
+      "unique_key": null,
+      "records": [
+        {
+          "title": "Daily Focus",
+          "description": "Complete 25 minutes of focused work",
+          "type": "daily",
+          "xp_reward": 50,
+          "coin_reward": 10,
+          "target": 25,
+          "target_type": "focus_minutes",
+          "target_config": null,
+          "skill_key": "focus",
+          "is_active": true,
+          "sort_order": 1
+        },
+        {
+          "title": "Habit Check",
+          "description": "Complete at least one habit today",
+          "type": "daily",
+          "xp_reward": 25,
+          "coin_reward": 5,
+          "target": 1,
+          "target_type": "habits_completed",
+          "target_config": null,
+          "skill_key": "discipline",
+          "is_active": true,
+          "sort_order": 2
+        },
+        {
+          "title": "Active Minutes",
+          "description": "Log 15 minutes of exercise",
+          "type": "daily",
+          "xp_reward": 40,
+          "coin_reward": 8,
+          "target": 15,
+          "target_type": "exercise_minutes",
+          "target_config": null,
+          "skill_key": "endurance",
+          "is_active": true,
+          "sort_order": 3
+        },
+        {
+          "title": "Focus Champion",
+          "description": "Complete 3 hours of focused work this week",
+          "type": "weekly",
+          "xp_reward": 200,
+          "coin_reward": 50,
+          "target": 180,
+          "target_type": "focus_minutes",
+          "target_config": null,
+          "skill_key": "focus",
+          "is_active": true,
+          "sort_order": 10
+        },
+        {
+          "title": "Habit Warrior",
+          "description": "Complete all habits for 5 days",
+          "type": "weekly",
+          "xp_reward": 150,
+          "coin_reward": 35,
+          "target": 5,
+          "target_type": "perfect_habit_days",
+          "target_config": null,
+          "skill_key": "discipline",
+          "is_active": true,
+          "sort_order": 11
+        },
+        {
+          "title": "Workout Week",
+          "description": "Complete 3 workouts this week",
+          "type": "weekly",
+          "xp_reward": 175,
+          "coin_reward": 40,
+          "target": 3,
+          "target_type": "workouts_completed",
+          "target_config": null,
+          "skill_key": "strength",
+          "is_active": true,
+          "sort_order": 12
+        },
+        {
+          "title": "Bookworm",
+          "description": "Read for 60 minutes this week",
+          "type": "weekly",
+          "xp_reward": 100,
+          "coin_reward": 25,
+          "target": 60,
+          "target_type": "reading_minutes",
+          "target_config": null,
+          "skill_key": "knowledge",
+          "is_active": true,
+          "sort_order": 13
+        },
+        {
+          "title": "Marathon Focus",
+          "description": "Complete 20 hours of focused work this month",
+          "type": "monthly",
+          "xp_reward": 500,
+          "coin_reward": 150,
+          "target": 1200,
+          "target_type": "focus_minutes",
+          "target_config": null,
+          "skill_key": "focus",
+          "is_active": true,
+          "sort_order": 20
+        },
+        {
+          "title": "Perfect Month",
+          "description": "Maintain a 30-day streak",
+          "type": "monthly",
+          "xp_reward": 750,
+          "coin_reward": 200,
+          "target": 30,
+          "target_type": "streak_days",
+          "target_config": null,
+          "skill_key": "discipline",
+          "is_active": true,
+          "sort_order": 21
+        }
+      ]
+    },
+    "learn_topics": {
+      "unique_key": "key",
+      "records": [
+        {
+          "key": "productivity",
+          "name": "Productivity",
+          "description": "Master time management and deep work techniques",
+          "category": "theory",
+          "icon": "clock",
+          "color": "#3B82F6",
+          "sort_order": 1,
+          "is_active": true
+        },
+        {
+          "key": "habits",
+          "name": "Habit Science",
+          "description": "Understand the science of habit formation",
+          "category": "theory",
+          "icon": "repeat",
+          "color": "#10B981",
+          "sort_order": 2,
+          "is_active": true
+        },
+        {
+          "key": "fitness_basics",
+          "name": "Fitness Fundamentals",
+          "description": "Learn proper form and training principles",
+          "category": "practice",
+          "icon": "dumbbell",
+          "color": "#EF4444",
+          "sort_order": 3,
+          "is_active": true
+        },
+        {
+          "key": "mindfulness",
+          "name": "Mindfulness",
+          "description": "Develop focus and mental clarity",
+          "category": "practice",
+          "icon": "brain",
+          "color": "#8B5CF6",
+          "sort_order": 4,
+          "is_active": true
+        },
+        {
+          "key": "music_theory",
+          "name": "Music Theory",
+          "description": "Understand the building blocks of music",
+          "category": "theory",
+          "icon": "music",
+          "color": "#F59E0B",
+          "sort_order": 5,
+          "is_active": true
+        }
+      ]
+    },
+    "onboarding_flows": {
+      "unique_key": "name",
+      "records": [
+        {
+          "name": "welcome",
+          "description": "New user welcome and setup flow",
+          "is_active": true,
+          "total_steps": 5
+        }
+      ]
+    },
+    "market_items": {
+      "unique_key": "key",
+      "records": [
+        {
+          "key": "theme_dark",
+          "name": "Dark Mode Theme",
+          "description": "A sleek dark interface theme",
+          "category": "theme",
+          "cost_coins": 0,
+          "rarity": "common",
+          "icon": "moon",
+          "is_global": true,
+          "is_available": true,
+          "is_active": true,
+          "is_consumable": false,
+          "sort_order": 1
+        },
+        {
+          "key": "theme_ocean",
+          "name": "Ocean Theme",
+          "description": "Calm blue tones inspired by the sea",
+          "category": "theme",
+          "cost_coins": 50,
+          "rarity": "common",
+          "icon": "waves",
+          "is_global": true,
+          "is_available": true,
+          "is_active": true,
+          "is_consumable": false,
+          "sort_order": 2
+        },
+        {
+          "key": "theme_forest",
+          "name": "Forest Theme",
+          "description": "Earthy greens for a natural feel",
+          "category": "theme",
+          "cost_coins": 50,
+          "rarity": "common",
+          "icon": "tree",
+          "is_global": true,
+          "is_available": true,
+          "is_active": true,
+          "is_consumable": false,
+          "sort_order": 3
+        },
+        {
+          "key": "theme_sunset",
+          "name": "Sunset Theme",
+          "description": "Warm oranges and purples",
+          "category": "theme",
+          "cost_coins": 100,
+          "rarity": "rare",
+          "icon": "sunset",
+          "is_global": true,
+          "is_available": true,
+          "is_active": true,
+          "is_consumable": false,
+          "sort_order": 4
+        },
+        {
+          "key": "xp_boost_1h",
+          "name": "1-Hour XP Boost",
+          "description": "Double XP for 1 hour",
+          "category": "boost",
+          "cost_coins": 25,
+          "rarity": "common",
+          "icon": "zap",
+          "is_global": true,
+          "is_available": true,
+          "is_active": true,
+          "is_consumable": true,
+          "sort_order": 10
+        },
+        {
+          "key": "xp_boost_24h",
+          "name": "24-Hour XP Boost",
+          "description": "Double XP for 24 hours",
+          "category": "boost",
+          "cost_coins": 100,
+          "rarity": "rare",
+          "icon": "zap",
+          "is_global": true,
+          "is_available": true,
+          "is_active": true,
+          "is_consumable": true,
+          "sort_order": 11
+        },
+        {
+          "key": "streak_shield",
+          "name": "Streak Shield",
+          "description": "Protect your streak for one missed day",
+          "category": "boost",
+          "cost_coins": 150,
+          "rarity": "rare",
+          "icon": "shield",
+          "is_global": true,
+          "is_available": true,
+          "is_active": true,
+          "is_consumable": true,
+          "sort_order": 12
+        },
+        {
+          "key": "avatar_crown",
+          "name": "Golden Crown",
+          "description": "A crown fit for royalty",
+          "category": "avatar",
+          "cost_coins": 500,
+          "rarity": "epic",
+          "icon": "crown",
+          "is_global": true,
+          "is_available": true,
+          "is_active": true,
+          "is_consumable": false,
+          "sort_order": 20
+        },
+        {
+          "key": "avatar_wings",
+          "name": "Angel Wings",
+          "description": "Majestic feathered wings",
+          "category": "avatar",
+          "cost_coins": 750,
+          "rarity": "epic",
+          "icon": "feather",
+          "is_global": true,
+          "is_available": true,
+          "is_active": true,
+          "is_consumable": false,
+          "sort_order": 21
+        },
+        {
+          "key": "avatar_halo",
+          "name": "Golden Halo",
+          "description": "A glowing halo of achievement",
+          "category": "avatar",
+          "cost_coins": 1000,
+          "rarity": "legendary",
+          "icon": "star",
+          "is_global": true,
+          "is_available": true,
+          "is_active": true,
+          "is_consumable": false,
+          "sort_order": 22
+        }
+      ]
+    }
+  }
+}

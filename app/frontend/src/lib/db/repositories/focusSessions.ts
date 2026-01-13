@@ -39,8 +39,8 @@ export async function createFocusSession(
   validateEnum(input.status, FOCUS_STATUSES, "status");
   validateEnum(input.mode, FOCUS_MODES, "mode");
 
-  if (input.planned_duration <= 0) {
-    throw new Error("planned_duration must be positive");
+  if (input.duration_seconds <= 0) {
+    throw new Error("duration_seconds must be positive");
   }
 
   const id = generateId();
@@ -49,39 +49,47 @@ export async function createFocusSession(
   const session: FocusSession = {
     id,
     user_id: input.user_id,
-    started_at: input.started_at,
-    ended_at: null,
-    planned_duration: input.planned_duration,
-    actual_duration: null,
-    status: input.status,
     mode: input.mode,
-    metadata: input.metadata,
-    created_at: timestamp,
+    duration_seconds: input.duration_seconds,
+    started_at: input.started_at,
+    completed_at: null,
+    abandoned_at: null,
     expires_at: input.expires_at || null,
-    linked_library_id: input.linked_library_id || null,
+    status: input.status,
+    xp_awarded: 0,
+    coins_awarded: 0,
+    task_id: null,
+    task_title: null,
+    paused_at: null,
+    paused_remaining_seconds: null,
+    created_at: timestamp,
   };
 
   await db
     .prepare(
       `INSERT INTO focus_sessions (
-        id, user_id, started_at, ended_at, planned_duration,
-        actual_duration, status, mode, metadata, created_at,
-        expires_at, linked_library_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        id, user_id, mode, duration_seconds, started_at, completed_at,
+        abandoned_at, expires_at, status, xp_awarded, coins_awarded, task_id,
+        task_title, paused_at, paused_remaining_seconds, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .bind(
       session.id,
       session.user_id,
-      session.started_at,
-      session.ended_at,
-      session.planned_duration,
-      session.actual_duration,
-      session.status,
       session.mode,
-      session.metadata,
-      session.created_at,
+      session.duration_seconds,
+      session.started_at,
+      session.completed_at,
+      session.abandoned_at,
       session.expires_at,
-      session.linked_library_id
+      session.status,
+      session.xp_awarded,
+      session.coins_awarded,
+      session.task_id,
+      session.task_title,
+      session.paused_at,
+      session.paused_remaining_seconds,
+      session.created_at
     )
     .run();
 
