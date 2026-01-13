@@ -460,7 +460,7 @@ async fn fetch_dynamic_ui(pool: &PgPool, user_id: Uuid) -> Result<DynamicUIData,
             mode as label
         FROM focus_sessions
         WHERE user_id = $1 AND status = 'completed'
-        ORDER BY ended_at DESC
+        ORDER BY completed_at DESC
         LIMIT 1
         "#
     )

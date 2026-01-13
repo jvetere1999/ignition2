@@ -137,18 +137,20 @@ export interface RewardLedgerEntry {
 export interface FocusSession {
   id: string;
   user_id: string;
+  mode: string;
+  duration_seconds: number;
   started_at: ISOTimestamp;
-  ended_at: ISOTimestamp | null;
-  planned_duration: number;
-  actual_duration: number | null;
-  status: FocusSessionStatus;
-  mode: FocusMode;
-  metadata: JSONString | null;
-  created_at: ISOTimestamp;
-  /** Session expiry time - auto-abandon if exceeded */
+  completed_at: ISOTimestamp | null;
+  abandoned_at: ISOTimestamp | null;
   expires_at: ISOTimestamp | null;
-  /** Linked reference library for focus music */
-  linked_library_id: string | null;
+  status: FocusSessionStatus;
+  xp_awarded: number;
+  coins_awarded: number;
+  task_id: string | null;
+  task_title: string | null;
+  paused_at: ISOTimestamp | null;
+  paused_remaining_seconds: number | null;
+  created_at: ISOTimestamp;
 }
 
 // ============================================
@@ -223,9 +225,9 @@ export interface WorkoutSession {
   id: string;
   user_id: string;
   workout_id: string | null;
-  calendar_event_id: string | null;
   started_at: ISOTimestamp;
-  ended_at: ISOTimestamp | null;
+  completed_at: ISOTimestamp | null;
+  duration_seconds: number | null;
   status: WorkoutSessionStatus;
   notes: string | null;
   rating: number | null;

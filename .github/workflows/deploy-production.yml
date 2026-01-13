@@ -42,6 +42,19 @@ jobs:
         run: |
           python3 -c "import json; schema = json.load(open('schema.json')); print(f'✓ Schema v{schema[\"version\"]}: {len(schema[\"tables\"])} tables')"
       
+      - name: Generate Rust, TypeScript, and SQL from schema.json
+        run: |
+          echo "Generating code from schema.json v2.0.0..."
+          python3 tools/schema-generator/generate_all.py
+          echo "✓ Code generation complete"
+          
+          # Verify migrations were generated
+          if [ ! -f "app/backend/migrations/0001_schema.sql" ]; then
+            echo "✗ Migration generation failed"
+            exit 1
+          fi
+          echo "✓ Migrations generated successfully"
+      
       - name: Check migration files exist
         run: |
           if [ ! -f "app/backend/migrations/0001_schema.sql" ]; then
