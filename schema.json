@@ -348,7 +348,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -467,7 +468,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "name": {
           "type": "TEXT",
@@ -509,7 +511,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "name": {
           "type": "TEXT",
@@ -727,7 +730,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -790,7 +794,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "key": {
           "type": "TEXT",
@@ -867,7 +872,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -924,7 +930,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "key": {
           "type": "TEXT",
@@ -1022,7 +1029,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -1064,7 +1072,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -1128,7 +1137,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -1185,7 +1195,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -1270,7 +1281,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -1334,7 +1346,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -1398,14 +1411,16 @@
           "nullable": false,
           "primary": false,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "0"
         },
         "coins_awarded": {
           "type": "INTEGER",
           "nullable": false,
           "primary": false,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "0"
         },
         "task_id": {
           "type": "UUID",
@@ -1454,7 +1469,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -1532,7 +1548,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -1603,7 +1620,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "library_id": {
           "type": "UUID",
@@ -1666,7 +1684,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -1729,21 +1748,24 @@
           "nullable": false,
           "primary": false,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "TRUE"
         },
         "current_streak": {
           "type": "INTEGER",
           "nullable": false,
           "primary": false,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "0"
         },
         "longest_streak": {
           "type": "INTEGER",
           "nullable": false,
           "primary": false,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "0"
         },
         "last_completed_at": {
           "type": "TIMESTAMPTZ",
@@ -1757,7 +1779,8 @@
           "nullable": false,
           "primary": false,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "0"
         },
         "created_at": {
           "type": "TIMESTAMPTZ",
@@ -1786,7 +1809,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "habit_id": {
           "type": "UUID",
@@ -1835,7 +1859,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -1941,7 +1966,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "goal_id": {
           "type": "UUID",
@@ -1996,7 +2022,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "title": {
           "type": "TEXT",
@@ -2109,7 +2136,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -2179,7 +2207,8 @@
           "nullable": false,
           "primary": false,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "0"
         },
         "target": {
           "type": "INTEGER",
@@ -2193,14 +2222,16 @@
           "nullable": false,
           "primary": false,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "true"
         },
         "is_repeatable": {
           "type": "BOOLEAN",
           "nullable": false,
           "primary": false,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "false"
         },
         "repeat_frequency": {
           "type": "TEXT",
@@ -2250,7 +2281,8 @@
           "nullable": false,
           "primary": false,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "0"
         },
         "created_at": {
           "type": "TIMESTAMPTZ",
@@ -2279,7 +2311,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -2372,7 +2405,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -2527,7 +2561,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -2584,7 +2619,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -2662,7 +2698,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "key": {
           "type": "TEXT",
@@ -2810,7 +2847,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -2893,7 +2931,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -2949,7 +2988,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -3026,7 +3066,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -3075,7 +3116,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -3110,7 +3152,8 @@
           "nullable": false,
           "primary": false,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "0"
         },
         "status": {
           "type": "TEXT",
@@ -3181,7 +3224,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "book_id": {
           "type": "UUID",
@@ -3265,7 +3309,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "name": {
           "type": "TEXT",
@@ -3356,7 +3401,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -3405,14 +3451,16 @@
           "nullable": false,
           "primary": false,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "false"
         },
         "is_public": {
           "type": "BOOLEAN",
           "nullable": false,
           "primary": false,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "false"
         },
         "created_at": {
           "type": "TIMESTAMPTZ",
@@ -3441,7 +3489,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "workout_id": {
           "type": "UUID",
@@ -3482,7 +3531,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "workout_id": {
           "type": "UUID",
@@ -3565,7 +3615,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -3642,7 +3693,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "session_id": {
           "type": "UUID",
@@ -3733,7 +3785,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -3811,7 +3864,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -3910,7 +3964,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "program_id": {
           "type": "UUID",
@@ -3958,7 +4013,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "program_week_id": {
           "type": "UUID",
@@ -4006,7 +4062,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "key": {
           "type": "TEXT",
@@ -4083,7 +4140,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "topic_id": {
           "type": "UUID",
@@ -4216,7 +4274,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "topic_id": {
           "type": "UUID",
@@ -4314,7 +4373,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -4376,7 +4436,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -4459,7 +4520,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -4593,7 +4655,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "track_id": {
           "type": "UUID",
@@ -4685,7 +4748,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "track_id": {
           "type": "UUID",
@@ -4777,7 +4841,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "track_id": {
           "type": "UUID",
@@ -4869,7 +4934,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "analysis_id": {
           "type": "UUID",
@@ -4988,7 +5054,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "manifest_id": {
           "type": "UUID",
@@ -5079,7 +5146,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "analysis_id": {
           "type": "UUID",
@@ -5142,7 +5210,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "name": {
           "type": "TEXT",
@@ -5248,7 +5317,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "name": {
           "type": "TEXT",
@@ -5326,7 +5396,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -5418,7 +5489,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -5489,7 +5561,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -5560,7 +5633,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "name": {
           "type": "TEXT",
@@ -5617,7 +5691,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "flow_id": {
           "type": "UUID",
@@ -5737,7 +5812,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -5822,7 +5898,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -5864,7 +5941,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -5942,7 +6020,8 @@
           "nullable": false,
           "primary": false,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "'light'"
         },
         "timezone": {
           "type": "TEXT",
@@ -5956,7 +6035,8 @@
           "nullable": false,
           "primary": false,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "'en-US'"
         },
         "profile_public": {
           "type": "BOOLEAN",
@@ -6013,7 +6093,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -6091,7 +6172,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "type": "UUID",
@@ -6176,7 +6258,8 @@
           "nullable": false,
           "primary": true,
           "unique": false,
-          "foreign_key": false
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
         },
         "flag_name": {
           "type": "TEXT",

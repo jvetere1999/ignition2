@@ -42,6 +42,8 @@ pub fn router() -> Router<Arc<AppState>> {
         .route("/badges", get(get_badges))
         .route("/focus-status", get(get_focus_status))
         .route("/plan-status", get(get_plan_status))
+        // Session endpoint for sync state
+        .route("/session", get(get_session))
 }
 
 // ============================================
@@ -504,4 +506,18 @@ fn generate_etag(
     plan.total.hash(&mut hasher);
     
     format!("{:x}", hasher.finish())
+}
+
+/// GET /sync/session
+/// Get current user session state
+async fn get_session(
+    Extension(user): Extension<crate::middleware::auth::AuthContext>,
+) -> Json<serde_json::Value> {
+    Json(serde_json::json!({
+        "session": {
+            "user_id": user.user_id,
+            "authenticated": true,
+            "created_at": chrono::Utc::now().to_rfc3339(),
+        }
+    }))
 }

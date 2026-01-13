@@ -118,6 +118,44 @@ impl HabitsRepo {
         Ok(HabitsListResponse { habits: responses, total })
     }
 
+    pub async fn list_archived(pool: &PgPool, user_id: Uuid) -> Result<HabitsListResponse, AppError> {
+        // Get archived habits
+        let habits = sqlx::query_as::<_, Habit>(
+            r#"SELECT id, user_id, name, description, frequency, target_count, custom_days,
+                      icon, color, is_active, current_streak, longest_streak,
+                      last_completed_at, sort_order, created_at, updated_at
+               FROM habits
+               WHERE user_id = $1 AND is_active = false
+               ORDER BY sort_order, name"#,
+        )
+        .bind(user_id)
+        .fetch_all(pool)
+        .await?;
+
+        let responses = habits
+            .into_iter()
+            .map(|h| HabitResponse {
+                completed_today: false,  // Archived habits can't be completed
+                id: h.id,
+                name: h.name,
+                description: h.description,
+                frequency: h.frequency,
+                target_count: h.target_count,
+                icon: h.icon,
+                color: h.color,
+                is_active: h.is_active,
+                current_streak: h.current_streak,
+                longest_streak: h.longest_streak,
+                last_completed_at: h.last_completed_at,
+                sort_order: h.sort_order,
+            })
+            .collect::<Vec<_>>();
+
+        let total = responses.len() as i64;
+
+        Ok(HabitsListResponse { habits: responses, total })
+    }
+
     /// Complete a habit for today
     pub async fn complete_habit(
         pool: &PgPool,

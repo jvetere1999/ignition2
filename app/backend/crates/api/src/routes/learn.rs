@@ -91,7 +91,7 @@ struct LearnOverview {
 
 #[derive(Serialize)]
 struct OverviewWrapper {
-    overview: LearnOverview,
+    items: LearnOverview,
 }
 
 // ============================================================================
@@ -109,7 +109,7 @@ async fn get_overview(
     let review = LearnRepo::get_review_items(&state.db, user.id).await?;
 
     Ok(Json(OverviewWrapper {
-        overview: LearnOverview {
+        items: LearnOverview {
             progress,
             review_count: review.total_due,
             topics: topics.topics,

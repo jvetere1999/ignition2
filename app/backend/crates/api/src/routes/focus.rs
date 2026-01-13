@@ -6,6 +6,7 @@ use std::sync::Arc;
 
 use axum::{
     extract::{Extension, Path, Query, State},
+    http::StatusCode,
     routing::{get, post},
     Json, Router,
 };
@@ -24,6 +25,9 @@ use crate::storage::{BlobCategory, SignedUrlResponse};
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/", get(list_sessions).post(start_session))
+        .route("/sessions", get(list_sessions))  // Alias for /
+        .route("/start", post(start_session))    // Alias for POST /
+        .route("/stats", get(get_stats))         // Focus statistics endpoint
         .route("/active", get(get_active))
         .route(
             "/pause",
@@ -139,12 +143,30 @@ async fn start_session(
     State(state): State<Arc<AppState>>,
     Extension(user): Extension<User>,
     Json(req): Json<CreateFocusRequest>,
-) -> Result<Json<SessionResponse>, AppError> {
+) -> Result<(StatusCode, Json<SessionResponse>), AppError> {
     let session = FocusSessionRepo::start_session(&state.db, user.id, &req).await?;
 
-    Ok(Json(SessionResponse {
+    Ok((StatusCode::CREATED, Json(SessionResponse {
         session: session.into(),
-    }))
+    })))
+}
+
+/// GET /focus/stats
+/// Get focus statistics for the user
+async fn get_stats(
+    State(state): State<Arc<AppState>>,
+    Extension(user): Extension<User>,
+    Query(query): Query<ListSessionsQuery>,
+) -> Result<Json<StatsResponse>, AppError> {
+    let since = match query.period.as_deref() {
+        Some("day") => Some(Utc::now() - Duration::days(1)),
+        Some("week") => Some(Utc::now() - Duration::weeks(1)),
+        Some("month") => Some(Utc::now() - Duration::days(30)),
+        _ => None,
+    };
+
+    let stats = FocusSessionRepo::get_stats(&state.db, user.id, since).await?;
+    Ok(Json(StatsResponse { stats }))
 }
 
 /// GET /focus/active
@@ -260,15 +282,15 @@ async fn create_library(
     State(state): State<Arc<AppState>>,
     Extension(user): Extension<User>,
     Json(req): Json<CreateFocusLibraryRequest>,
-) -> Result<Json<LibraryWrapper>, AppError> {
+) -> Result<(StatusCode, Json<LibraryWrapper>), AppError> {
     if req.name.is_empty() {
         return Err(AppError::Validation("Library name cannot be empty".into()));
     }
 
     let library = FocusLibraryRepo::create(&state.db, user.id, &req).await?;
-    Ok(Json(LibraryWrapper {
+    Ok((StatusCode::CREATED, Json(LibraryWrapper {
         library: FocusLibraryResponse::from(library),
-    }))
+    })))
 }
 
 /// GET /focus/libraries/:id

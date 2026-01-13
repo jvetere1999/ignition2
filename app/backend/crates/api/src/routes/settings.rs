@@ -9,6 +9,7 @@ use axum::{
     routing::{get, patch},
     Extension, Json, Router,
 };
+use serde::Serialize;
 
 use crate::middleware::auth::AuthContext;
 use crate::state::AppState;
@@ -22,13 +23,18 @@ pub fn router() -> Router<Arc<AppState>> {
         .route("/", get(get_settings).patch(update_settings))
 }
 
+#[derive(Serialize)]
+struct SettingsWrapper {
+    settings: UserSettingsResponse,
+}
+
 /// GET /api/settings - Get all settings for authenticated user
 async fn get_settings(
     State(state): State<Arc<AppState>>,
     Extension(auth): Extension<AuthContext>,
-) -> Result<Json<UserSettingsResponse>, AppError> {
+) -> Result<Json<SettingsWrapper>, AppError> {
     let settings = UserSettingsRepo::get(&state.db, auth.user_id).await?;
-    Ok(Json(settings))
+    Ok(Json(SettingsWrapper { settings }))
 }
 
 /// PATCH /api/settings - Update user settings
@@ -36,8 +42,8 @@ async fn update_settings(
     State(state): State<Arc<AppState>>,
     Extension(auth): Extension<AuthContext>,
     Json(payload): Json<UpdateUserSettingsRequest>,
-) -> Result<Json<UserSettingsResponse>, AppError> {
+) -> Result<Json<SettingsWrapper>, AppError> {
     let updated = UserSettingsRepo::update(&state.db, auth.user_id, &payload).await?;
-    Ok(Json(updated))
+    Ok(Json(SettingsWrapper { settings: updated }))
 }
 

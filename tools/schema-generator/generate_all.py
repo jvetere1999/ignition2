@@ -28,15 +28,15 @@ SCRIPT_DIR = Path(__file__).parent
 REPO_ROOT = SCRIPT_DIR.parent.parent
 SCHEMA_FILE = REPO_ROOT / 'schema.json'
 
-# Default output paths
+# Default output paths (all go directly to app folders)
 DEFAULT_PATHS = {
     'rust': REPO_ROOT / 'app/backend/crates/api/src/db/generated.rs',
     'ts': REPO_ROOT / 'app/frontend/src/lib/generated_types.ts',
     'migrations': REPO_ROOT / 'app/backend/migrations',
-    'rust_ref': REPO_ROOT / 'generated_models.rs',
-    'ts_ref': REPO_ROOT / 'generated_types.ts', 
-    'sql_ref': REPO_ROOT / 'generated_schema.sql',
-    'seeds_ref': REPO_ROOT / 'generated_seeds.sql',
+    'sql_path': REPO_ROOT / 'app/backend/migrations/0001_schema.sql',
+    'seeds_path': REPO_ROOT / 'app/backend/migrations/0002_seeds.sql',
+    # Archive copies with schema date
+    'archive': REPO_ROOT / 'agent/archive/generated',
 }
 
 # Rust reserved keywords needing r# prefix
@@ -683,7 +683,7 @@ def main():
     parser.add_argument('--rust', type=Path, help='Rust output path')
     parser.add_argument('--ts', type=Path, help='TypeScript output path')
     parser.add_argument('--migrations', type=Path, help='Migrations directory')
-    parser.add_argument('--no-refs', action='store_true', help='Skip reference copies at repo root')
+    parser.add_argument('--no-archive', action='store_true', help='Skip archive copies with schema date')
     args = parser.parse_args()
     
     # Load schema
@@ -714,12 +714,12 @@ def main():
     sql_content = gen.generate_sql()
     seeds_content = gen.generate_seeds()
     
-    # Paths
+    # Paths - all go directly to app folders
     rust_path = args.rust or DEFAULT_PATHS['rust']
     ts_path = args.ts or DEFAULT_PATHS['ts']
     migrations_dir = args.migrations or DEFAULT_PATHS['migrations']
-    sql_path = migrations_dir / '0001_schema.sql'
-    seeds_path = migrations_dir / '0002_seeds.sql'
+    sql_path = DEFAULT_PATHS['sql_path']
+    seeds_path = DEFAULT_PATHS['seeds_path']
     
     if args.dry_run:
         print(f"Would generate (schema v{schema['version']}):")
@@ -729,32 +729,71 @@ def main():
         print(f"  Seeds:      {seeds_path} ({len(seeds_content)} bytes)")
         return
     
-    # Write files
+    # Ensure directories exist
+    rust_path.parent.mkdir(parents=True, exist_ok=True)
+    ts_path.parent.mkdir(parents=True, exist_ok=True)
+    migrations_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Write files directly to app folders
     outputs = []
     
     if not args.sql_only:
-        rust_path.parent.mkdir(parents=True, exist_ok=True)
+        # Remove old generated.rs if exists to ensure clean generation
+        if rust_path.exists():
+            rust_path.unlink()
         rust_path.write_text(rust_content)
         outputs.append(('Rust', rust_path))
         
-        ts_path.parent.mkdir(parents=True, exist_ok=True)
+        # Remove old generated_types.ts if exists to ensure clean generation
+        if ts_path.exists():
+            ts_path.unlink()
         ts_path.write_text(ts_content)
         outputs.append(('TypeScript', ts_path))
     
-    migrations_dir.mkdir(parents=True, exist_ok=True)
+    # Remove old migration files if exist to ensure clean generation
+    if sql_path.exists():
+        sql_path.unlink()
     sql_path.write_text(sql_content)
     outputs.append(('Schema', sql_path))
     
+    if seeds_path.exists():
+        seeds_path.unlink()
     seeds_path.write_text(seeds_content)
     outputs.append(('Seeds', seeds_path))
     
-    # Reference copies
-    if not args.no_refs:
+    # Archive copies with schema version/date
+    if not args.no_archive:
+        archive_dir = DEFAULT_PATHS['archive']
+        archive_dir.mkdir(parents=True, exist_ok=True)
+        
+        schema_version = schema.get('version', 'unknown')
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        archive_prefix = f"v{schema_version}_{timestamp}"
+        
         if not args.sql_only:
-            DEFAULT_PATHS['rust_ref'].write_text(rust_content)
-            DEFAULT_PATHS['ts_ref'].write_text(ts_content)
-        DEFAULT_PATHS['sql_ref'].write_text(sql_content)
-        DEFAULT_PATHS['seeds_ref'].write_text(seeds_content)
+            archive_rust = archive_dir / f"{archive_prefix}_generated.rs"
+            archive_rust.write_text(rust_content)
+            
+            archive_ts = archive_dir / f"{archive_prefix}_generated_types.ts"
+            archive_ts.write_text(ts_content)
+        
+        archive_sql = archive_dir / f"{archive_prefix}_schema.sql"
+        archive_sql.write_text(sql_content)
+        
+        archive_seeds = archive_dir / f"{archive_prefix}_seeds.sql"
+        archive_seeds.write_text(seeds_content)
+        
+        # Clean up old archives (keep last 5)
+        try:
+            archive_files = sorted(archive_dir.glob('v*_*.sql'), key=lambda p: p.stat().st_mtime, reverse=True)
+            for old_file in archive_files[5:]:
+                old_file.unlink()
+            # Also clean Rust and TypeScript archives
+            for pattern in ['v*_generated.rs', 'v*_generated_types.ts']:
+                for old_file in sorted(archive_dir.glob(pattern), key=lambda p: p.stat().st_mtime, reverse=True)[5:]:
+                    old_file.unlink()
+        except Exception:
+            pass  # Ignore cleanup errors
     
     # Summary
     seed_count = sum(len(s.get('records', [])) for s in schema.get('seeds', {}).values())
@@ -763,9 +802,9 @@ def main():
     for label, path in outputs:
         print(f"  {label:12} → {path}")
     
-    if not args.no_refs:
+    if not args.no_archive:
         print()
-        print("  Reference copies at repo root")
+        print(f"  Archive copies → {DEFAULT_PATHS['archive']} (v{schema_version}_{timestamp}_*)")
 
 if __name__ == '__main__':
     main()

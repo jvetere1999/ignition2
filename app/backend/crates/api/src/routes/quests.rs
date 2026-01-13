@@ -6,6 +6,7 @@ use std::sync::Arc;
 
 use axum::{
     extract::{Extension, Path, Query, State},
+    http::StatusCode,
     routing::{get, post},
     Json, Router,
 };
@@ -79,10 +80,10 @@ async fn create_quest(
     State(state): State<Arc<AppState>>,
     Extension(user): Extension<User>,
     Json(req): Json<CreateQuestRequest>,
-) -> Result<Json<QuestResponseWrapper>, AppError> {
+) -> Result<(StatusCode, Json<QuestResponseWrapper>), AppError> {
     let quest = QuestsRepo::create(&state.db, user.id, &req).await?;
 
-    Ok(Json(QuestResponseWrapper { quest: quest.into() }))
+    Ok((StatusCode::CREATED, Json(QuestResponseWrapper { quest: quest.into() })))
 }
 
 /// GET /quests/:id

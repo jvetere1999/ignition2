@@ -47,8 +47,8 @@ impl QuestsRepo {
         let query = format!(
             r#"INSERT INTO user_quests
                (user_id, title, description, category, difficulty, xp_reward, coin_reward,
-                target, is_repeatable, repeat_frequency, status)
-               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'active')
+                target, is_repeatable, repeat_frequency, status, is_active, progress, streak_count)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'active', true, 0, 0)
                RETURNING {}"#,
             QUEST_COLUMNS
         );

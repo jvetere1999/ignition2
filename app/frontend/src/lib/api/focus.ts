@@ -88,7 +88,7 @@ export async function startFocusSession(req: CreateFocusRequest = {}): Promise<F
  * GET /api/focus/active
  */
 export async function getActiveFocusSession(): Promise<ActiveFocusResponse> {
-  const response = await apiGet<{ session: FocusSession | null; pause_state: any }>('/api/focus/active');
+  const response = await apiGet<{ session: FocusSession | null; pause_state: PauseState | null }>('/api/focus/active');
   return { session: response.session, pause_state: response.pause_state };
 }
 

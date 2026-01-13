@@ -286,8 +286,8 @@ impl WorkoutRepo {
     ) -> Result<Workout, AppError> {
         let workout = sqlx::query_as::<_, Workout>(
             r#"
-            INSERT INTO workouts (user_id, name, description, estimated_duration, is_template)
-            VALUES ($1, $2, $3, $4, $5)
+            INSERT INTO workouts (user_id, name, description, estimated_duration, is_template, is_public)
+            VALUES ($1, $2, $3, $4, $5, false)
             RETURNING id, user_id, name, description, estimated_duration,
                       is_template, created_at, updated_at
             "#,

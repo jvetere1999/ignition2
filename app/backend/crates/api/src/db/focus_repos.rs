@@ -46,12 +46,13 @@ impl FocusSessionRepo {
         // Create new session
         let session = sqlx::query_as::<_, FocusSession>(
             r#"INSERT INTO focus_sessions
-               (user_id, mode, duration_seconds, expires_at, task_id, task_title, status)
-               VALUES ($1, $2, $3, $4, $5, $6, 'active')
+               (id, user_id, mode, duration_seconds, expires_at, task_id, task_title, status, xp_awarded, coins_awarded)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, 'active', 0, 0)
                RETURNING id, user_id, mode, duration_seconds, started_at, completed_at,
                          abandoned_at, expires_at, paused_at, paused_remaining_seconds,
                          status, xp_awarded, coins_awarded, task_id, task_title, created_at"#,
         )
+        .bind(Uuid::new_v4())
         .bind(user_id)
         .bind(&req.mode)
         .bind(req.duration_seconds)

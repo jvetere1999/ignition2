@@ -6,6 +6,7 @@ use std::sync::Arc;
 
 use axum::{
     extract::{Extension, Path, Query, State},
+    http::StatusCode,
     routing::{get, post},
     Json, Router,
 };
@@ -21,11 +22,13 @@ use crate::state::AppState;
 /// Create exercise routes
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
+        // Main endpoint returns workouts
+        .route("/", get(list_workouts).post(create_workout))
         // Exercises
-        .route("/", get(list_exercises).post(create_exercise))
-        .route("/{id}", get(get_exercise).delete(delete_exercise))
+        .route("/exercises", get(list_exercises).post(create_exercise))
+        .route("/exercises/{id}", get(get_exercise).delete(delete_exercise))
         .route("/seed", post(seed_exercises))
-        // Workouts
+        // Workouts (kept for compatibility)
         .route("/workouts", get(list_workouts).post(create_workout))
         .route("/workouts/{id}", get(get_workout).delete(delete_workout))
         // Sessions
@@ -223,9 +226,9 @@ async fn create_workout(
     State(state): State<Arc<AppState>>,
     Extension(user): Extension<User>,
     Json(req): Json<CreateWorkoutRequest>,
-) -> Result<Json<WorkoutWrapper>, AppError> {
+) -> Result<(StatusCode, Json<WorkoutWrapper>), AppError> {
     let workout = WorkoutRepo::create(&state.db, user.id, &req).await?;
-    Ok(Json(WorkoutWrapper {
+    Ok((StatusCode::CREATED, Json(WorkoutWrapper {
         workout: WorkoutResponse {
             id: workout.id,
             name: workout.name,
@@ -235,7 +238,7 @@ async fn create_workout(
             exercises: vec![],
             created_at: workout.created_at,
         },
-    }))
+    })))
 }
 
 /// GET /exercise/workouts/:id

@@ -6,7 +6,8 @@ use std::sync::Arc;
 
 use axum::{
     extract::{Extension, Path, Query, State},
-    routing::get,
+    http::StatusCode,
+    routing::{get, post},
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
@@ -87,9 +88,9 @@ async fn create_book(
     State(state): State<Arc<AppState>>,
     Extension(user): Extension<User>,
     Json(req): Json<CreateBookRequest>,
-) -> Result<Json<BookWrapper>, AppError> {
+) -> Result<(StatusCode, Json<BookWrapper>), AppError> {
     let book = BookRepo::create(&state.db, user.id, &req).await?;
-    Ok(Json(BookWrapper { book: book.into() }))
+    Ok((StatusCode::CREATED, Json(BookWrapper { book: book.into() })))
 }
 
 /// GET /books/:id

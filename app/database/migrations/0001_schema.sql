@@ -41,7 +41,7 @@ CREATE TABLE accounts (
 );
 
 CREATE TABLE authenticators (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     credential_id TEXT NOT NULL,
     provider_account_id TEXT NOT NULL,
@@ -54,7 +54,7 @@ CREATE TABLE authenticators (
 );
 
 CREATE TABLE entitlements (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,
     resource TEXT NOT NULL,
@@ -69,7 +69,7 @@ CREATE TABLE role_entitlements (
 );
 
 CREATE TABLE roles (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,
     parent_role_id UUID,
@@ -127,7 +127,7 @@ CREATE TABLE verification_tokens (
 -- =============================================================================
 
 CREATE TABLE achievement_definitions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     key TEXT NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
@@ -143,7 +143,7 @@ CREATE TABLE achievement_definitions (
 );
 
 CREATE TABLE activity_events (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     event_type TEXT NOT NULL,
     category TEXT,
@@ -154,7 +154,7 @@ CREATE TABLE activity_events (
 );
 
 CREATE TABLE skill_definitions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     key TEXT NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
@@ -167,7 +167,7 @@ CREATE TABLE skill_definitions (
 );
 
 CREATE TABLE universal_quests (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     title TEXT NOT NULL,
     description TEXT,
     type TEXT NOT NULL,
@@ -185,7 +185,7 @@ CREATE TABLE universal_quests (
 );
 
 CREATE TABLE user_achievements (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     achievement_key TEXT NOT NULL,
     earned_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -193,7 +193,7 @@ CREATE TABLE user_achievements (
 );
 
 CREATE TABLE user_progress (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     total_xp INTEGER NOT NULL,
     current_level INTEGER NOT NULL,
@@ -216,21 +216,21 @@ CREATE TABLE user_quests (
     status TEXT NOT NULL,
     progress INTEGER NOT NULL DEFAULT 0,
     target INTEGER NOT NULL,
-    is_active BOOLEAN NOT NULL DEFAULT true,
-    is_repeatable BOOLEAN NOT NULL DEFAULT false,
+    is_active BOOLEAN NOT NULL,
+    is_repeatable BOOLEAN NOT NULL,
     repeat_frequency TEXT,
     accepted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     completed_at TIMESTAMPTZ,
     claimed_at TIMESTAMPTZ,
     expires_at TIMESTAMPTZ,
     last_completed_date DATE,
-    streak_count INTEGER NOT NULL DEFAULT 0,
+    streak_count INTEGER NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE user_skills (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     skill_key TEXT NOT NULL,
     current_stars INTEGER NOT NULL,
@@ -240,7 +240,7 @@ CREATE TABLE user_skills (
 );
 
 CREATE TABLE user_wallet (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     coins INTEGER NOT NULL,
     total_earned INTEGER NOT NULL,
@@ -254,7 +254,7 @@ CREATE TABLE user_wallet (
 -- =============================================================================
 
 CREATE TABLE focus_pause_state (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     session_id UUID NOT NULL,
     mode TEXT,
@@ -267,7 +267,7 @@ CREATE TABLE focus_pause_state (
 );
 
 CREATE TABLE focus_sessions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     mode TEXT NOT NULL,
     duration_seconds INTEGER NOT NULL,
@@ -290,7 +290,7 @@ CREATE TABLE focus_sessions (
 -- =============================================================================
 
 CREATE TABLE goal_milestones (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     goal_id UUID NOT NULL,
     title TEXT NOT NULL,
     description TEXT,
@@ -300,7 +300,7 @@ CREATE TABLE goal_milestones (
 );
 
 CREATE TABLE goals (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     title TEXT NOT NULL,
     description TEXT,
@@ -317,7 +317,7 @@ CREATE TABLE goals (
 );
 
 CREATE TABLE habit_completions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     habit_id UUID NOT NULL,
     user_id UUID NOT NULL,
     completed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -349,12 +349,12 @@ CREATE TABLE habits (
 -- =============================================================================
 
 CREATE TABLE books (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     title TEXT NOT NULL,
     author TEXT,
     total_pages INTEGER,
-    current_page INTEGER NOT NULL DEFAULT 0,
+    current_page INTEGER NOT NULL,
     status TEXT NOT NULL,
     started_at TIMESTAMPTZ,
     completed_at TIMESTAMPTZ,
@@ -366,7 +366,7 @@ CREATE TABLE books (
 );
 
 CREATE TABLE reading_sessions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     book_id UUID NOT NULL,
     user_id UUID NOT NULL,
     pages_read INTEGER NOT NULL,
@@ -384,7 +384,7 @@ CREATE TABLE reading_sessions (
 -- =============================================================================
 
 CREATE TABLE personal_records (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     exercise_id UUID NOT NULL,
     record_type TEXT NOT NULL,
@@ -397,7 +397,7 @@ CREATE TABLE personal_records (
 );
 
 CREATE TABLE workout_exercises (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     workout_id UUID NOT NULL,
     section_id UUID,
     exercise_id UUID NOT NULL,
@@ -411,7 +411,7 @@ CREATE TABLE workout_exercises (
 );
 
 CREATE TABLE workout_sessions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     workout_id UUID,
     started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -428,7 +428,7 @@ CREATE TABLE workout_sessions (
 -- =============================================================================
 
 CREATE TABLE learn_lessons (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     topic_id UUID NOT NULL,
     key TEXT NOT NULL,
     title TEXT NOT NULL,
@@ -449,7 +449,7 @@ CREATE TABLE learn_lessons (
 );
 
 CREATE TABLE learn_topics (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     key TEXT NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
@@ -462,7 +462,7 @@ CREATE TABLE learn_topics (
 );
 
 CREATE TABLE user_lesson_progress (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     lesson_id UUID NOT NULL,
     status TEXT NOT NULL,
@@ -477,7 +477,7 @@ CREATE TABLE user_lesson_progress (
 -- =============================================================================
 
 CREATE TABLE market_items (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     key TEXT NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
@@ -500,7 +500,7 @@ CREATE TABLE market_items (
 );
 
 CREATE TABLE user_purchases (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     item_id UUID NOT NULL,
     cost_coins INTEGER NOT NULL,
@@ -518,7 +518,7 @@ CREATE TABLE user_purchases (
 -- =============================================================================
 
 CREATE TABLE calendar_events (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     title TEXT NOT NULL,
     description TEXT,
@@ -542,7 +542,7 @@ CREATE TABLE calendar_events (
 );
 
 CREATE TABLE daily_plans (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     date DATE NOT NULL,
     items JSONB NOT NULL,
@@ -556,7 +556,7 @@ CREATE TABLE daily_plans (
 -- =============================================================================
 
 CREATE TABLE analysis_events (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     analysis_id UUID NOT NULL,
     time_ms INTEGER NOT NULL,
     duration_ms INTEGER,
@@ -567,7 +567,7 @@ CREATE TABLE analysis_events (
 );
 
 CREATE TABLE analysis_frame_data (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     manifest_id UUID NOT NULL,
     chunk_index INTEGER NOT NULL,
     start_frame INTEGER NOT NULL,
@@ -582,7 +582,7 @@ CREATE TABLE analysis_frame_data (
 );
 
 CREATE TABLE analysis_frame_manifests (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     analysis_id UUID NOT NULL,
     manifest_version INTEGER NOT NULL,
     hop_ms INTEGER NOT NULL,
@@ -605,7 +605,7 @@ CREATE TABLE analysis_frame_manifests (
 -- =============================================================================
 
 CREATE TABLE feature_flags (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     flag_name TEXT NOT NULL,
     enabled BOOLEAN NOT NULL,
     description TEXT,
@@ -620,9 +620,9 @@ CREATE TABLE user_settings (
     notifications_enabled BOOLEAN NOT NULL,
     email_notifications BOOLEAN NOT NULL,
     push_notifications BOOLEAN NOT NULL,
-    theme TEXT NOT NULL DEFAULT 'light',
+    theme TEXT NOT NULL,
     timezone TEXT,
-    locale TEXT NOT NULL DEFAULT 'en-US',
+    locale TEXT NOT NULL,
     profile_public BOOLEAN NOT NULL,
     show_activity BOOLEAN NOT NULL,
     daily_reminder_time TEXT,
@@ -636,7 +636,7 @@ CREATE TABLE user_settings (
 -- =============================================================================
 
 CREATE TABLE ideas (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     title TEXT NOT NULL,
     content TEXT,
@@ -648,7 +648,7 @@ CREATE TABLE ideas (
 );
 
 CREATE TABLE inbox_items (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     title TEXT NOT NULL,
     description TEXT,
@@ -665,7 +665,7 @@ CREATE TABLE inbox_items (
 -- =============================================================================
 
 CREATE TABLE onboarding_flows (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,
     is_active BOOLEAN NOT NULL,
@@ -675,7 +675,7 @@ CREATE TABLE onboarding_flows (
 );
 
 CREATE TABLE onboarding_steps (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     flow_id UUID NOT NULL,
     step_order INTEGER NOT NULL,
     step_type TEXT NOT NULL,
@@ -714,7 +714,7 @@ CREATE TABLE audit_log (
 );
 
 CREATE TABLE feedback (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     feedback_type TEXT NOT NULL,
     title TEXT NOT NULL,
@@ -733,7 +733,7 @@ CREATE TABLE feedback (
 -- =============================================================================
 
 CREATE TABLE exercise_sets (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     session_id UUID NOT NULL,
     exercise_id UUID NOT NULL,
     set_number INTEGER NOT NULL,
@@ -748,7 +748,7 @@ CREATE TABLE exercise_sets (
 );
 
 CREATE TABLE exercises (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,
     category TEXT NOT NULL,
@@ -763,7 +763,7 @@ CREATE TABLE exercises (
 );
 
 CREATE TABLE focus_libraries (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
@@ -775,7 +775,7 @@ CREATE TABLE focus_libraries (
 );
 
 CREATE TABLE focus_library_tracks (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     library_id UUID NOT NULL,
     track_id TEXT,
     track_title TEXT NOT NULL,
@@ -786,7 +786,7 @@ CREATE TABLE focus_library_tracks (
 );
 
 CREATE TABLE infobase_entries (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     title TEXT NOT NULL,
     content TEXT NOT NULL,
@@ -798,7 +798,7 @@ CREATE TABLE infobase_entries (
 );
 
 CREATE TABLE learn_drills (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     topic_id UUID NOT NULL,
     key TEXT NOT NULL,
     title TEXT NOT NULL,
@@ -814,7 +814,7 @@ CREATE TABLE learn_drills (
 );
 
 CREATE TABLE listening_prompt_presets (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,
     template_id UUID NOT NULL,
@@ -827,7 +827,7 @@ CREATE TABLE listening_prompt_presets (
 );
 
 CREATE TABLE listening_prompt_templates (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,
     category TEXT NOT NULL,
@@ -844,7 +844,7 @@ CREATE TABLE listening_prompt_templates (
 );
 
 CREATE TABLE market_recommendations (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     item_id UUID NOT NULL,
     score REAL NOT NULL,
@@ -853,7 +853,7 @@ CREATE TABLE market_recommendations (
 );
 
 CREATE TABLE market_transactions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     transaction_type TEXT NOT NULL,
     coins_amount INTEGER NOT NULL,
@@ -871,7 +871,7 @@ CREATE TABLE oauth_states (
 );
 
 CREATE TABLE plan_templates (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
@@ -884,7 +884,7 @@ CREATE TABLE plan_templates (
 );
 
 CREATE TABLE points_ledger (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     event_type TEXT NOT NULL,
     event_id UUID,
@@ -898,7 +898,7 @@ CREATE TABLE points_ledger (
 );
 
 CREATE TABLE program_weeks (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     program_id UUID NOT NULL,
     week_number INTEGER NOT NULL,
     name TEXT,
@@ -907,7 +907,7 @@ CREATE TABLE program_weeks (
 );
 
 CREATE TABLE program_workouts (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     program_week_id UUID NOT NULL,
     workout_id UUID NOT NULL,
     day_of_week INTEGER NOT NULL,
@@ -916,7 +916,7 @@ CREATE TABLE program_workouts (
 );
 
 CREATE TABLE reference_tracks (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
@@ -937,7 +937,7 @@ CREATE TABLE reference_tracks (
 );
 
 CREATE TABLE track_analyses (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     track_id UUID NOT NULL,
     analysis_type TEXT NOT NULL,
     version TEXT NOT NULL,
@@ -952,7 +952,7 @@ CREATE TABLE track_analyses (
 );
 
 CREATE TABLE track_annotations (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     track_id UUID NOT NULL,
     user_id UUID NOT NULL,
     start_time_ms INTEGER NOT NULL,
@@ -967,7 +967,7 @@ CREATE TABLE track_annotations (
 );
 
 CREATE TABLE track_regions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     track_id UUID NOT NULL,
     user_id UUID NOT NULL,
     start_time_ms INTEGER NOT NULL,
@@ -982,7 +982,7 @@ CREATE TABLE track_regions (
 );
 
 CREATE TABLE training_programs (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
@@ -998,7 +998,7 @@ CREATE TABLE training_programs (
 );
 
 CREATE TABLE user_drill_stats (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     drill_id UUID NOT NULL,
     total_attempts INTEGER NOT NULL,
@@ -1012,7 +1012,7 @@ CREATE TABLE user_drill_stats (
 );
 
 CREATE TABLE user_interests (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     interest_key TEXT NOT NULL,
     interest_label TEXT NOT NULL,
@@ -1020,7 +1020,7 @@ CREATE TABLE user_interests (
 );
 
 CREATE TABLE user_onboarding_responses (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     step_id UUID NOT NULL,
     response JSONB NOT NULL,
@@ -1028,7 +1028,7 @@ CREATE TABLE user_onboarding_responses (
 );
 
 CREATE TABLE user_onboarding_state (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     flow_id UUID NOT NULL,
     current_step_id UUID,
@@ -1042,7 +1042,7 @@ CREATE TABLE user_onboarding_state (
 );
 
 CREATE TABLE user_quest_progress (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     quest_id UUID NOT NULL,
     status TEXT NOT NULL,
@@ -1057,7 +1057,7 @@ CREATE TABLE user_quest_progress (
 );
 
 CREATE TABLE user_references (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     title TEXT NOT NULL,
     content TEXT,
@@ -1071,7 +1071,7 @@ CREATE TABLE user_references (
 );
 
 CREATE TABLE user_rewards (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     reward_type TEXT NOT NULL,
     source_id UUID,
@@ -1084,7 +1084,7 @@ CREATE TABLE user_rewards (
 );
 
 CREATE TABLE user_streaks (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     streak_type TEXT NOT NULL,
     current_streak INTEGER NOT NULL,
@@ -1095,7 +1095,7 @@ CREATE TABLE user_streaks (
 );
 
 CREATE TABLE workout_sections (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     workout_id UUID NOT NULL,
     name TEXT NOT NULL,
     section_type TEXT,
@@ -1103,15 +1103,15 @@ CREATE TABLE workout_sections (
 );
 
 CREATE TABLE workouts (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
     estimated_duration INTEGER,
     difficulty TEXT,
     category TEXT,
-    is_template BOOLEAN NOT NULL DEFAULT false,
-    is_public BOOLEAN NOT NULL DEFAULT false,
+    is_template BOOLEAN NOT NULL,
+    is_public BOOLEAN NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

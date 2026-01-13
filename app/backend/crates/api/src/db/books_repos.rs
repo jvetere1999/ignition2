@@ -94,8 +94,8 @@ impl BookRepo {
 
         let book = sqlx::query_as::<_, Book>(
             r#"
-            INSERT INTO books (user_id, title, author, total_pages, status)
-            VALUES ($1, $2, $3, $4, $5)
+            INSERT INTO books (user_id, title, author, total_pages, status, current_page)
+            VALUES ($1, $2, $3, $4, $5, 0)
             RETURNING id, user_id, title, author, total_pages, current_page,
                       status, started_at, completed_at, rating, notes,
                       cover_blob_id, created_at, updated_at

@@ -6,6 +6,7 @@ use std::sync::Arc;
 
 use axum::{
     extract::{Extension, Path, State},
+    http::StatusCode,
     routing::{get, post},
     Json, Router,
 };
@@ -22,6 +23,7 @@ use crate::state::AppState;
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/", get(list_habits).post(create_habit))
+        .route("/archived", get(list_archived_habits))
         .route("/{id}/complete", post(complete_habit))
 }
 
@@ -60,16 +62,27 @@ async fn list_habits(
     Ok(Json(HabitsListWrapper { habits: result.habits, total: result.total }))
 }
 
+/// GET /habits/archived
+/// List archived habits
+async fn list_archived_habits(
+    State(state): State<Arc<AppState>>,
+    Extension(user): Extension<User>,
+) -> Result<Json<HabitsListWrapper>, AppError> {
+    let result = HabitsRepo::list_archived(&state.db, user.id).await?;
+
+    Ok(Json(HabitsListWrapper { habits: result.habits, total: result.total }))
+}
+
 /// POST /habits
 /// Create a new habit
 async fn create_habit(
     State(state): State<Arc<AppState>>,
     Extension(user): Extension<User>,
     Json(req): Json<CreateHabitRequest>,
-) -> Result<Json<HabitResponseWrapper>, AppError> {
+) -> Result<(StatusCode, Json<HabitResponseWrapper>), AppError> {
     let habit = HabitsRepo::create(&state.db, user.id, &req).await?;
 
-    Ok(Json(HabitResponseWrapper {
+    Ok((StatusCode::CREATED, Json(HabitResponseWrapper {
         habit: HabitResponse {
             id: habit.id,
             name: habit.name,
@@ -85,7 +98,7 @@ async fn create_habit(
             completed_today: false,
             sort_order: habit.sort_order,
         },
-    }))
+    })))
 }
 
 #[derive(Debug, Deserialize)]
