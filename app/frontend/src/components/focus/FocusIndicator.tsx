@@ -138,7 +138,23 @@ export function FocusIndicator() {
     try {
       const response = await safeFetch(`${API_BASE_URL}/api/focus/active`);
       if (response.ok) {
-        const data = await response.json() as { active?: { session?: { id: string; started_at: string; duration_seconds: number; status: string; mode: string } | null; pause_state?: { mode?: string | null; time_remaining_seconds?: number | null; paused_at?: string | null } | null } };
+        const data = await response.json() as {
+          active?: {
+            session?: {
+              id: string;
+              started_at: string;
+              duration_seconds: number;
+              status: string;
+              mode: string;
+              expires_at?: string | null;
+            } | null;
+            pause_state?: {
+              mode?: string | null;
+              time_remaining_seconds?: number | null;
+              paused_at?: string | null;
+            } | null;
+          };
+        };
         if (data.active?.session && data.active.session.status === "active") {
           const mappedSession: FocusSession = {
             id: data.active.session.id,
@@ -146,6 +162,7 @@ export function FocusIndicator() {
             planned_duration: data.active.session.duration_seconds,
             status: "active",
             mode: data.active.session.mode as FocusSession["mode"],
+            expires_at: data.active.session.expires_at ?? null,
           };
           setSession(mappedSession);
           setPausedState(null); // Clear paused state if there's an active session
