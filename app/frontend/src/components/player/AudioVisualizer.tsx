@@ -53,7 +53,9 @@ export function AudioVisualizer({ audioElement, isPlaying, onClose }: AudioVisua
         analyzerRef.current.connect(audioContext.destination);
       }
     } catch (error) {
-      console.error("Failed to initialize audio context:", error);
+      // Audio context initialization may fail on some devices or contexts
+      // Visualizer will not render, but playback continues normally
+      console.debug("Audio visualizer initialization failed (non-critical):", error);
     }
 
     return () => {

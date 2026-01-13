@@ -419,7 +419,7 @@ async fn signout(
         .status(StatusCode::OK)
         .header(header::SET_COOKIE, cookie)
         .body(axum::body::Body::empty())
-        .unwrap()
+        .expect("Logout response construction with static header should never fail")
 }
 
 #[derive(Deserialize)]

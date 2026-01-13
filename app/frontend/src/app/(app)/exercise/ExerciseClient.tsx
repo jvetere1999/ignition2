@@ -314,7 +314,15 @@ export function ExerciseClient() {
         };
         setActiveSession((prev) => prev ? { ...prev, sets: [...prev.sets, newSet] } : null);
         if (data.newPR) {
-          alert(`New Personal Record! ${weight} lbs for ${reps} reps!`);
+          // Show notification for new personal record instead of alert()
+          if ("Notification" in window && Notification.permission === "granted") {
+            new Notification("New Personal Record!", {
+              body: `${weight} lbs for ${reps} reps!`,
+              icon: "/icon-192.png",
+            });
+          } else {
+            console.info(`New Personal Record! ${weight} lbs for ${reps} reps!`);
+          }
           loadData();
         }
       }

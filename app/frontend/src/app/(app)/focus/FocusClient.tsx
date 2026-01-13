@@ -347,7 +347,11 @@ export function FocusClient({ initialStats, initialSession }: FocusClientProps) 
           }
         }
       })
-      .catch(console.error);
+      .catch((err) => {
+        // Pause state load failed, but app continues with defaults
+        // This is non-critical since timer still works
+        console.debug("Pause state load failed (non-critical):", err);
+      });
   }, []);
 
   // Save paused state to D1 (source of truth)
@@ -374,7 +378,10 @@ export function FocusClient({ initialStats, initialSession }: FocusClientProps) 
           mode,
           timeRemaining,
         }),
-      }).catch((err) => console.error("Failed to sync pause state:", err));
+      }).catch((err) => {
+        // Pause state save is best-effort; app continues with in-memory state
+        console.debug("Pause state save failed (non-critical):", err);
+      });
     } else if (status === "running" || status === "idle") {
       // Clear paused state when running or idle
       if (typeof localStorage !== "undefined") {
@@ -387,7 +394,10 @@ export function FocusClient({ initialStats, initialSession }: FocusClientProps) 
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "clear" }),
-      }).catch((err) => console.error("Failed to clear pause state:", err));
+      }).catch((err) => {
+        // Pause state clear is best-effort; app continues with in-memory state
+        console.debug("Pause state clear failed (non-critical):", err);
+      });
     }
   }, [status, mode, timeRemaining]);
 
@@ -406,9 +416,19 @@ export function FocusClient({ initialStats, initialSession }: FocusClientProps) 
     // Play notification sound (optional)
     try {
       const audio = new Audio("/sounds/timer-complete.mp3");
-      audio.play().catch(() => {});
-    } catch {
-      // Ignore audio errors
+      audio.play().catch((err) => {
+        // Audio playback may fail on some devices (e.g., muted, unsupported)
+        // This is not critical, notification dialog still shows
+        if (process.env.NODE_ENV === "development") {
+          console.debug("Audio notification failed (non-critical):", err);
+        }
+      });
+    } catch (err) {
+      // Audio initialization may fail on restricted contexts
+      // This is not critical, notification dialog still shows
+      if (process.env.NODE_ENV === "development") {
+        console.debug("Audio initialization failed (non-critical):", err);
+      }
     }
 
     // Show notification

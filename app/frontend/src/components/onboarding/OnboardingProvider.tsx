@@ -11,15 +11,34 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { getOnboardingState, type OnboardingResponse } from "@/lib/api/onboarding";
 import { OnboardingModal } from "./OnboardingModal";
 
-export function OnboardingProvider() {
+interface OnboardingContextType {
+  isVisible: boolean;
+  currentStep: unknown; // OnboardingStep or null
+  currentStepIndex: number;
+  completeStep: () => Promise<void>;
+  skipOnboarding: () => Promise<void>;
+}
+
+const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
+
+export function useOnboarding() {
+  const context = useContext(OnboardingContext);
+  if (!context) {
+    throw new Error("useOnboarding must be used within OnboardingProvider");
+  }
+  return context;
+}
+
+export function OnboardingProvider({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [onboarding, setOnboarding] = useState<OnboardingResponse | null>(null);
   const [checked, setChecked] = useState(false);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   useEffect(() => {
     if (isLoading || !isAuthenticated || checked) return;
@@ -37,43 +56,64 @@ export function OnboardingProvider() {
     checkOnboarding();
   }, [isLoading, isAuthenticated, checked]);
 
+  const handleCompleteStep = useCallback(async () => {
+    if (!onboarding?.flow?.steps) return;
+    const nextIndex = currentStepIndex + 1;
+    if (nextIndex < onboarding.flow.steps.length) {
+      setCurrentStepIndex(nextIndex);
+    } else {
+      // All steps completed
+      await handleSkipOnboarding();
+    }
+  }, [onboarding, currentStepIndex]);
+
+  const handleSkipOnboarding = useCallback(async () => {
+    try {
+      await getOnboardingState(); // Mark as skipped via API call
+      setOnboarding(null);
+    } catch (error) {
+      console.error("Failed to skip onboarding:", error);
+    }
+  }, []);
+
   // Don't render if not authenticated or still loading
   if (!isAuthenticated || !user) {
-    return null;
+    return children;
   }
 
   // Don't render if we haven't checked yet
   if (!checked || !onboarding) {
-    return null;
+    return children;
   }
 
   // Don't render if onboarding not needed
   if (!onboarding.needs_onboarding) {
-    return null;
+    return children;
   }
 
   // Don't render if already completed or skipped
   if (onboarding.state?.status === "completed" || onboarding.state?.status === "skipped") {
-    return null;
+    return children;
   }
 
   // Don't render if no flow
   if (!onboarding.flow) {
-    return null;
+    return children;
   }
 
   // Provide context to children - modal will render based on context state
   return (
     <OnboardingContext.Provider
       value={{
-        isVisible: true, // Modal shows when conditions are met above
-        currentStep: onboarding.flow?.steps[0] || null,
-        currentStepIndex: 0,
+        isVisible: true,
+        currentStep: onboarding.flow?.steps[currentStepIndex] || null,
+        currentStepIndex,
         completeStep: handleCompleteStep,
         skipOnboarding: handleSkipOnboarding,
       }}
     >
       {children}
+      <OnboardingModal />
     </OnboardingContext.Provider>
   );
 }

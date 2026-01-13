@@ -143,11 +143,8 @@ jobs:
           retention-days: 30
 
   build-and-deploy-backend:
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      contains(github.event.head_commit.modified, 'app/backend/') ||
-      contains(github.event.head_commit.modified, 'app/database/')
-    needs: [pre-deployment-checks, wipe-and-rebuild-neon]
+    if: always()
+    needs: [pre-deployment-checks]
     env:
       SKIP_MIGRATIONS: 'true'
     runs-on: ubuntu-latest
@@ -200,9 +197,7 @@ jobs:
         run: flyctl logs --app ignition-api --no-tail | tail -50
 
   deploy-frontend:
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      contains(github.event.head_commit.modified, 'app/frontend/')
+    if: always() && needs.build-and-deploy-backend.result == 'success'
     needs: build-and-deploy-backend
     runs-on: ubuntu-latest
     environment:
@@ -250,9 +245,7 @@ jobs:
           exit 1
 
   deploy-admin:
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      contains(github.event.head_commit.modified, 'app/admin/')
+    if: always() && needs.build-and-deploy-backend.result == 'success'
     needs: build-and-deploy-backend
     runs-on: ubuntu-latest
     environment:
@@ -278,7 +271,7 @@ jobs:
         working-directory: ./app/admin
         env:
           NEXT_PUBLIC_API_URL: https://api.ecent.online
-        run: npx @opennextjs/cloudflare build
+        run: npm run build:worker
       
       - name: Deploy to Cloudflare Workers
         working-directory: ./app/admin

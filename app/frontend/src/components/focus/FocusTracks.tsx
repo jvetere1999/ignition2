@@ -29,6 +29,7 @@ interface Library {
   name: string;
   tracks: ReferenceTrack[];
   createdAt: string;
+  library_type?: string;
 }
 
 function formatDuration(ms: number): string {
@@ -52,7 +53,7 @@ export function FocusTracks() {
         // Find the "Focus" library from backend
         // Get the first library as default focus library
         if (response.items && response.items.length > 0) {
-          const focusLib = response.items.find((lib: any) => lib.library_type === 'focus') || response.items[0];
+          const focusLib = response.items.find((lib: Library) => lib.library_type === 'focus') || response.items[0];
           setFocusLibrary(focusLib);
         } else {
           // No libraries exist yet - user hasn't created any

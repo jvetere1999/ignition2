@@ -765,7 +765,12 @@ export function AudioSegment({
 
       // Cleanup AudioContext
       if (audioCtxRef.current) {
-        audioCtxRef.current.close().catch(() => {});
+        audioCtxRef.current.close().catch((err) => {
+          // Audio context close failure is non-critical
+          if (process.env.NODE_ENV === "development") {
+            console.debug("Audio context close failed (non-critical):", err);
+          }
+        });
       }
     };
   }, []);

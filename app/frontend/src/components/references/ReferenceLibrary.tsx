@@ -124,11 +124,11 @@ export function ReferenceLibrary() {
         const response = await listReferences(1, 100);
         
         // Map backend reference data to library format
-        const mappedLibraries: Library[] = response.items.map((ref: any) => ({
+        const mappedLibraries: Library[] = response.items.map((ref: { id: string; title: string; category?: string }) => ({
           id: ref.id,
-          name: ref.name || 'Untitled Library',
+          name: ref.title || 'Untitled Reference',
           tracks: [], // Tracks will be loaded separately from IndexedDB
-          libraryType: ref.library_type || 'reference'
+          createdAt: new Date().toISOString()
         }));
         
         setLibraries(mappedLibraries);
