@@ -1169,3 +1169,8 @@ CREATE INDEX idx_user_progress_user_id ON user_progress(user_id);
 CREATE INDEX idx_activity_events_created_at ON activity_events(created_at);
 CREATE INDEX idx_focus_sessions_started_at ON focus_sessions(started_at);
 CREATE INDEX idx_habit_completions_completed_at ON habit_completions(completed_at);
+
+-- Performance optimizations (Quick Wins)
+CREATE INDEX idx_daily_plans_user_date ON daily_plans(user_id, date DESC);
+CREATE INDEX idx_habit_completions_user_date ON habit_completions(user_id, completed_at DESC);
+CREATE INDEX idx_user_settings_config_gin ON user_settings USING gin(config_json);

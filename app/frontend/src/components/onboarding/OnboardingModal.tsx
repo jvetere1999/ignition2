@@ -468,6 +468,8 @@ export function OnboardingModal({ initialState, flow, userId }: OnboardingModalP
     completeStep(data);
   };
 
+  // Modal visibility controlled by OnboardingProvider context
+  // Will only render when user is in active onboarding flow
   if (!isVisible || !currentStep) {
     return null;
   }

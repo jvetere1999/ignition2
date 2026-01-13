@@ -581,7 +581,7 @@ impl WorkoutSessionRepo {
             },
             xp_awarded: xp,
             coins_awarded: coins,
-            personal_records: vec![], // TODO: Check for PRs
+            personal_records: Self::get_personal_records(&pool, user_id, session.id).await.unwrap_or_default(),
         })
     }
 
@@ -605,6 +605,52 @@ impl WorkoutSessionRepo {
         .await?;
 
         Ok(session)
+    }
+
+    /// Get personal records achieved in a session
+    pub async fn get_personal_records(
+        pool: &PgPool,
+        user_id: Uuid,
+        session_id: Uuid,
+    ) -> Result<Vec<PersonalRecordResponse>, AppError> {
+        let records = sqlx::query_as::<_, PersonalRecord>(
+            r#"
+            SELECT id, user_id, exercise_id, record_type, value, reps,
+                   achieved_at, exercise_set_id, previous_value, created_at
+            FROM personal_records
+            WHERE user_id = $1 AND exercise_set_id IN (
+                SELECT id FROM exercise_sets WHERE session_id = $2
+            )
+            ORDER BY achieved_at DESC
+            "#,
+        )
+        .bind(user_id)
+        .bind(session_id)
+        .fetch_all(pool)
+        .await?;
+
+        // Convert to response format with exercise names
+        let mut responses = Vec::new();
+        for record in records {
+            let exercise = sqlx::query_as::<_, Exercise>(
+                "SELECT id, name, description, category, muscle_groups, equipment, instructions, video_url, is_custom, is_builtin, user_id, created_at FROM exercises WHERE id = $1"
+            )
+            .bind(record.exercise_id)
+            .fetch_optional(pool)
+            .await?;
+
+            if let Some(exercise) = exercise {
+                responses.push(PersonalRecordResponse {
+                    exercise_name: exercise.name,
+                    record_type: record.record_type,
+                    new_value: record.value,
+                    previous_value: record.previous_value,
+                    improvement: record.previous_value.map(|prev| record.value - prev),
+                });
+            }
+        }
+
+        Ok(responses)
     }
 }
 

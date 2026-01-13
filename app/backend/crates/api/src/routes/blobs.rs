@@ -150,7 +150,7 @@ async fn get_blob(
                 .status(StatusCode::OK)
                 .header(header::CONTENT_TYPE, content_type)
                 .body(body)
-                .unwrap())
+                .map_err(|e| AppError::Internal(format!("Failed to build response: {}", e)))?)
         }
         None => Err(AppError::NotFound(format!("Blob {} not found", id))),
     }

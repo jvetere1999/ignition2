@@ -1,12 +1,12 @@
 /**
- * OnboardingProvider - DISABLED (2026-01-11)
+ * OnboardingProvider - ENABLED (2026-01-13)
  *
- * Onboarding modal feature has been disabled per user selection (Option C).
- * Users now add daily plan items manually instead of via guided onboarding.
+ * Onboarding modal feature is enabled and provides guided setup for new users.
+ * Displays onboarding flow when conditions are met (new user, active onboarding state).
  *
- * Component structure remains intact but always returns null.
- * Backend API still works for onboarding state management.
- * Can be re-enabled in the future if needed.
+ * Backend API: GET /api/onboarding/state, POST /api/onboarding/step
+ * Context provides: isVisible, currentStep, completeStep, skipOnboarding
+ * Modal renders within context when all validation passes.
  */
 
 "use client";
@@ -62,11 +62,19 @@ export function OnboardingProvider() {
     return null;
   }
 
-  // DISABLED (2026-01-11): Onboarding modal rendering intentionally disabled
-  // Decision: Option C - Manual plan entry only
-  // Rationale: Users prefer manual control over guided setup
-  // The API returns data but we don't render the modal
-  // Backend still manages onboarding state for analytics/tracking
-  return null;
+  // Provide context to children - modal will render based on context state
+  return (
+    <OnboardingContext.Provider
+      value={{
+        isVisible: true, // Modal shows when conditions are met above
+        currentStep: onboarding.flow?.steps[0] || null,
+        currentStepIndex: 0,
+        completeStep: handleCompleteStep,
+        skipOnboarding: handleSkipOnboarding,
+      }}
+    >
+      {children}
+    </OnboardingContext.Provider>
+  );
 }
 

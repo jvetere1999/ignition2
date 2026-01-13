@@ -227,7 +227,10 @@ async fn admin_claim(
             .status(StatusCode::OK)
             .header(header::SET_COOKIE, cookie)
             .header(header::CONTENT_TYPE, "application/json")
-            .body(axum::body::Body::from(serde_json::to_string(&response).unwrap()))
+            .body(axum::body::Body::from(
+                serde_json::to_string(&response)
+                    .map_err(|e| AppError::Internal(format!("Failed to serialize response: {}", e)))?
+            ))
             .map_err(|e| AppError::Internal(e.to_string()))?;
 
         return Ok(response);

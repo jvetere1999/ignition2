@@ -6,9 +6,11 @@
  * User account, settings, and admin controls.
  */
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { signOut } from "@/lib/auth/api-auth";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { safeFetch } from "@/lib/api/client";
 import styles from "./MobileMe.module.css";
 
 interface MobileMeClientProps {
@@ -23,7 +25,25 @@ interface MobileMeClientProps {
 export function MobileMeClient({ user: propUser, isAdmin: propIsAdmin }: MobileMeClientProps = {}) {
   const { user: authUser } = useAuth();
   const user = propUser || authUser;
-  const isAdmin = propIsAdmin ?? false; // TODO: Check admin status via API
+  const [isAdmin, setIsAdmin] = useState(propIsAdmin ?? false);
+  
+  // Check admin status via API on mount if not provided
+  useEffect(() => {
+    if (propIsAdmin === undefined && authUser?.id) {
+      const checkAdminStatus = async () => {
+        try {
+          const response = await safeFetch('/api/user/admin-status');
+          if (response.ok) {
+            const data = await response.json() as { is_admin: boolean };
+            setIsAdmin(data.is_admin);
+          }
+        } catch (error) {
+          console.error('Failed to check admin status:', error);
+        }
+      };
+      checkAdminStatus();
+    }
+  }, [authUser?.id, propIsAdmin]);
   
   const handleSignOut = async () => {
     await signOut();

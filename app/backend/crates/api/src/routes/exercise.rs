@@ -195,7 +195,10 @@ async fn seed_exercises(
     Extension(user): Extension<User>,
     Json(exercises): Json<Vec<CreateExerciseRequest>>,
 ) -> Result<Json<SeedResult>, AppError> {
-    // TODO: Check admin role
+    // Check admin role
+    if !user.is_admin() {
+        return Err(AppError::Unauthorized("Admin access required".to_string()));
+    }
     let _ = user;
     let count = ExerciseRepo::seed_builtin(&state.db, exercises).await?;
     Ok(Json(SeedResult {

@@ -11,9 +11,12 @@ import { formatTime, type QueueTrack } from "@/lib/player";
 import {
   getCachedAnalysis,
   generateContentHash,
+  saveAnalysisToCache,
   type CachedAnalysis,
 } from "@/lib/player/analysis-cache";
 import styles from "./TrackAnalysisPopup.module.css";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.ecent.online";
 
 interface TrackAnalysisPopupProps {
   track: QueueTrack;
@@ -83,16 +86,27 @@ export function TrackAnalysisPopup({
             return;
           }
 
-          // TODO: If not cached, compute analysis here
-          // For now, create a placeholder
-          const newAnalysis: CachedAnalysis = {
-            id: track.id,
-            contentHash,
-            name: track.title,
-            durationMs: duration ? Math.round(duration * 1000) : undefined,
-          };
-
-          setAnalysis(newAnalysis);
+          // Fetch fresh analysis from backend
+          // Backend computes analysis asynchronously if not already cached
+          const analysisRes = await fetch(`${API_BASE_URL}/api/references/${track.id}/analysis`, {
+            credentials: 'include',
+          });
+          
+          if (analysisRes.ok) {
+            const analysisData = await analysisRes.json() as CachedAnalysis;
+            setAnalysis(analysisData);
+            // Cache the result for future use
+            await saveAnalysisToCache(analysisData);
+          } else {
+            // Fallback: Create minimal analysis if backend call fails
+            const newAnalysis: CachedAnalysis = {
+              id: track.id,
+              contentHash,
+              name: track.title,
+              durationMs: duration ? Math.round(duration * 1000) : undefined,
+            };
+            setAnalysis(newAnalysis);
+          }
         }
       } catch (e) {
         console.error("Failed to load analysis:", e);

@@ -7170,5 +7170,31 @@
         }
       ]
     }
+  },
+  "indexes": {
+    "daily_plans": [
+      {
+        "name": "idx_daily_plans_user_date",
+        "columns": ["user_id", "date DESC"],
+        "type": "btree",
+        "unique": false
+      }
+    ],
+    "habit_completions": [
+      {
+        "name": "idx_habit_completions_user_date",
+        "columns": ["user_id", "completed_at DESC"],
+        "type": "btree",
+        "unique": false
+      }
+    ],
+    "user_settings": [
+      {
+        "name": "idx_user_settings_config_gin",
+        "columns": ["config_json"],
+        "type": "gin",
+        "unique": false
+      }
+    ]
   }
 }

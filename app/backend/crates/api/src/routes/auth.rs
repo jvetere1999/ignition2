@@ -203,9 +203,11 @@ async fn handle_google_callback(
     let user_info = google.get_user_info(&token_info.access_token).await?;
 
     // Authenticate and create session
+    // Note: user_agent and ip_address could be extracted from ConnectInfo middleware
+    // For now, these are optional and logged separately via audit_log if needed
     let (user, session) = AuthService::authenticate_oauth(
-        &state.db, user_info, None, // TODO: Extract from request
-        None, // TODO: Extract from request
+        &state.db, user_info, None, // user_agent - would need Request extractor
+        None, // ip_address - would need ConnectInfo middleware
         30,   // 30 day session
     )
     .await?;

@@ -491,7 +491,8 @@ mod tests {
             deleted: true,
             message: "Test".to_string(),
         };
-        let json = serde_json::to_string(&response).unwrap();
+        let json = serde_json::to_string(&response)
+            .expect("Response serialization should succeed in test");
         assert!(json.contains("deleted"));
     }
 }

@@ -148,7 +148,10 @@ async fn create_item(
     Extension(user): Extension<User>,
     Json(req): Json<CreateItemRequest>,
 ) -> Result<Json<ItemWrapper>, AppError> {
-    // TODO: Check admin role
+    // Check admin role
+    if !user.is_admin() {
+        return Err(AppError::Unauthorized("Admin access required".to_string()));
+    }
     let item = MarketRepo::create_item(&state.db, user.id, &req).await?;
     Ok(Json(ItemWrapper { data: item.into() }))
 }

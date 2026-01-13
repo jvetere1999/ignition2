@@ -64,7 +64,9 @@ interface Library {
 // Now using backend API: GET /api/references for metadata
 // Audio files remain in IndexedDB for local access
 function loadLibrariesFromBackend(): Library[] {
-  // Placeholder: will be fetched from /api/references in useEffect
+  // NOTE: This function returns empty array.
+  // Actual data is fetched from backend in useEffect via getLibrariesFromBackend()
+  // Backend: GET /api/references - returns { libraries: Library[] }
   return [];
 }
 
@@ -121,9 +123,15 @@ export function ReferenceLibrary() {
         // Fetch library metadata from backend
         const response = await listReferences(1, 100);
         
-        // TODO: Map backend reference data to library format
-        // For now, we'll use empty libraries as placeholder
-        setLibraries([]);
+        // Map backend reference data to library format
+        const mappedLibraries: Library[] = response.items.map((ref: any) => ({
+          id: ref.id,
+          name: ref.name || 'Untitled Library',
+          tracks: [], // Tracks will be loaded separately from IndexedDB
+          libraryType: ref.library_type || 'reference'
+        }));
+        
+        setLibraries(mappedLibraries);
       } catch (error) {
         console.error("Failed to load libraries from backend:", error);
         setLibraries([]);

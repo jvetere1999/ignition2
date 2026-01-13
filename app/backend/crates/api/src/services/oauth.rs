@@ -65,7 +65,9 @@ impl GoogleOAuth {
             csrf_token: csrf_token.secret().clone(),
             pkce_verifier: pkce_verifier.secret().clone(),
             provider: OAuthProvider::Google,
-            redirect_uri: self.client.redirect_url().unwrap().to_string(),
+            redirect_uri: self.client.redirect_url()
+                .ok_or_else(|| AppError::Config("Google OAuth redirect URL not configured".to_string()))?
+                .to_string(),
         };
 
         (auth_url.to_string(), state)
@@ -184,7 +186,9 @@ impl AzureOAuth {
             csrf_token: csrf_token.secret().clone(),
             pkce_verifier: pkce_verifier.secret().clone(),
             provider: OAuthProvider::Azure,
-            redirect_uri: self.client.redirect_url().unwrap().to_string(),
+            redirect_uri: self.client.redirect_url()
+                .ok_or_else(|| AppError::Config("Azure OAuth redirect URL not configured".to_string()))?
+                .to_string(),
         };
 
         (auth_url.to_string(), state)

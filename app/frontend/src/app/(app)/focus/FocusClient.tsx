@@ -231,12 +231,13 @@ export function FocusClient({ initialStats, initialSession }: FocusClientProps) 
           totalSessions?: number;
           completedSessions?: number;
           totalFocusTime?: number;
+          streak_days?: number;
         };
         setStats({
           totalSessions: data.totalSessions || 0,
           completedSessions: data.completedSessions || 0,
           totalFocusTime: data.totalFocusTime || 0,
-          streak: 0, // TODO: Calculate streak
+          streak: data.streak_days || 0, // From user_streaks.current_streak in sync
         });
       }
     } catch (error) {

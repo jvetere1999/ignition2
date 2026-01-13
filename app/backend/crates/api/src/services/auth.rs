@@ -320,7 +320,8 @@ impl DevBypassAuth {
     /// Get dev bypass user info
     pub fn get_dev_user() -> (Uuid, String, String, String) {
         (
-            Uuid::parse_str("00000000-0000-0000-0000-000000000001").unwrap(),
+            Uuid::parse_str("00000000-0000-0000-0000-000000000001")
+                .expect("Invalid hardcoded UUID for dev user"),
             "dev@localhost".to_string(),
             "Local Dev User".to_string(),
             "admin".to_string(), // Admin for full access during dev

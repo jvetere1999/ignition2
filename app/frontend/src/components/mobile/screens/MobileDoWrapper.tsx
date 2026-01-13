@@ -62,12 +62,20 @@ export function MobileDoWrapper({ userId }: MobileDoWrapperProps) {
           // Extract focus status from sync response
           const focusActive = !!syncData.focus.active_session;
           
-          // For plan data, we still need to fetch separately (not in sync yet)
-          // TODO: Add plan data to /api/sync/poll when available
-          const planRes = await fetch(`${API_BASE_URL}/api/daily-plan`, {
-            credentials: 'include',
-          });
-          const planData = planRes.ok ? await planRes.json() as PlanDataResponse : null;
+          // Plan data now included in sync response under daily_plan
+          let planData = syncData.daily_plan || null;
+          
+          // Fallback fetch if plan data not yet in sync
+          if (!planData) {
+            try {
+              const planRes = await fetch(`${API_BASE_URL}/api/daily-plan`, {
+                credentials: 'include',
+              });
+              planData = planRes.ok ? await planRes.json() as PlanDataResponse : null;
+            } catch (e) {
+              planData = null;
+            }
+          }
           
           // Find next incomplete item
           const incompleteItem = planData?.items?.find(

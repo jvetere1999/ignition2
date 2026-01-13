@@ -50,12 +50,17 @@ export function FocusTracks() {
       try {
         const response = await listFocusLibraries(1, 100);
         // Find the "Focus" library from backend
-        // For now, we'll get the first library as default
-        // Once backend track storage is ready, this will work properly
-        // TODO: Implement track storage in focus libraries
-        setFocusLibrary(null); // Placeholder until backend track support
+        // Get the first library as default focus library
+        if (response.items && response.items.length > 0) {
+          const focusLib = response.items.find((lib: any) => lib.library_type === 'focus') || response.items[0];
+          setFocusLibrary(focusLib);
+        } else {
+          // No libraries exist yet - user hasn't created any
+          setFocusLibrary(null);
+        }
       } catch (error) {
         console.error("Failed to load focus libraries:", error);
+        setFocusLibrary(null);
       } finally {
         setIsLoading(false);
       }
@@ -93,7 +98,7 @@ export function FocusTracks() {
   const handleCreateLibrary = useCallback(async () => {
     try {
       const newLibrary = await createFocusLibrary(FOCUS_LIBRARY_NAME);
-      setFocusLibrary(null); // Placeholder until backend track support
+      setFocusLibrary(null); // NOTE: Backend track persistence not yet implemented
     } catch (error) {
       console.error("Failed to create focus library:", error);
     }
