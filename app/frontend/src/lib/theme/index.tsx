@@ -8,7 +8,6 @@
 
 "use client";
 
-import { safeFetch } from "@/lib/api/client";
 import {
   createContext,
   useContext,

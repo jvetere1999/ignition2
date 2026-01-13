@@ -48,7 +48,7 @@ export function AdUnit({
         (window.adsbygoogle = window.adsbygoogle || []).push({});
         pushed.current = true;
       }
-    } catch (error) {
+    } catch {
       // AdSense not loaded or blocked - fail silently
       console.warn("AdSense not available");
     }

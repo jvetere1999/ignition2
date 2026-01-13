@@ -4,7 +4,7 @@
  * Tests the sync logic for offline-first data management.
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 describe('Sync Engine', () => {
   describe('Change Detection', () => {

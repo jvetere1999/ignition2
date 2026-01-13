@@ -13,8 +13,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online';
-
 /**
  * Public routes that don't require authentication
  * Using a Set for O(1) exact match lookup

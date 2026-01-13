@@ -28,7 +28,6 @@ import {
 } from "react";
 import {
   pollAll,
-  type PollResponse,
   type ProgressData,
   type BadgeData,
   type FocusStatusData,
@@ -68,7 +67,6 @@ const SyncStateContext = createContext<SyncStateContextValue | null>(null);
 // ============================================
 
 const POLL_INTERVAL_MS = 30000; // 30 seconds
-const RETRY_DELAY_MS = 5000; // 5 seconds after error
 
 // ============================================
 // Provider Component
