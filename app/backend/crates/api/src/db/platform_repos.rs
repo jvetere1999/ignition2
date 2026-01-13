@@ -1499,7 +1499,10 @@ impl UserSettingsRepo {
         .await?;
 
         match settings {
-            Some(s) => Ok(Self::to_response(s, s.theme.clone())),
+            Some(s) => {
+                let theme = s.theme.clone();
+                Ok(Self::to_response(s, theme))
+            },
             None => Ok(UserSettingsResponse {
                 notifications_enabled: true,
                 email_notifications: true,
