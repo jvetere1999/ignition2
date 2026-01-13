@@ -37,7 +37,6 @@ on:
 ```yaml
 workflow_dispatch:
   inputs:
-    skip_db:        # Can skip database rebuild
     skip_frontend:  # Can skip frontend
     skip_admin:     # Can skip admin
 ```
@@ -65,20 +64,17 @@ if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
 
 **Exit Behavior**: If any step fails → entire workflow stops
 
-### ✅ Job 2: `wipe-and-rebuild-neon` (Conditional)
+### ✅ Job 2: `wipe-and-rebuild-neon` (Always runs)
 
 **Trigger**:
 ```yaml
 if: |
   github.event_name == 'workflow_dispatch' ||
-  contains(github.event.head_commit.modified, 'app/backend/migrations/') ||
-  contains(github.event.head_commit.modified, 'app/database/') ||
-  contains(github.event.head_commit.modified, 'schema.json') ||
-  contains(github.event.head_commit.modified, 'tools/schema-generator/')
+  github.event_name == 'push'
 needs: pre-deployment-checks
 ```
 
-**Status**: ✅ Will run if database-related changes OR manual trigger
+**Status**: ✅ Runs for every production deployment (push or manual)
 
 **Tasks**:
 1. Drops and recreates Neon schema
@@ -343,4 +339,3 @@ The workflow expects these GitHub Secrets to exist:
 - GitHub → Actions tab
 - Click running workflow
 - Monitor each job (typically 10-15 min)
-

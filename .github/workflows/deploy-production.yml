@@ -13,10 +13,6 @@ on:
       - '.github/workflows/deploy-production.yml'
   workflow_dispatch:
     inputs:
-      skip_db:
-        description: 'Skip database rebuild (use incremental migrations)'
-        type: boolean
-        default: false
       skip_frontend:
         description: 'Skip frontend deployment'
         type: boolean
@@ -70,13 +66,8 @@ jobs:
 
   wipe-and-rebuild-neon:
     if: |
-      (github.event_name == 'workflow_dispatch' && inputs.skip_db != true) ||
-      (github.event_name == 'push' && (
-        contains(github.event.head_commit.modified, 'app/backend/migrations/') ||
-        contains(github.event.head_commit.modified, 'app/database/') ||
-        contains(github.event.head_commit.modified, 'schema.json') ||
-        contains(github.event.head_commit.modified, 'tools/schema-generator/')
-      ))
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'push'
     needs: pre-deployment-checks
     runs-on: ubuntu-latest
     environment:
@@ -145,7 +136,7 @@ jobs:
 
   build-and-deploy-backend:
     if: always()
-    needs: [pre-deployment-checks]
+    needs: [pre-deployment-checks, wipe-and-rebuild-neon]
     env:
       SKIP_MIGRATIONS: 'true'
     runs-on: ubuntu-latest
