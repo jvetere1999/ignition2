@@ -973,7 +973,7 @@ impl LearnRepo {
 
         let synth = req.synth.as_deref().unwrap_or(&existing.synth);
         let patch_name = req.patch_name.as_deref().unwrap_or(&existing.patch_name);
-        let tags = req.tags.as_ref().unwrap_or(&existing.tags);
+        let tags = req.tags.clone().or(existing.tags.clone());
         let notes = req.notes.as_ref().or(existing.notes.as_ref());
         let what_learned = req.what_learned.as_ref().or(existing.what_learned.as_ref());
         let what_broke = req.what_broke.as_ref().or(existing.what_broke.as_ref());

@@ -15,7 +15,7 @@ use axum::{
     Extension, Json, Router,
 };
 use chrono::{DateTime, Utc};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::db::admin_models::*;
