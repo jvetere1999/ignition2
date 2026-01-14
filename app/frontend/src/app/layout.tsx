@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/shell/SiteFooter";
 import { ErrorNotifications } from "@/components/ui/ErrorNotifications";
 import { ErrorNotificationInitializer } from "@/components/ui/ErrorNotificationInitializer";
 import { ZenBrowserInitializer } from "@/components/browser/ZenBrowserInitializer";
+import { OnboardingGate } from "@/components/onboarding/OnboardingGate";
 import "@/styles/tokens.css";
 import "./globals.css";
 import "./zen-browser.css";
@@ -139,10 +140,12 @@ export default function RootLayout({
         <AuthProvider>
           <ThemeProvider>
             <ZenBrowserInitializer />
-            <div id="app-root">{children}</div>
-            <SiteFooter />
-            <ErrorNotifications />
-            <ErrorNotificationInitializer />
+            <OnboardingGate>
+              <div id="app-root">{children}</div>
+              <SiteFooter />
+              <ErrorNotifications />
+              <ErrorNotificationInitializer />
+            </OnboardingGate>
           </ThemeProvider>
         </AuthProvider>
       </body>
