@@ -88,6 +88,7 @@ export function SyncStateProvider({ children, disabled = false }: SyncStateProvi
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [lastSyncAt, setLastSyncAt] = useState<Date | null>(null);
+  const [forbidden, setForbidden] = useState(false);
 
   // Refs for polling control
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -121,13 +122,18 @@ export function SyncStateProvider({ children, disabled = false }: SyncStateProvi
       setUser(data.user);
       setLastSyncAt(new Date());
       setError(null);
+      setForbidden(false);
       lastEtagRef.current = data.etag;
 
-    } catch (err) {
+    } catch (err: any) {
       if (!isMountedRef.current) return;
-      
+      // Detect 403 Forbidden
+      if (err && (err.status === 403 || (err.message && err.message.toLowerCase().includes('forbidden')))) {
+        setForbidden(true);
+      } else {
+        setError(err instanceof Error ? err : new Error(String(err)));
+      }
       console.error("[SyncState] Poll error:", err);
-      setError(err instanceof Error ? err : new Error(String(err)));
       // Don't clear existing data on error - stale is better than nothing
     } finally {
       if (isMountedRef.current) {
@@ -220,7 +226,17 @@ export function SyncStateProvider({ children, disabled = false }: SyncStateProvi
 
   return (
     <SyncStateContext.Provider value={value}>
-      {children}
+      {forbidden ? (
+        <div style={{ color: 'red', textAlign: 'center', marginTop: '2rem' }}>
+          <h2>Access Denied</h2>
+          <p>Your account must accept the Terms of Service before using the app.</p>
+        </div>
+      ) : error ? (
+        <div style={{ color: 'red', textAlign: 'center', marginTop: '2rem' }}>
+          <h2>Sync Error</h2>
+          <p>{error.message}</p>
+        </div>
+      ) : children}
     </SyncStateContext.Provider>
   );
 }

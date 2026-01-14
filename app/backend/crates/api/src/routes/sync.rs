@@ -141,12 +141,17 @@ async fn poll_all(
         fetch_plan_status(&state.db, user_id),
         fetch_user_data(&state.db, user_id),
     )?;
-    
+
+    // TOS acceptance check
+    if !user.tos_accepted {
+        return Err(AppError::Forbidden);
+    }
+
     let server_time = chrono::Utc::now().to_rfc3339();
-    
+
     // Generate ETag from content hash
     let etag = generate_etag(&progress, &badges, &focus, &plan, &user);
-    
+
     let response = PollResponse {
         progress,
         badges,
