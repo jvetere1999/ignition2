@@ -28,6 +28,7 @@ import {
   applyWaveformMode,
 } from "../themes";
 import { API_BASE_URL, safeFetch } from "@/lib/api";
+import { safeGetItem, safeSetItem } from "@/lib/storage-safe";
 
 // Simple theme type for backward compatibility
 export type Theme = "light" | "dark" | "system";
@@ -112,7 +113,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setMounted(true);
 
     // First check for legacy simple theme
-    const legacyTheme = localStorage.getItem(STORAGE_KEY) as Theme | null;
+    const legacyTheme = safeGetItem(STORAGE_KEY) as Theme | null;
     const stored = loadThemePreferences();
 
     // If legacy theme exists but no extended prefs, migrate
@@ -155,7 +156,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setPrefs((prev) => {
       const next = { ...prev, themeId };
       saveThemePreferences(next);
-      localStorage.setItem(STORAGE_KEY, theme); // Keep legacy key for compat
+      safeSetItem(STORAGE_KEY, theme); // Keep legacy key for compat
       return next;
     });
   }, []);

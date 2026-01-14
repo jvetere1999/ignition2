@@ -14,6 +14,7 @@ import Link from "next/link";
 import { useAutoRefresh } from "@/lib/hooks";
 import { usePlanStatus } from "@/lib/sync/SyncStateContext";
 import { safeFetch, API_BASE_URL } from "@/lib/api";
+import { safeGetItem, safeSetItem } from "@/lib/storage-safe";
 import styles from "./DailyPlan.module.css";
 
 const COLLAPSE_STATE_KEY = "today_dailyplan_collapsed";
@@ -67,7 +68,7 @@ export function DailyPlanWidget({ forceCollapsed = false, onExpand }: DailyPlanW
       return;
     }
     try {
-      const stored = localStorage.getItem(COLLAPSE_STATE_KEY);
+      const stored = safeGetItem(COLLAPSE_STATE_KEY);
       // Default is collapsed (true), so expanded when stored is "false"
       if (stored === "false") {
         setIsExpanded(true);
@@ -83,7 +84,7 @@ export function DailyPlanWidget({ forceCollapsed = false, onExpand }: DailyPlanW
       const newValue = !prev;
       try {
         // Store collapsed state (inverse of expanded)
-        localStorage.setItem(COLLAPSE_STATE_KEY, newValue ? "false" : "true");
+        safeSetItem(COLLAPSE_STATE_KEY, newValue ? "false" : "true");
       } catch {
         // localStorage not available
       }

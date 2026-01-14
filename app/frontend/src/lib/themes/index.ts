@@ -16,6 +16,8 @@ import { DEFAULT_THEME_PREFERENCES } from "./types";
 import { themeManifest } from "./manifest";
 
 // Storage key for theme preferences
+import { safeGetItem, safeSetItem } from "@/lib/storage-safe";
+
 const STORAGE_KEY = "passion_os_theme_prefs_v1";
 
 // Use the imported manifest
@@ -46,12 +48,8 @@ export function getThemesByMode(mode: "light" | "dark"): ThemeDefinition[] {
  * Load theme preferences from localStorage
  */
 export function loadThemePreferences(): ThemePreferences {
-  if (typeof localStorage === "undefined") {
-    return DEFAULT_THEME_PREFERENCES;
-  }
-
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = safeGetItem(STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
       return {
@@ -70,10 +68,8 @@ export function loadThemePreferences(): ThemePreferences {
  * Save theme preferences to localStorage
  */
 export function saveThemePreferences(prefs: ThemePreferences): void {
-  if (typeof localStorage === "undefined") return;
-
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+    safeSetItem(STORAGE_KEY, JSON.stringify(prefs));
   } catch (e) {
     console.warn("Failed to save theme preferences:", e);
   }

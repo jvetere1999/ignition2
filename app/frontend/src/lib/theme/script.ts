@@ -10,19 +10,37 @@
 export const themeScript = `
 (function() {
   try {
-    // Check extended theme prefs first
-    var prefs = localStorage.getItem('passion_os_theme_prefs_v1');
+    // CRITICAL: Check if localStorage is available (may be blocked in incognito/strict contexts)
+    var hasStorage = false;
+    try {
+      var test = '__test__';
+      localStorage.setItem(test, test);
+      localStorage.removeItem(test);
+      hasStorage = true;
+    } catch (e) {
+      // localStorage is blocked, use system preference only
+      hasStorage = false;
+    }
+    
     var themeId = 'system';
-    if (prefs) {
+    if (hasStorage) {
       try {
-        var parsed = JSON.parse(prefs);
-        themeId = parsed.themeId || 'system';
-      } catch (e) {}
-    } else {
-      // Fallback to legacy simple theme
-      var legacy = localStorage.getItem('passion-os-theme');
-      if (legacy === 'light') themeId = 'ableton-live-light';
-      else if (legacy === 'dark') themeId = 'ableton-live-dark';
+        // Check extended theme prefs first
+        var prefs = localStorage.getItem('passion_os_theme_prefs_v1');
+        if (prefs) {
+          try {
+            var parsed = JSON.parse(prefs);
+            themeId = parsed.themeId || 'system';
+          } catch (e) {}
+        } else {
+          // Fallback to legacy simple theme
+          var legacy = localStorage.getItem('passion-os-theme');
+          if (legacy === 'light') themeId = 'ableton-live-light';
+          else if (legacy === 'dark') themeId = 'ableton-live-dark';
+        }
+      } catch (e) {
+        // Silently ignore localStorage errors
+      }
     }
     
     var resolved = themeId;

@@ -12,6 +12,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import styles from "./ExploreDrawer.module.css";
+import { safeGetItem, safeSetItem } from "@/lib/storage-safe";
 
 const COLLAPSE_STATE_KEY = "today_explore_collapsed";
 
@@ -71,7 +72,7 @@ export function ExploreDrawer({ children, forceCollapsed = false, onExpand }: Ex
       return;
     }
     try {
-      const stored = localStorage.getItem(COLLAPSE_STATE_KEY);
+      const stored = safeGetItem(COLLAPSE_STATE_KEY);
       // Default is collapsed (true), so expanded when stored is "false"
       if (stored === "false") {
         setIsExpanded(true);
@@ -87,7 +88,7 @@ export function ExploreDrawer({ children, forceCollapsed = false, onExpand }: Ex
       const newValue = !prev;
       try {
         // Store collapsed state (inverse of expanded)
-        localStorage.setItem(COLLAPSE_STATE_KEY, newValue ? "false" : "true");
+        safeSetItem(COLLAPSE_STATE_KEY, newValue ? "false" : "true");
       } catch {
         // localStorage not available
       }
