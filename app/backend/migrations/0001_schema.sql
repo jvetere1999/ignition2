@@ -104,7 +104,6 @@ CREATE TABLE users (
     image TEXT,
     role TEXT NOT NULL,
     approved BOOLEAN NOT NULL,
-    age_verified BOOLEAN NOT NULL,
     tos_accepted BOOLEAN NOT NULL,
     tos_accepted_at TIMESTAMPTZ,
     tos_version TEXT,

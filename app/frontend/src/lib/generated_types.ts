@@ -114,7 +114,6 @@ export interface Users {
   image?: string;
   role: string;
   approved: boolean;
-  age_verified: boolean;
   tos_accepted: boolean;
   tos_accepted_at?: string;
   tos_version?: string;

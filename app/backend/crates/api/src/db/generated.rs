@@ -129,7 +129,6 @@ pub struct Users {
     pub image: Option<String>,
     pub role: String,
     pub approved: bool,
-    pub age_verified: bool,
     pub tos_accepted: bool,
     pub tos_accepted_at: Option<chrono::DateTime<chrono::Utc>>,
     pub tos_version: Option<String>,
