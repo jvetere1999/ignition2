@@ -472,14 +472,14 @@
           "foreign_key": false
         },
         "lock_reason": {
-          "type": "VARCHAR",
+          "type": "TEXT",
           "nullable": true,
           "primary": false,
           "unique": false,
           "foreign_key": false
         },
         "enforce_tier": {
-          "type": "INT",
+          "type": "INTEGER",
           "nullable": false,
           "primary": false,
           "unique": false,
@@ -525,7 +525,7 @@
     "crypto_policies": {
       "fields": {
         "version": {
-          "type": "VARCHAR",
+          "type": "TEXT",
           "nullable": false,
           "primary": true,
           "unique": true,
@@ -533,7 +533,7 @@
           "comment": "Semantic version string (e.g., '1.0.0', '2.0.0')"
         },
         "algorithm": {
-          "type": "VARCHAR",
+          "type": "TEXT",
           "nullable": false,
           "primary": false,
           "unique": false,
@@ -541,7 +541,7 @@
           "comment": "Encryption algorithm (e.g., 'AES-256-GCM', 'ChaCha20-Poly1305')"
         },
         "kdf_algorithm": {
-          "type": "VARCHAR",
+          "type": "TEXT",
           "nullable": false,
           "primary": false,
           "unique": false,
@@ -549,7 +549,7 @@
           "comment": "Key derivation function (e.g., 'PBKDF2-SHA256', 'Argon2id')"
         },
         "kdf_iterations": {
-          "type": "INT",
+          "type": "INTEGER",
           "nullable": false,
           "primary": false,
           "unique": false,
@@ -557,7 +557,7 @@
           "comment": "Number of KDF iterations for PBKDF2"
         },
         "kdf_memory_mb": {
-          "type": "INT",
+          "type": "INTEGER",
           "nullable": true,
           "primary": false,
           "unique": false,
@@ -565,7 +565,7 @@
           "comment": "Memory cost for Argon2id (MB)"
         },
         "tls_minimum": {
-          "type": "VARCHAR",
+          "type": "TEXT",
           "nullable": false,
           "primary": false,
           "unique": false,
