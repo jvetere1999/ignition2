@@ -21,10 +21,10 @@ use std::sync::Arc;
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/current", get(get_current_policy))
-        .route("/:version", get(get_policy_by_version))
+        .route("/{version}", get(get_policy_by_version))
         .route("/", get(list_all_policies))
         .route("/", post(create_policy))
-        .route("/:version/deprecate", post(deprecate_policy))
+        .route("/{version}/deprecate", post(deprecate_policy))
 }
 
 /// Get the current active crypto policy
