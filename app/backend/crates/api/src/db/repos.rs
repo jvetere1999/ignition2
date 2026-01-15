@@ -89,17 +89,6 @@ impl UserRepo {
         Ok(())
     }
 
-    /// Verify user's age (COPPA compliance)
-    pub async fn verify_age(pool: &PgPool, user_id: Uuid) -> Result<(), AppError> {
-        sqlx::query("UPDATE users SET age_verified = true WHERE id = $1")
-            .bind(user_id)
-            .execute(pool)
-            .await
-            .map_err(|e| AppError::Database(e.to_string()))?;
-
-        Ok(())
-    }
-
     /// Accept Terms of Service
     pub async fn accept_tos(
         pool: &PgPool,

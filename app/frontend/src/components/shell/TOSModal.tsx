@@ -19,6 +19,7 @@ interface TOSModalProps {
 export function TOSModal({ onAccept }: TOSModalProps) {
   const [isAccepting, setIsAccepting] = useState(false);
   const [hasRead, setHasRead] = useState(false);
+  const [isOldEnough, setIsOldEnough] = useState(false);
   const { user, isLoading } = useAuth();
 
   // Show loading bar while auth initializes
@@ -46,6 +47,11 @@ export function TOSModal({ onAccept }: TOSModalProps) {
   const handleAccept = async () => {
     if (!hasRead) {
       alert("Please confirm that you have read the Terms of Service.");
+      return;
+    }
+
+    if (!isOldEnough) {
+      alert("You must confirm that you are at least 16 years old to use Ignition.");
       return;
     }
 
@@ -154,6 +160,15 @@ export function TOSModal({ onAccept }: TOSModalProps) {
           <label className={styles.checkbox}>
             <input
               type="checkbox"
+              checked={isOldEnough}
+              onChange={(e) => setIsOldEnough(e.target.checked)}
+            />
+            <span>I confirm that I am at least 16 years old</span>
+          </label>
+
+          <label className={styles.checkbox}>
+            <input
+              type="checkbox"
               checked={hasRead}
               onChange={(e) => setHasRead(e.target.checked)}
             />
@@ -163,7 +178,7 @@ export function TOSModal({ onAccept }: TOSModalProps) {
           <button
             className={styles.acceptButton}
             onClick={handleAccept}
-            disabled={isAccepting || !hasRead}
+            disabled={isAccepting || !hasRead || !isOldEnough}
           >
             {isAccepting ? "Accepting..." : "Accept and Continue"}
           </button>

@@ -41,7 +41,6 @@ pub fn router() -> Router<Arc<AppState>> {
         .route("/session", get(get_session))
         .route("/signout", post(signout))
         // Verification endpoints
-        .route("/verify-age", post(verify_age))
         .route("/accept-tos", post(accept_tos))
 }
 
@@ -429,63 +428,6 @@ async fn signout(
         .header(header::SET_COOKIE, cookie)
         .body(axum::body::Body::empty())
         .expect("Logout response construction with static header should never fail")
-}
-
-#[derive(Deserialize)]
-pub struct VerifyAgeRequest {
-    pub is_13_or_older: bool,
-}
-
-/// Verify age (for COPPA compliance)
-async fn verify_age(
-    State(state): State<Arc<AppState>>,
-    auth: Option<Extension<AuthContext>>,
-    Json(payload): Json<VerifyAgeRequest>,
-) -> AppResult<Response> {
-    let auth_context = auth.ok_or(AppError::Unauthorized("Authentication required".to_string()))?.0;
-
-    if !payload.is_13_or_older {
-        return Err(AppError::Forbidden);
-    }
-
-    // Update user record
-    crate::db::repos::UserRepo::verify_age(&state.db, auth_context.user_id).await?;
-
-    // Rotate session after privilege change (prevents session fixation)
-    if !auth_context.is_dev_bypass {
-        let new_session = AuthService::rotate_session(
-            &state.db,
-            auth_context.session_id,
-            auth_context.user_id,
-            "age_verification",
-        )
-        .await?;
-
-        // Return new session cookie to client
-        let cookie = create_session_cookie(
-            &new_session.token,
-            &state.config.auth.cookie_domain,
-            state.config.auth.session_ttl_seconds,
-        );
-
-        tracing::info!(
-            user_id = %auth_context.user_id,
-            "Age verified and session rotated"
-        );
-
-        let response = Response::builder()
-            .status(StatusCode::OK)
-            .header(header::SET_COOKIE, cookie)
-            .body(axum::body::Body::empty())
-            .map_err(|e| AppError::Internal(e.to_string()))?;
-
-        return Ok(response);
-    }
-
-    Ok(Response::builder()
-        .status(StatusCode::OK)
-        .body(axum::body::Body::empty())
-        .map_err(|e| AppError::Internal(e.to_string()))?)
 }
 
 #[derive(Deserialize)]
