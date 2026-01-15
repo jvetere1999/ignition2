@@ -732,6 +732,20 @@ CREATE TABLE feedback (
 -- OTHER TABLES
 -- =============================================================================
 
+CREATE TABLE crypto_policies (
+    version TEXT PRIMARY KEY,
+    algorithm TEXT NOT NULL,
+    kdf_algorithm TEXT NOT NULL,
+    kdf_iterations INTEGER NOT NULL,
+    kdf_memory_mb INTEGER,
+    tls_minimum TEXT NOT NULL DEFAULT 'TLS1.3',
+    effective_date TIMESTAMPTZ NOT NULL,
+    deprecated_date TIMESTAMPTZ,
+    migration_deadline TIMESTAMPTZ,
+    rationale TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE exercise_sets (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     session_id UUID NOT NULL,
@@ -1170,6 +1184,22 @@ CREATE TABLE user_streaks (
     current_streak INTEGER NOT NULL,
     longest_streak INTEGER NOT NULL,
     last_activity_date DATE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE vaults (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL,
+    passphrase_salt BYTEA NOT NULL,
+    passphrase_hash TEXT NOT NULL,
+    key_derivation_params JSONB NOT NULL,
+    crypto_policy_version TEXT,
+    locked_at TIMESTAMPTZ,
+    lock_reason TEXT,
+    enforce_tier INTEGER NOT NULL DEFAULT 0,
+    last_rotated_at TIMESTAMPTZ,
+    next_rotation_due TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

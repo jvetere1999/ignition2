@@ -389,7 +389,7 @@ export class SearchIndexManager {
         itemsIndexed: 0,
         status: 'error',
       });
-      this.emit('rebuild-error', { error });
+      this.emit('rebuild-error', { error: error instanceof Error ? error : new Error(String(error)) });
     } finally {
       this.isBuilding = false;
     }
@@ -746,7 +746,7 @@ export class SearchIndexManager {
     this.listeners.delete(callback);
   }
 
-  private emit(eventType: string, data: IndexRebuildEvent): void {
+  private emit(eventType: string, data: Omit<IndexRebuildEvent, 'type'>): void {
     for (const listener of this.listeners) {
       listener({ ...data, type: eventType });
     }

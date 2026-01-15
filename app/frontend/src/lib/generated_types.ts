@@ -781,6 +781,21 @@ export interface Feedback {
 // OTHER TABLES
 // =============================================================================
 
+/** Database model for `crypto_policies` table */
+export interface CryptoPolicies {
+  version: string;
+  algorithm: string;
+  kdf_algorithm: string;
+  kdf_iterations: number;
+  kdf_memory_mb?: number;
+  tls_minimum: string;
+  effective_date: string;
+  deprecated_date?: string;
+  migration_deadline?: string;
+  rationale?: string;
+  created_at: string;
+}
+
 /** Database model for `exercise_sets` table */
 export interface ExerciseSets {
   id: string;
@@ -1257,6 +1272,23 @@ export interface UserStreaks {
   updated_at: string;
 }
 
+/** Database model for `vaults` table */
+export interface Vaults {
+  id: string;
+  user_id: string;
+  passphrase_salt: Uint8Array;
+  passphrase_hash: string;
+  key_derivation_params: Record<string, unknown>;
+  crypto_policy_version?: string;
+  locked_at?: string;
+  lock_reason?: string;
+  enforce_tier: number;
+  last_rotated_at?: string;
+  next_rotation_due?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 /** Database model for `workout_sections` table */
 export interface WorkoutSections {
   id: string;
@@ -1293,6 +1325,7 @@ export type AnalysisFrameManifest = AnalysisFrameManifests;
 export type Authenticator = Authenticators;
 export type Book = Books;
 export type CalendarEvent = CalendarEvents;
+export type CryptoPolicy = CryptoPolicies;
 export type DailyPlan = DailyPlans;
 export type Entitlement = Entitlements;
 export type ExerciseSet = ExerciseSets;
@@ -1352,6 +1385,7 @@ export type UserSetting = UserSettings;
 export type UserSkill = UserSkills;
 export type UserStreak = UserStreaks;
 export type User = Users;
+export type Vault = Vaults;
 export type VerificationToken = VerificationTokens;
 export type WorkoutExercise = WorkoutExercises;
 export type WorkoutSection = WorkoutSections;

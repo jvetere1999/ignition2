@@ -44,7 +44,7 @@ async function deriveKey(passphrase: string, salt: Uint8Array): Promise<CryptoKe
   return crypto.subtle.deriveKey(
     {
       name: "PBKDF2",
-      salt,
+      salt: salt as BufferSource,
       iterations: PBKDF2_ITERATIONS,
       hash: PBKDF2_HASH,
     },
@@ -61,7 +61,7 @@ export async function encryptString(plaintext: string, passphrase: string): Prom
   const key = await deriveKey(passphrase, salt);
   const enc = new TextEncoder();
   const cipherBuf = await crypto.subtle.encrypt(
-    { name: AES_ALGO, iv },
+    { name: AES_ALGO, iv: iv as BufferSource },
     key,
     enc.encode(plaintext)
   );
@@ -79,9 +79,9 @@ export async function decryptString(payload: EncryptedPayload, passphrase: strin
   const key = await deriveKey(passphrase, salt);
   const cipherBytes = fromBase64(payload.cipher);
   const plainBuf = await crypto.subtle.decrypt(
-    { name: AES_ALGO, iv },
+    { name: AES_ALGO, iv: iv as BufferSource },
     key,
-    cipherBytes
+    cipherBytes as BufferSource
   );
   const dec = new TextDecoder();
   return dec.decode(plainBuf);
@@ -98,7 +98,7 @@ export async function encryptBytes(data: ArrayBuffer, passphrase: string): Promi
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const key = await deriveKey(passphrase, salt);
   const cipherBuf = await crypto.subtle.encrypt(
-    { name: AES_ALGO, iv },
+    { name: AES_ALGO, iv: iv as BufferSource },
     key,
     data
   );
@@ -115,7 +115,7 @@ export async function decryptBytes(payload: EncryptedBytes, passphrase: string):
   const salt = fromBase64(payload.salt);
   const key = await deriveKey(passphrase, salt);
   return crypto.subtle.decrypt(
-    { name: AES_ALGO, iv },
+    { name: AES_ALGO, iv: iv as BufferSource },
     key,
     payload.cipher
   );

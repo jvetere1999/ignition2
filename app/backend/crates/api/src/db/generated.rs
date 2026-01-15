@@ -835,6 +835,22 @@ pub struct Feedback {
 // OTHER TABLES
 // =============================================================================
 
+/// Database model for `crypto_policies` table
+#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
+pub struct CryptoPolicies {
+    pub version: String,
+    pub algorithm: String,
+    pub kdf_algorithm: String,
+    pub kdf_iterations: i32,
+    pub kdf_memory_mb: Option<i32>,
+    pub tls_minimum: String,
+    pub effective_date: chrono::DateTime<chrono::Utc>,
+    pub deprecated_date: Option<chrono::DateTime<chrono::Utc>>,
+    pub migration_deadline: Option<chrono::DateTime<chrono::Utc>>,
+    pub rationale: Option<String>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+}
+
 /// Database model for `exercise_sets` table
 #[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
 pub struct ExerciseSets {
@@ -1345,6 +1361,24 @@ pub struct UserStreaks {
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }
 
+/// Database model for `vaults` table
+#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
+pub struct Vaults {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub passphrase_salt: Vec<u8>,
+    pub passphrase_hash: String,
+    pub key_derivation_params: serde_json::Value,
+    pub crypto_policy_version: Option<String>,
+    pub locked_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub lock_reason: Option<String>,
+    pub enforce_tier: i32,
+    pub last_rotated_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub next_rotation_due: Option<chrono::DateTime<chrono::Utc>>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub updated_at: chrono::DateTime<chrono::Utc>,
+}
+
 /// Database model for `workout_sections` table
 #[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
 pub struct WorkoutSections {
@@ -1383,6 +1417,7 @@ pub type AnalysisFrameManifest = AnalysisFrameManifests;
 pub type Authenticator = Authenticators;
 pub type Book = Books;
 pub type CalendarEvent = CalendarEvents;
+pub type CryptoPolicy = CryptoPolicies;
 pub type DailyPlan = DailyPlans;
 pub type Entitlement = Entitlements;
 pub type ExerciseSet = ExerciseSets;
@@ -1442,6 +1477,7 @@ pub type UserSetting = UserSettings;
 pub type UserSkill = UserSkills;
 pub type UserStreak = UserStreaks;
 pub type User = Users;
+pub type Vault = Vaults;
 pub type VerificationToken = VerificationTokens;
 pub type WorkoutExercise = WorkoutExercises;
 pub type WorkoutSection = WorkoutSections;
