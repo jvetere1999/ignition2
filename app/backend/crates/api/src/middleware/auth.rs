@@ -171,10 +171,6 @@ pub async fn require_auth(
         return Err(AppError::Forbidden);
     }
 
-    if !user.age_verified {
-        return Err(AppError::Forbidden);
-    }
-
     if !user.tos_accepted {
         return Err(AppError::Forbidden);
     }

@@ -350,7 +350,6 @@ pub struct SessionUser {
     pub role: String,
     pub entitlements: Vec<String>,
     pub approved: bool,
-    pub age_verified: bool,
     pub tos_accepted: bool,
 }
 
@@ -383,7 +382,6 @@ async fn get_session(
                     role: user.role,
                     entitlements: auth_context.entitlements,
                     approved: user.approved,
-                    age_verified: user.age_verified,
                     tos_accepted: user.tos_accepted,
                 }),
             });
