@@ -100,7 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             justifyContent: 'center',
             minHeight: '100vh',
             width: '100%',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: '#1e1e1e',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             position: 'relative',
             overflow: 'hidden',
@@ -110,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               position: 'absolute',
               width: '400px',
               height: '400px',
-              background: 'rgba(255, 255, 255, 0.05)',
+              background: 'rgba(255, 118, 77, 0.08)',
               borderRadius: '50%',
               top: '-50px',
               left: '-50px',
@@ -120,7 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               position: 'absolute',
               width: '300px',
               height: '300px',
-              background: 'rgba(255, 255, 255, 0.03)',
+              background: 'rgba(80, 184, 184, 0.05)',
               borderRadius: '50%',
               bottom: '-100px',
               right: '-50px',
@@ -142,15 +142,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   width: '70px',
                   height: '70px',
                   margin: '0 auto',
-                  background: 'white',
+                  background: '#2d2d2d',
                   borderRadius: '16px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: '36px',
                   fontWeight: 'bold',
-                  color: '#667eea',
-                  boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+                  color: '#ff764d',
+                  boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)',
+                  border: '1px solid #3d3d3d',
                 }}>
                   🎵
                 </div>
@@ -160,7 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               <h1 style={{
                 fontSize: '28px',
                 fontWeight: '700',
-                color: 'white',
+                color: '#ffffff',
                 margin: '0 0 0.75rem 0',
                 letterSpacing: '0.5px',
               }}>
@@ -170,7 +171,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               {/* Subtext */}
               <p style={{
                 fontSize: '15px',
-                color: 'rgba(255, 255, 255, 0.85)',
+                color: 'rgba(255, 255, 255, 0.75)',
                 margin: '0 0 2.5rem 0',
                 fontWeight: '500',
               }}>
@@ -189,21 +190,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   width: '8px',
                   height: '8px',
                   borderRadius: '50%',
-                  background: 'white',
+                  background: '#ff764d',
                   animation: 'bounce 1.4s infinite ease-in-out 0s',
                 }} />
                 <div style={{
                   width: '8px',
                   height: '8px',
                   borderRadius: '50%',
-                  background: 'white',
+                  background: '#ff764d',
                   animation: 'bounce 1.4s infinite ease-in-out 0.2s',
                 }} />
                 <div style={{
                   width: '8px',
                   height: '8px',
                   borderRadius: '50%',
-                  background: 'white',
+                  background: '#ff764d',
                   animation: 'bounce 1.4s infinite ease-in-out 0.4s',
                 }} />
               </div>
@@ -211,7 +212,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               {/* Status message */}
               <p style={{
                 fontSize: '12px',
-                color: 'rgba(255, 255, 255, 0.7)',
+                color: 'rgba(255, 255, 255, 0.6)',
                 margin: 0,
               }}>
                 This usually takes a few seconds...
