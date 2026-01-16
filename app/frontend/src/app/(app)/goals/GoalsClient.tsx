@@ -118,8 +118,8 @@ export function GoalsClient() {
       try {
         const response = await safeFetch(`${API_BASE_URL}/api/goals`);
         if (response.ok) {
-          const data = await response.json() as { goals?: GoalApiResponse[] };
-          const mapped = (data.goals || []).map(mapGoalFromApi);
+          const response_data = await response.json() as { data: { goals?: GoalApiResponse[] } };
+          const mapped = (response_data.data?.goals || []).map(mapGoalFromApi);
           setGoals(mapped);
           setMemoryCache(GOALS_CACHE_KEY, { goals: mapped });
           setIsLoading(false);
@@ -172,9 +172,9 @@ export function GoalsClient() {
         console.error("Failed to create goal");
         return;
       }
-      const data = await response.json() as { goal?: GoalApiResponse };
-      if (data.goal) {
-        const mapped = mapGoalFromApi(data.goal);
+      const response_data = await response.json() as { data: { goal?: GoalApiResponse } };
+      if (response_data.data?.goal) {
+        const mapped = mapGoalFromApi(response_data.data.goal);
         setGoals((prev) => {
           const next = [mapped, ...prev];
           setMemoryCache(GOALS_CACHE_KEY, { goals: next });
@@ -201,10 +201,10 @@ export function GoalsClient() {
         console.error("Failed to add milestone");
         return;
       }
-      const data = await response.json() as { milestone?: MilestoneApiResponse };
-      if (!data.milestone) return;
+      const response_data = await response.json() as { data: { milestone?: MilestoneApiResponse } };
+      if (!response_data.data?.milestone) return;
 
-      const milestone = data.milestone;
+      const milestone = response_data.data.milestone;
       setGoals((prev) => {
         const next = prev.map((g) =>
           g.id === goalId
@@ -240,17 +240,15 @@ export function GoalsClient() {
         console.error("Failed to complete milestone");
         return;
       }
-      const data = await response.json() as {
-        result?: { milestone?: MilestoneApiResponse; goal_progress?: number; goal_completed?: boolean };
-      };
-      if (data.result?.milestone) {
+      const response_data = await response.json() as { data: { result?: { milestone?: MilestoneApiResponse; goal_progress?: number; goal_completed?: boolean } } };
+      if (response_data.data?.result?.milestone) {
         setGoals((prev) => {
           const next = prev.map((g) => {
             if (g.id !== goalId) return g;
             const updatedMilestones = g.milestones.map((m) =>
               m.id === milestoneId ? { ...m, completed: true } : m
             );
-            return { ...g, milestones: updatedMilestones, completed: data.result?.goal_completed ?? g.completed };
+            return { ...g, milestones: updatedMilestones, completed: response_data.data?.result?.goal_completed ?? g.completed };
           });
           setMemoryCache(GOALS_CACHE_KEY, { goals: next });
           return next;

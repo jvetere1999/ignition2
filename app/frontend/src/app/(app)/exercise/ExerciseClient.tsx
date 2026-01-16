@@ -169,12 +169,12 @@ export function ExerciseClient() {
       if (exercisesRes.ok) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const data: any = await exercisesRes.json();
-        setExercises(data.exercises || []);
+        setExercises(data.data?.exercises || []);
       }
       if (workoutsRes.ok) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const data: any = await workoutsRes.json();
-        const mapped = (data.workouts || []).map((workout: Workout) => ({
+        const mapped = (data.data?.workouts || []).map((workout: Workout) => ({
           ...workout,
           workout_type: workout.workout_type || "strength",
         }));
@@ -183,7 +183,7 @@ export function ExerciseClient() {
       if (sessionsRes.ok) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const data: any = await sessionsRes.json();
-        const sessionsData = data.sessions || [];
+        const sessionsData = data.data?.sessions || [];
         setSessions(sessionsData);
         const totalSets = sessionsData.reduce((sum: number, session: WorkoutSession) => sum + (session.sets_logged || 0), 0);
         setStats({ workouts: sessionsData.length, sets: totalSets, prs: 0 });

@@ -109,8 +109,8 @@ export function HabitsClient() {
     try {
       const res = await safeFetch(`${API_BASE_URL}/api/habits`);
       if (res.ok) {
-        const data = await res.json() as { habits?: Habit[] };
-        const nextHabits = data.habits || [];
+        const response_data = await res.json() as { data: { habits?: Habit[] } };
+        const nextHabits = response_data.data?.habits || [];
         setHabits(nextHabits);
         setMemoryCache(HABITS_CACHE_KEY, { habits: nextHabits });
       }

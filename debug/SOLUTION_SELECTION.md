@@ -1,9 +1,82 @@
 # SOLUTION SELECTION - Current Decisions Awaiting Action
 
-**Updated**: 2026-01-12 18:54 UTC  
-**Status**: 🟡 **Testing Phase - 2 Decisions Pending**  
-**Purpose**: Document decisions to resolve remaining test failures  
-**Test Results**: 17 passed / 17 failed (50% pass rate)
+**Updated**: 2026-01-15 UTC  
+**Status**: 🟡 **Implementation Phase - 1 Decision Pending**  
+**Purpose**: Document decisions to resolve API response format standardization  
+
+---
+
+## BACK-015: API Response Format Standardization
+
+**Issue**: Backend returns `{ data: {...} }` but frontend components expect different formats (`{ resource: [...] }`, `{ session: ... }`, etc.)
+
+**Impact**: Critical - Blocks all data create/update operations across 20+ features
+
+**Affected Components**:
+- GoalsClient.tsx, QuestsClient.tsx, FocusClient.tsx
+- HabitsClient.tsx, ExerciseClient.tsx, BooksClient.tsx
+- PlannerClient.tsx, FocusIndicator.tsx
+- Plus ~10 admin and shell components
+
+### Option A: Standardize Backend Response Formats (Not Recommended)
+**Approach**: Update all 20+ backend routes to return endpoint-specific formats
+
+**Implementation**:
+```rust
+// Different formats per endpoint:
+// /api/goals → { goals: [...] }
+// /api/quests → { quest: {...} }
+// /api/focus → { session: {...} }
+// etc.
+```
+
+**Pros**:
+- Frontend changes minimal
+- Can optimize per-endpoint response
+
+**Cons**:
+- ❌ Loses API consistency
+- ❌ Hard to maintain (20+ different patterns)
+- ❌ Error handling becomes endpoint-specific
+- ❌ Documentation more complex
+
+**Effort**: 4-5 hours
+**Risk**: High (inconsistent API contract)
+
+---
+
+### Option B: Standardize Frontend to Match Backend ⭐ RECOMMENDED
+**Approach**: Update all 20+ frontend components to parse `{ data: {...} }` format
+
+**Implementation**:
+```typescript
+// Current (wrong):
+const { goals } = await response.json();
+
+// Fixed (correct):
+const { data } = await response.json();
+const { goals } = data;
+```
+
+**Pros**:
+- ✅ Backend stays consistent
+- ✅ Cleaner API contract
+- ✅ Easier to maintain (one pattern)
+- ✅ Consistent error handling
+- ✅ Documentation simplified
+
+**Cons**:
+- More frontend file changes (20+ files)
+- But: All follow same pattern (copy/paste)
+
+**Effort**: 3-4 hours (systematic, repeatable)
+**Risk**: Low (simple pattern application)
+
+---
+
+**RECOMMENDATION**: **Option B** - Standardize frontend  
+**Decision Owner**: User  
+**Status**: ⏳ AWAITING USER SELECTION
 
 ---
 

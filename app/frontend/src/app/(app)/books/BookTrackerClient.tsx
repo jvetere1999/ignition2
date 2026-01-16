@@ -73,14 +73,14 @@ export function BookTrackerClient() {
       ]);
 
       if (booksRes.ok) {
-        const data = await booksRes.json() as { books?: Book[] };
-        setBooks(data.books || []);
+        const response_data = await booksRes.json() as { data: { books?: Book[] } };
+        setBooks(response_data.data?.books || []);
       }
 
       if (statsRes.ok) {
-        const data = await statsRes.json() as { stats?: ReadingStats };
+        const response_data = await statsRes.json() as { data: { stats?: ReadingStats } };
         setStats(
-          data.stats || {
+          response_data.data?.stats || {
             books_completed: 0,
             books_reading: 0,
             total_books: 0,
@@ -136,9 +136,9 @@ export function BookTrackerClient() {
       });
 
       if (res.ok) {
-        const data = await res.json() as { book?: Book };
-        if (data.book?.id && newBook.notes.trim()) {
-          await safeFetch(`${API_BASE_URL}/api/books/${data.book.id}`, {
+        const response_data = await res.json() as { data: { book?: Book } };
+        if (response_data.data?.book?.id && newBook.notes.trim()) {
+          await safeFetch(`${API_BASE_URL}/api/books/${response_data.data.book.id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ notes: newBook.notes.trim() }),

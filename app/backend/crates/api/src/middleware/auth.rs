@@ -199,6 +199,8 @@ pub fn require_entitlement(
 /// 
 /// This function consolidates the session lookup, user fetch, and activity logging
 /// into a single point of logic. It replaces scattered session handling code.
+/// 
+/// Includes timeout enforcement: returns 401 if session has been inactive too long.
 async fn init_auth_context(
     state: &Arc<AppState>,
     req: &mut Request,
@@ -217,6 +219,18 @@ async fn init_auth_context(
                 user_id = %session.user_id,
                 "Session found in database"
             );
+
+            // TIMEOUT CHECK: Return 401 if session has been inactive too long
+            if SessionRepo::is_inactive(&session, state.config.auth.session_inactivity_timeout_minutes) {
+                tracing::warn!(
+                    session_id = %session.id,
+                    user_id = %session.user_id,
+                    timeout_minutes = state.config.auth.session_inactivity_timeout_minutes,
+                    "Session inactive for too long, returning 401"
+                );
+                // Don't insert AuthContext - handler will return 401 when it requires Extension(auth)
+                return;
+            }
 
             // Get user
             match UserRepo::find_by_id(&state.db, session.user_id).await {

@@ -89,12 +89,12 @@ export function FocusIndicator() {
     try {
       const response = await safeFetch(`${API_BASE_URL}/api/focus/pause`);
       if (response.ok) {
-        const data = await response.json() as { pause?: { mode?: string | null; time_remaining_seconds?: number | null; paused_at?: string | null } | null };
-        if (data.pause?.mode) {
+        const response_data = await response.json() as { data: { pause?: { mode?: string | null; time_remaining_seconds?: number | null; paused_at?: string | null } | null } };
+        if (response_data.data?.pause?.mode) {
           const mappedPause: PausedState = {
-            mode: data.pause.mode as PausedState["mode"],
-            timeRemaining: data.pause.time_remaining_seconds || 0,
-            pausedAt: data.pause.paused_at || new Date().toISOString(),
+            mode: response_data.data.pause.mode as PausedState["mode"],
+            timeRemaining: response_data.data.pause.time_remaining_seconds || 0,
+            pausedAt: response_data.data.pause.paused_at || new Date().toISOString(),
           };
           setPausedState(mappedPause);
           setTimeRemaining(mappedPause.timeRemaining);
@@ -138,7 +138,7 @@ export function FocusIndicator() {
     try {
       const response = await safeFetch(`${API_BASE_URL}/api/focus/active`);
       if (response.ok) {
-        const data = await response.json() as {
+        const response_data = await response.json() as { data: {
           active?: {
             session?: {
               id: string;
@@ -154,15 +154,15 @@ export function FocusIndicator() {
               paused_at?: string | null;
             } | null;
           };
-        };
-        if (data.active?.session && data.active.session.status === "active") {
+        } };
+        if (response_data.data?.active?.session && response_data.data.active.session.status === "active") {
           const mappedSession: FocusSession = {
-            id: data.active.session.id,
-            started_at: data.active.session.started_at,
-            planned_duration: data.active.session.duration_seconds,
+            id: response_data.data.active.session.id,
+            started_at: response_data.data.active.session.started_at,
+            planned_duration: response_data.data.active.session.duration_seconds,
             status: "active",
-            mode: data.active.session.mode as FocusSession["mode"],
-            expires_at: data.active.session.expires_at ?? null,
+            mode: response_data.data.active.session.mode as FocusSession["mode"],
+            expires_at: response_data.data.active.session.expires_at ?? null,
           };
           setSession(mappedSession);
           setPausedState(null); // Clear paused state if there's an active session

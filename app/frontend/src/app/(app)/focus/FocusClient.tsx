@@ -227,17 +227,11 @@ export function FocusClient({ initialStats, initialSession }: FocusClientProps) 
         credentials: "include",
       });
       if (response.ok) {
-        const data = await response.json() as {
-          stats?: {
-            completed_sessions?: number;
-            abandoned_sessions?: number;
-            total_focus_seconds?: number;
-          };
-        };
-        const completed = data.stats?.completed_sessions || 0;
-        const abandoned = data.stats?.abandoned_sessions || 0;
+        const response_data = await response.json() as { data: { stats?: { completed_sessions?: number; abandoned_sessions?: number; total_focus_seconds?: number } } };
+        const completed = response_data.data?.stats?.completed_sessions || 0;
+        const abandoned = response_data.data?.stats?.abandoned_sessions || 0;
         const totalSessions = completed + abandoned;
-        const totalFocusTime = data.stats?.total_focus_seconds || 0;
+        const totalFocusTime = response_data.data?.stats?.total_focus_seconds || 0;
         setStats((prev) => ({
           ...prev,
           totalSessions,
@@ -257,23 +251,23 @@ export function FocusClient({ initialStats, initialSession }: FocusClientProps) 
           credentials: "include",
         });
       if (response.ok) {
-        const data = await response.json() as { active?: { session?: FocusSession | null; pause_state?: { mode: FocusMode; timeRemaining: number; pausedAt: string } | null } };
-        if (data.active?.session) {
-          setCurrentSession(data.active.session);
-          setMode(data.active.session.mode);
+        const response_data = await response.json() as { data: { active?: { session?: FocusSession | null; pause_state?: { mode: FocusMode; timeRemaining: number; pausedAt: string } | null } } };
+        if (response_data.data?.active?.session) {
+          setCurrentSession(response_data.data.active.session);
+          setMode(response_data.data.active.session.mode);
 
           // Calculate remaining time
-          const startTime = new Date(data.active.session.started_at).getTime();
+          const startTime = new Date(response_data.data.active.session.started_at).getTime();
           const elapsed = Math.floor((Date.now() - startTime) / 1000);
-          const remaining = Math.max(0, data.active.session.duration_seconds - elapsed);
+          const remaining = Math.max(0, response_data.data.active.session.duration_seconds - elapsed);
 
           setTimeRemaining(remaining);
           if (remaining > 0) {
             setStatus("running");
           }
-        } else if (data.active?.pause_state) {
-          setMode(data.active.pause_state.mode);
-          setTimeRemaining(data.active.pause_state.timeRemaining);
+        } else if (response_data.data?.active?.pause_state) {
+          setMode(response_data.data.active.pause_state.mode);
+          setTimeRemaining(response_data.data.active.pause_state.timeRemaining);
           setStatus("paused");
         }
       }
@@ -290,8 +284,8 @@ export function FocusClient({ initialStats, initialSession }: FocusClientProps) 
         credentials: "include",
       });
       if (response.ok) {
-        const data = await response.json() as { sessions?: FocusSession[] };
-        const sessions = data.sessions || [];
+        const response_data = await response.json() as { data: { sessions?: FocusSession[] } };
+        const sessions = response_data.data?.sessions || [];
         setSessionHistory(sessions);
         setWeeklyData(generateWeeklyData(sessions));
       }

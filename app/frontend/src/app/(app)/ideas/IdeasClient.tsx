@@ -74,7 +74,7 @@ export function IdeasClient({}: IdeasClientProps = {}) {
     try {
       const response = await safeFetch(`${API_BASE_URL}/api/ideas`);
       if (response.ok) {
-        const data = await response.json() as { ideas?: Array<{
+        const response_data = await response.json() as { data: { ideas?: Array<{
           id: string;
           title: string;
           content: string | null;
@@ -82,8 +82,8 @@ export function IdeasClient({}: IdeasClientProps = {}) {
           tags: string[];
           is_pinned: boolean;
           created_at: string;
-        }> };
-        const mapped: Idea[] = await Promise.all((data.ideas || []).map(async (idea) => {
+        }> } };
+        const mapped: Idea[] = await Promise.all((response_data.data?.ideas || []).map(async (idea) => {
           let title = idea.title;
           try {
             const maybe = JSON.parse(idea.title);
@@ -173,8 +173,8 @@ export function IdeasClient({}: IdeasClientProps = {}) {
       if (!response.ok) {
         return;
       }
-      const data = await response.json() as { data?: { id: string } };
-      const savedId = data.data?.id;
+      const response_data = await response.json() as { data: { id: string } };
+      const savedId = response_data.data?.id;
       if (!savedId) return;
 
       setIdeas(prev => [{ ...idea, id: savedId }, ...prev.filter(i => i.id !== idea.id)]);
