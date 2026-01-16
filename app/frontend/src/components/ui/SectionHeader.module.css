@@ -1,32 +1,23 @@
 .header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-3);
+  composes: flex items-start justify-between gap-3 from '@/styles/utilities.css';
   margin-bottom: var(--space-4);
 }
 
 .text {
-  flex: 1;
-  min-width: 0;
+  composes: flex-1 min-w-0 from '@/styles/utilities.css';
 }
 
 .title {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
+  composes: text-lg font-semibold text-primary line-height-tight from '@/styles/utilities.css';
   margin: 0;
-  line-height: var(--line-height-tight);
 }
 
 .subtitle {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  composes: text-sm text-secondary line-height-normal from '@/styles/utilities.css';
   margin: var(--space-1) 0 0;
-  line-height: var(--line-height-normal);
 }
 
 .action {
-  flex-shrink: 0;
+  composes: flex-shrink-0 from '@/styles/utilities.css';
 }
 

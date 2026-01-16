@@ -4,9 +4,7 @@
  */
 
 .container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  composes: flex items-center justify-between from '@/styles/utilities.css';
   padding: var(--space-3) var(--space-4);
   background-color: var(--color-accent-primary);
   color: var(--color-text-inverse);
@@ -15,22 +13,16 @@
 }
 
 .title {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  composes: text-sm font-semibold from '@/styles/utilities.css';
 }
 
 .backLink {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
+  composes: flex items-center gap-1 rounded-sm font-medium transition-colors from '@/styles/utilities.css';
   padding: var(--space-1) var(--space-2);
   background-color: rgba(255, 255, 255, 0.2);
   color: var(--color-text-inverse);
-  border-radius: var(--radius-sm);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
   text-decoration: none;
-  transition: background-color var(--transition-fast);
 }
 
 .backLink:hover {
@@ -39,6 +31,6 @@
 }
 
 .backLink svg {
-  flex-shrink: 0;
+  composes: flex-shrink-0 from '@/styles/utilities.css';
 }
 

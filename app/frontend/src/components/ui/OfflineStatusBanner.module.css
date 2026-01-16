@@ -2,10 +2,7 @@
   position: sticky;
   top: 0;
   z-index: var(--z-sticky);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
+  composes: flex items-center justify-between gap-3 from '@/styles/utilities.css';
   padding: var(--space-2) var(--space-4);
   border-bottom: 1px solid var(--color-border-primary);
   background: var(--color-warning-bg);
@@ -18,30 +15,28 @@
 }
 
 .status {
-  font-weight: var(--font-weight-semibold);
+  composes: font-semibold text-xs from '@/styles/utilities.css';
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
 }
 
 .message {
-  flex: 1;
+  composes: flex-1 from '@/styles/utilities.css';
   color: var(--color-text-secondary);
 }
 
 .queueCount {
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-full);
+  composes: px-2 rounded-full text-xs from '@/styles/utilities.css';
+  padding-top: 2px;
+  padding-bottom: 2px;
   background: var(--color-bg-primary);
   border: 1px solid var(--color-border-secondary);
-  font-size: var(--font-size-xs);
   color: var(--color-text-primary);
 }
 
 @media (max-width: 640px) {
   .banner {
-    flex-direction: column;
-    align-items: flex-start;
+    composes: flex-col items-start from '@/styles/utilities.css';
   }
 }
