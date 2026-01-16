@@ -184,12 +184,19 @@ export function QuestsClient() {
 
   // Sync quest completion to API
   const syncCompletionToApi = useCallback(async (quest: Quest) => {
+    // Keep previous wallet state for rollback on error
+    const previousWallet = wallet;
     try {
       const response = await safeFetch(`${API_BASE_URL}/api/quests/${quest.id}/complete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
-      if (!response.ok) return;
+      if (!response.ok) {
+        console.error("Failed to complete quest:", response.status);
+        // Rollback wallet update on error
+        setWallet(previousWallet);
+        return;
+      }
       const response_data = await response.json() as { data: { result?: { xp_awarded?: number; coins_awarded?: number } } };
       const result = response_data.data?.result;
       if (result) {
@@ -197,11 +204,16 @@ export function QuestsClient() {
           coins: prev.coins + (result.coins_awarded || 0),
           totalXp: prev.totalXp + (result.xp_awarded || 0),
         }));
+      } else {
+        // No result returned - rollback and exit
+        setWallet(previousWallet);
       }
     } catch (e) {
       console.error("[quests] Failed to sync completion to API:", e);
+      // Rollback on exception
+      setWallet(previousWallet);
     }
-  }, []);
+  }, [wallet]);
 
   // Complete a quest manually (for testing)
   const handleCompleteQuest = useCallback((questId: string) => {
@@ -267,6 +279,8 @@ export function QuestsClient() {
   // Add custom quest
   const handleAddCustomQuest = useCallback(async () => {
     if (!newQuest.title.trim()) return;
+    // Keep previous quests for rollback on error
+    const previousQuests = quests;
 
     try {
       const response = await safeFetch(`${API_BASE_URL}/api/quests`, {
@@ -285,7 +299,9 @@ export function QuestsClient() {
       });
 
       if (!response.ok) {
-        console.error("Failed to create quest");
+        console.error("Failed to create quest:", response.status);
+        // Rollback optimistic update on error
+        setQuests(previousQuests);
         return;
       }
 

@@ -13,7 +13,7 @@
 
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/shell";
 import { OnboardingProvider } from "@/components/onboarding";
@@ -25,13 +25,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, isLoading, signIn } = useAuth();
   const router = useRouter();
 
+  // Track if we're actively redirecting to avoid infinite redirects
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
   // Session guard - redirect to login if not authenticated
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      console.log('[AppLayout] User not authenticated, redirecting to sign in');
+    if (!isLoading && !isAuthenticated && !isRedirecting) {
+      console.log('[AppLayout] User not authenticated, initiating redirect to sign in');
+      setIsRedirecting(true);
       signIn();
     }
-  }, [isLoading, isAuthenticated, signIn]);
+  }, [isLoading, isAuthenticated, signIn, isRedirecting]);
 
   useEffect(() => {
     if (isLoading || !isAuthenticated || !user) return;

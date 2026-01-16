@@ -1,0 +1,134 @@
+# E2E Testing Infrastructure
+#
+# Ephemeral test environment with fresh database
+#
+# Usage:
+#   docker compose -f infra/docker-compose.e2e.yml up -d
+#   API_BASE_URL=http://localhost:8080 npx playwright test tests/
+#   docker compose -f infra/docker-compose.e2e.yml down -v
+#
+# IMPORTANT: AUTH_DEV_BYPASS=true. This file is ONLY for testing.
+# NEVER use in production.
+
+version: '3.9'
+
+services:
+  # ============================================================================
+  # PostgreSQL Database (Test)
+  # ============================================================================
+  postgres-e2e:
+    image: postgres:17-alpine
+    container_name: ignition-postgres-e2e
+    environment:
+      POSTGRES_USER: ignition
+      POSTGRES_PASSWORD: ignition_test
+      POSTGRES_DB: ignition_test
+    ports:
+      - "5433:5432"  # Different port to avoid conflicts
+    volumes:
+      # Mount migrations directly from app/backend/migrations
+      - ../app/backend/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ignition"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ignition-e2e-network
+
+  # ============================================================================
+  # MinIO (S3-compatible storage for tests)
+  # ============================================================================
+  minio-e2e:
+    image: minio/minio:latest
+    container_name: ignition-minio-e2e
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9002:9000"   # S3 API (different port)
+      - "9003:9001"   # Console (different port)
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ignition-e2e-network
+
+  # ============================================================================
+  # MinIO Bucket Initialization (Test)
+  # ============================================================================
+  minio-init-e2e:
+    image: minio/mc:latest
+    container_name: ignition-minio-init-e2e
+    depends_on:
+      minio-e2e:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio-e2e:9000 minioadmin minioadmin;
+      mc mb local/ignition-test --ignore-existing;
+      mc anonymous set download local/ignition-test/public;
+      echo 'Test bucket initialized';
+      exit 0;
+      "
+    networks:
+      - ignition-e2e-network
+
+  # ============================================================================
+  # Backend API (Test)
+  # ============================================================================
+  api-e2e:
+    build:
+      context: ../app/backend
+      dockerfile: Dockerfile
+    container_name: ignition-api-e2e
+    depends_on:
+      postgres-e2e:
+        condition: service_healthy
+      minio-init-e2e:
+        condition: service_completed_successfully
+    environment:
+      # Database
+      DATABASE_URL: postgres://ignition:ignition_test@postgres-e2e:5432/ignition_test
+      
+      # Server
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 8080
+      
+      # Auth - CRITICAL: DEV BYPASS ENABLED FOR TESTING
+      AUTH_DEV_BYPASS: "true"
+      
+      # S3 / MinIO
+      S3_ENDPOINT: http://minio-e2e:9000
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+      S3_BUCKET: ignition-test
+      S3_REGION: us-east-1
+      
+      # CORS for Playwright
+      CORS_ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:3001"
+      
+      # Features
+      FEATURE_E2EE: "true"
+      FEATURE_RECOVERY_CODES: "true"
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - ignition-e2e-network
+
+volumes:
+  # Ephemeral: volumes not persisted after down -v
+  postgres_e2e_data:
+  minio_e2e_data:
+
+networks:
+  ignition-e2e-network:
+    driver: bridge

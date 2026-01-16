@@ -54,10 +54,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log('[AuthProvider] Window focused, refetching session');
         fetchSession();
       };
+
+      // Listen for cross-tab session termination (triggered by 401 in another tab)
+      const handleStorageChange = (event: StorageEvent) => {
+        if (event.key === '__session_terminated__' && event.newValue) {
+          console.log('[AuthProvider] Detected session termination from another tab');
+          try {
+            const data = JSON.parse(event.newValue);
+            console.log('[AuthProvider] Session terminated at:', new Date(data.timestamp).toISOString(), 'reason:', data.reason);
+            // Clear local user state
+            setUser(null);
+            // Redirect to landing page
+            window.location.href = '/';
+          } catch (error) {
+            console.error('[AuthProvider] Error parsing session termination event:', error);
+          }
+        }
+      };
+
       window.addEventListener('focus', handleFocus);
+      window.addEventListener('storage', handleStorageChange);
       return () => {
         console.log('[AuthProvider] Unmounted');
         window.removeEventListener('focus', handleFocus);
+        window.removeEventListener('storage', handleStorageChange);
       };
     }, [fetchSession]);
 

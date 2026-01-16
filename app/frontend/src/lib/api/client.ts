@@ -105,8 +105,13 @@ async function clearAllClientData(): Promise<void> {
  * 
  * Flow:
  * 1. Clear all client data (localStorage + backend session)
- * 2. Show user notification
- * 3. Redirect to main landing page (NOT /login which doesn't exist)
+ * 2. Broadcast session termination to other tabs
+ * 3. Show user notification
+ * 4. Redirect to main landing page (NOT /login which doesn't exist)
+ * 
+ * Cross-Tab Synchronization:
+ * Uses localStorage event to notify other tabs of session expiry,
+ * preventing "ghost" authenticated states across tabs.
  */
 async function handle401(): Promise<void> {
   console.warn('[API] 401 Unauthorized - Session expired, clearing client data');
@@ -114,7 +119,21 @@ async function handle401(): Promise<void> {
   // STEP 1: Clear all session data FIRST (prevents sync from restoring)
   await clearAllClientData();
 
-  // STEP 2: Show error notification
+  // STEP 2: Broadcast session termination to other tabs (cross-tab sync)
+  if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+    try {
+      const timestamp = Date.now();
+      localStorage.setItem('__session_terminated__', JSON.stringify({
+        timestamp,
+        reason: 'session_expired',
+      }));
+      console.log('[API] Broadcast session termination to other tabs');
+    } catch (error) {
+      console.error('[API] Error broadcasting session termination:', error);
+    }
+  }
+
+  // STEP 3: Show error notification
   if (typeof window !== 'undefined') {
     try {
       const { useErrorStore } = await import('@/lib/hooks/useErrorNotification');
@@ -133,7 +152,7 @@ async function handle401(): Promise<void> {
       console.error('[API] Error showing notification:', error);
     }
 
-    // STEP 3: Redirect to main landing page (clean slate)
+    // STEP 4: Redirect to main landing page (clean slate)
     // Note: No delay needed - clearAllClientData already completed
     // Redirecting to '/' (not '/login') per user requirement
     console.log('[API] Redirecting to main landing page');
@@ -432,11 +451,18 @@ export async function apiDelete<T>(path: string, options?: ApiRequestOptions): P
 // ============================================
 
 /**
- * Safe wrapper for raw fetch() calls that checks for 401 responses
+ * Safe wrapper for raw fetch() calls with comprehensive error handling
+ * 
+ * Features:
+ * - 401 session expiry handling
+ * - Error notifications for API failures (400, 500, etc.)
+ * - Network error handling
+ * - Offline queue support
+ * - Automatic credential injection
  * 
  * CRITICAL: Use this wrapper for all fetch() calls that aren't going through
  * the standard apiGet/apiPost/etc functions. This ensures session termination
- * works globally, not just for centralized API calls.
+ * and error notifications work globally.
  * 
  * Usage:
  *   const response = await safeFetch(`${API_BASE_URL}/api/focus`);
@@ -455,8 +481,9 @@ export async function safeFetch(
   } as RequestInit;
 
   const method = (fetchOptions.method || 'GET').toUpperCase();
+  const url = typeof normalizedInput === 'string' ? normalizedInput : normalizedInput.url;
+  
   if (typeof navigator !== 'undefined' && !navigator.onLine && isMutation(method)) {
-    const url = typeof normalizedInput === 'string' ? normalizedInput : normalizedInput.url;
     if (!isQueueableMutation(url)) {
       return new Response(
         JSON.stringify({ error: 'offline_blocked', message: 'Offline write blocked for encrypted content' }),
@@ -480,7 +507,44 @@ export async function safeFetch(
   }
 
   const runFetch = () => fetch(normalizedInput, fetchOptions);
-  const response = isMutation(method) ? await withMutationLock(runFetch) : await runFetch();
+  let response: Response;
+  
+  try {
+    response = isMutation(method) ? await withMutationLock(runFetch) : await runFetch();
+  } catch (error) {
+    // Network error (offline, DNS failure, etc.)
+    const errorMessage = error instanceof Error ? error.message : 'Network error';
+    console.error(`[API] Network error for ${method} ${url}:`, error);
+    
+    // Notify user of network failure
+    if (typeof window !== 'undefined') {
+      try {
+        const { useErrorStore } = await import('@/lib/hooks/useErrorNotification');
+        const store = useErrorStore.getState();
+        store.addError({
+          id: `network-error-${Date.now()}`,
+          timestamp: new Date(),
+          message: 'Network error. Please check your connection and try again.',
+          endpoint: url,
+          method,
+          status: 0,
+          type: 'error',
+          details: { reason: 'network_error', originalError: errorMessage },
+        });
+      } catch (notifyError) {
+        console.error('[API] Error showing notification:', notifyError);
+      }
+    }
+    
+    // Return error response
+    return new Response(
+      JSON.stringify({ error: 'network_error', message: errorMessage }),
+      {
+        status: 0,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+  }
 
   // Handle 401 Unauthorized - Session expired or invalid
   if (response.status === 401) {
@@ -489,7 +553,62 @@ export async function safeFetch(
     return response;
   }
 
+  // Handle other error responses (400, 500, etc.)
+  if (!response.ok && response.status !== 202) {
+    const errorMessage = getErrorMessage(response.status);
+    console.error(`[API] ${response.status} error for ${method} ${url}`);
+    
+    // Notify user of API failure
+    if (typeof window !== 'undefined' && isMutation(method)) {
+      try {
+        const { useErrorStore } = await import('@/lib/hooks/useErrorNotification');
+        const store = useErrorStore.getState();
+        store.addError({
+          id: `api-error-${Date.now()}`,
+          timestamp: new Date(),
+          message: errorMessage,
+          endpoint: url,
+          method,
+          status: response.status,
+          type: 'error',
+          details: { 
+            reason: 'api_error',
+            statusCode: response.status,
+          },
+        });
+      } catch (notifyError) {
+        console.error('[API] Error showing notification:', notifyError);
+      }
+    }
+  }
+
   return response;
+}
+
+/**
+ * Get user-friendly error message from HTTP status code
+ */
+function getErrorMessage(status: number): string {
+  switch (status) {
+    case 400:
+      return 'Invalid request. Please check your input and try again.';
+    case 403:
+      return 'You do not have permission to perform this action.';
+    case 404:
+      return 'The requested resource was not found.';
+    case 409:
+      return 'Conflict: This item may have been modified. Please refresh and try again.';
+    case 429:
+      return 'Too many requests. Please wait a moment and try again.';
+    case 500:
+      return 'Server error. Please try again later.';
+    case 502:
+      return 'Bad gateway. Please try again later.';
+    case 503:
+      return 'Service temporarily unavailable. Please try again later.';
+    default:
+      return `Error: ${status}. Please try again.`;
+  }
 }
 
 // ============================================

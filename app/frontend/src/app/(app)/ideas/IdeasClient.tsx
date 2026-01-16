@@ -151,6 +151,9 @@ export function IdeasClient({}: IdeasClientProps = {}) {
 
   // Save idea to D1
   const saveIdea = useCallback(async (idea: Idea) => {
+    // Keep original ideas list for rollback if needed
+    const previousIdeas = ideas;
+    
     try {
       let titleToSend: string = idea.content;
       if (vaultUnlocked && passphrase) {
@@ -171,11 +174,18 @@ export function IdeasClient({}: IdeasClientProps = {}) {
         }),
       });
       if (!response.ok) {
+        // Rollback optimistic update on error
+        setIdeas(previousIdeas);
+        console.error("Failed to save idea: server returned", response.status);
         return;
       }
       const response_data = await response.json() as { data: { id: string } };
       const savedId = response_data.data?.id;
-      if (!savedId) return;
+      if (!savedId) {
+        // No ID returned - rollback and exit
+        setIdeas(previousIdeas);
+        return;
+      }
 
       setIdeas(prev => [{ ...idea, id: savedId }, ...prev.filter(i => i.id !== idea.id)]);
     } catch (error) {

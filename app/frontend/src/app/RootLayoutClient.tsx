@@ -2,6 +2,7 @@
 
 import { AuthProvider } from "@/lib/auth";
 import { VaultLockProvider } from "@/lib/auth/VaultLockContext";
+import { VaultRecoveryProvider } from "@/contexts/VaultRecoveryContext";
 import { ThemeProvider } from "@/lib/theme";
 import { SiteFooter } from "@/components/shell/SiteFooter";
 import { VaultLockBanner } from "@/components/shell/VaultLockBanner";
@@ -27,7 +28,8 @@ export function RootLayoutClient({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
       <VaultLockProvider>
-        <ThemeProvider>
+        <VaultRecoveryProvider>
+          <ThemeProvider>
           <ZenBrowserInitializer />
           <OnboardingGate>
             <OfflineStatusBanner />
@@ -41,6 +43,7 @@ export function RootLayoutClient({ children }: { children: React.ReactNode }) {
             <OfflineQueueWorker />
           </OnboardingGate>
         </ThemeProvider>
+        </VaultRecoveryProvider>
       </VaultLockProvider>
     </AuthProvider>
   );

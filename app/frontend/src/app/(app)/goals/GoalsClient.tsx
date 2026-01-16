@@ -156,6 +156,8 @@ export function GoalsClient() {
   // Add a new goal
   const handleAddGoal = useCallback(async () => {
     if (!newGoal.title.trim()) return;
+    // Keep previous state for rollback on error
+    const previousGoals = goals;
     try {
       const response = await safeFetch(`${API_BASE_URL}/api/goals`, {
         method: "POST",
@@ -169,7 +171,9 @@ export function GoalsClient() {
         }),
       });
       if (!response.ok) {
-        console.error("Failed to create goal");
+        console.error("Failed to create goal:", response.status);
+        // Rollback optimistic update on error
+        setGoals(previousGoals);
         return;
       }
       const response_data = await response.json() as { data: { goal?: GoalApiResponse } };
@@ -180,6 +184,10 @@ export function GoalsClient() {
           setMemoryCache(GOALS_CACHE_KEY, { goals: next });
           return next;
         });
+      } else {
+        // No goal returned - rollback and exit
+        setGoals(previousGoals);
+        return;
       }
       setNewGoal({ title: "", description: "", category: "personal", deadline: "" });
       setShowAddForm(false);
@@ -191,6 +199,8 @@ export function GoalsClient() {
   // Add milestone to goal
   const handleAddMilestone = useCallback(async (goalId: string, title: string) => {
     if (!title.trim()) return;
+    // Keep previous state for rollback on error
+    const previousGoals = goals;
     try {
       const response = await safeFetch(`${API_BASE_URL}/api/goals/${goalId}/milestones`, {
         method: "POST",
@@ -198,11 +208,17 @@ export function GoalsClient() {
         body: JSON.stringify({ title: title.trim(), description: undefined }),
       });
       if (!response.ok) {
-        console.error("Failed to add milestone");
+        console.error("Failed to add milestone:", response.status);
+        // Rollback optimistic update on error
+        setGoals(previousGoals);
         return;
       }
       const response_data = await response.json() as { data: { milestone?: MilestoneApiResponse } };
-      if (!response_data.data?.milestone) return;
+      if (!response_data.data?.milestone) {
+        // No milestone returned - rollback and exit
+        setGoals(previousGoals);
+        return;
+      }
 
       const milestone = response_data.data.milestone;
       setGoals((prev) => {
@@ -231,13 +247,17 @@ export function GoalsClient() {
     const milestone = goal?.milestones.find((m) => m.id === milestoneId);
     if (!milestone || milestone.completed) return;
 
+    // Keep previous state for rollback on error
+    const previousGoals = goals;
     try {
       const response = await safeFetch(`${API_BASE_URL}/api/goals/milestones/${milestoneId}/complete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
       if (!response.ok) {
-        console.error("Failed to complete milestone");
+        console.error("Failed to complete milestone:", response.status);
+        // Rollback optimistic update on error
+        setGoals(previousGoals);
         return;
       }
       const response_data = await response.json() as { data: { result?: { milestone?: MilestoneApiResponse; goal_progress?: number; goal_completed?: boolean } } };
@@ -253,9 +273,14 @@ export function GoalsClient() {
           setMemoryCache(GOALS_CACHE_KEY, { goals: next });
           return next;
         });
+      } else {
+        // No milestone returned - rollback and exit
+        setGoals(previousGoals);
       }
     } catch (e) {
       console.error("Failed to complete milestone:", e);
+      // Rollback on exception
+      setGoals(previousGoals);
     }
   }, [goals]);
 

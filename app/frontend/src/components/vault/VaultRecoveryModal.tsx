@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styles from './VaultRecoveryModal.module.css';
 
 export interface RecoveryCode {
@@ -158,13 +158,13 @@ Learn more at: https://passion-os.com/security/recovery-codes`;
                   className={styles.actionButton}
                   onClick={handleCopyToClipboard}
                 >
-                  {copied ? '✓ Copied!' : '📋 Copy All'}
+                  {copied ? '✓ Copied!' : 'Copy All'}
                 </button>
                 <button
                   className={styles.actionButton}
                   onClick={handleDownload}
                 >
-                  ⬇️ Download
+                  Download
                 </button>
                 <button
                   className={styles.actionButton}
@@ -243,7 +243,7 @@ Learn more at: https://passion-os.com/security/recovery-codes`;
 
             <div className={styles.content}>
               <p>Change your vault passphrase and generate new recovery codes.</p>
-              <p className={styles.note}>You'll be asked to verify your current passphrase.</p>
+              <p className={styles.note}>You&apos;ll be asked to verify your current passphrase.</p>
             </div>
           </>
         )}
