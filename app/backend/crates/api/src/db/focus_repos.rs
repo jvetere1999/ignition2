@@ -7,7 +7,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use super::focus_models::*;
-use super::gamification_models::AwardPointsInput;
+use super::gamification_models::{AwardPointsInput, EventType};
 use super::gamification_repos::GamificationRepo;
 use crate::error::AppError;
 
@@ -251,7 +251,7 @@ impl FocusSessionRepo {
                 coins: Some(coins),
                 skill_stars: None,
                 skill_key: None,
-                event_type: "focus_complete".to_string(),
+                event_type: EventType::FocusSessionCompleted,
                 event_id: Some(session_id),
                 reason: Some("Focus session completed".to_string()),
                 idempotency_key: Some(idempotency_key),

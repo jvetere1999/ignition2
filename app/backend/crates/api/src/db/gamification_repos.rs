@@ -92,7 +92,6 @@ impl UserProgressRepo {
             if existing > 0 {
                 let progress = Self::get_or_create(pool, user_id).await?;
                 return Ok(AwardResult {
-                    success: true,
                     already_awarded: true,
                     new_balance: progress.total_xp,
                     leveled_up: Some(false),
@@ -152,7 +151,6 @@ impl UserProgressRepo {
         .await?;
 
         Ok(AwardResult {
-            success: true,
             already_awarded: false,
             new_balance: new_xp,
             leveled_up: Some(leveled_up),
@@ -226,7 +224,6 @@ impl UserWalletRepo {
             if existing > 0 {
                 let wallet = Self::get_or_create(pool, user_id).await?;
                 return Ok(AwardResult {
-                    success: true,
                     already_awarded: true,
                     new_balance: wallet.coins,
                     leveled_up: None,
@@ -269,7 +266,6 @@ impl UserWalletRepo {
         .await?;
 
         Ok(AwardResult {
-            success: true,
             already_awarded: false,
             new_balance,
             leveled_up: None,
@@ -778,7 +774,6 @@ impl GamificationRepo {
         input: &AwardPointsInput,
     ) -> Result<AwardResult, AppError> {
         let mut result = AwardResult {
-            success: true,
             already_awarded: false,
             new_balance: 0,
             leveled_up: None,
@@ -788,11 +783,17 @@ impl GamificationRepo {
         // Award XP if specified
         if let Some(xp) = input.xp {
             if xp > 0 {
+                // Serialize EventType to string (snake_case format via serde)
+                let event_type_str = serde_json::to_string(&input.event_type)
+                    .unwrap_or_else(|_| "\"custom\"".to_string())
+                    .trim_matches('\"')
+                    .to_string();
+                
                 let xp_result = UserProgressRepo::award_xp(
                     pool,
                     user_id,
                     xp,
-                    &input.event_type,
+                    &event_type_str,
                     input.event_id,
                     input.reason.as_deref(),
                     input.idempotency_key.as_deref(),
@@ -808,11 +809,17 @@ impl GamificationRepo {
         // Award coins if specified
         if let Some(coins) = input.coins {
             if coins > 0 {
+                // Serialize EventType to string (snake_case format via serde)
+                let event_type_str = serde_json::to_string(&input.event_type)
+                    .unwrap_or_else(|_| "\"custom\"".to_string())
+                    .trim_matches('\"')
+                    .to_string();
+                
                 let coins_result = UserWalletRepo::award_coins(
                     pool,
                     user_id,
                     coins,
-                    &input.event_type,
+                    &event_type_str,
                     input.event_id,
                     input.reason.as_deref(),
                     input.idempotency_key.as_deref(),

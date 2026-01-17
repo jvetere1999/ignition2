@@ -31,6 +31,6 @@
 }
 
 .backLink svg {
-  composes: flex-shrink-0 from '@/styles/utilities.css';
+  flex-shrink: 0;
 }
 

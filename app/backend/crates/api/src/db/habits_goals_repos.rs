@@ -6,7 +6,7 @@ use chrono::{NaiveDate, Utc};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use super::gamification_models::AwardPointsInput;
+use super::gamification_models::{AwardPointsInput, EventType};
 use super::gamification_repos::GamificationRepo;
 use super::habits_goals_models::*;
 use crate::error::AppError;
@@ -30,7 +30,7 @@ fn generate_milestone_idempotency_key(milestone_id: Uuid) -> String {
 async fn award_points_for_event(
     pool: &PgPool,
     user_id: Uuid,
-    event_type: &str,
+    event_type: EventType,  // Changed from &str to EventType
     event_id: Uuid,
     xp: Option<i32>,
     coins: Option<i32>,
@@ -45,7 +45,7 @@ async fn award_points_for_event(
             coins,
             skill_stars: None,
             skill_key: None,
-            event_type: event_type.to_string(),
+            event_type,  // EventType enum passed directly
             event_id: Some(event_id),
             reason: Some(reason),
             idempotency_key: Some(idempotency_key),
@@ -364,7 +364,7 @@ impl HabitsRepo {
         award_points_for_event(
             pool,
             user_id,
-            "habit_complete",
+            EventType::HabitCompleted,
             habit_id,
             Some(xp),
             None,
@@ -679,7 +679,7 @@ impl GoalsRepo {
         award_points_for_event(
             pool,
             user_id,
-            "milestone_complete",
+            EventType::GoalMilestoneCompleted,
             milestone_id,
             Some(10),
             if goal_completed { Some(20) } else { None },

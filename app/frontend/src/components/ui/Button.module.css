@@ -8,11 +8,13 @@
 }
 
 .button:disabled {
-  composes: disabled from '@/styles/utilities.css';
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .button:focus-visible {
-  composes: focus-ring from '@/styles/utilities.css';
+  outline: 2px solid var(--color-accent-primary);
+  outline-offset: 2px;
 }
 
 /* Variants */

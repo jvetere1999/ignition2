@@ -6,7 +6,7 @@ use chrono::Utc;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use super::gamification_models::AwardPointsInput;
+use super::gamification_models::{AwardPointsInput, EventType};
 use super::gamification_repos::GamificationRepo;
 use super::quests_models::*;
 use crate::error::AppError;
@@ -221,7 +221,7 @@ impl QuestsRepo {
                 coins: Some(quest.coin_reward),
                 skill_stars: None,
                 skill_key: None,
-                event_type: "quest_complete".to_string(),
+                event_type: EventType::QuestCompleted,
                 event_id: Some(quest_id),
                 reason: Some(format!("Completed quest: {}", quest.title)),
                 idempotency_key: Some(idempotency_key),
