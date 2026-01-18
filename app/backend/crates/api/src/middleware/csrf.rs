@@ -38,14 +38,20 @@ pub async fn csrf_check(req: Request, next: Next) -> Result<Response, AppError> 
     // Skip CSRF check in development mode (dev bypass)
     let is_dev_bypass = std::env::var("AUTH_DEV_BYPASS").is_ok();
     if is_dev_bypass {
-        let host = req.headers()
+        let host = req
+            .headers()
             .get("Host")
             .and_then(|h| h.to_str().ok())
             .unwrap_or("");
-        
+
         // Allow dev bypass on localhost/127.0.0.1
         if host.starts_with("localhost") || host.starts_with("127.0.0.1") {
-            tracing::debug!("CSRF check skipped - dev mode enabled on localhost");
+            tracing::debug!(
+                mode = "dev",
+                host = %host,
+                operation = "csrf_check",
+                "CSRF check skipped - dev mode enabled on localhost"
+            );
             return Ok(next.run(req).await);
         }
     }
@@ -84,9 +90,11 @@ pub async fn csrf_check(req: Request, next: Next) -> Result<Response, AppError> 
 
     if !is_valid {
         tracing::warn!(
-            "CSRF check failed - Origin: {:?}, Referer: {:?}",
-            origin,
-            referer
+            error.type = "csrf",
+            http.origin = ?origin,
+            http.referer = ?referer,
+            operation = "csrf_check",
+            "CSRF token validation failed"
         );
         return Err(AppError::CsrfViolation);
     }

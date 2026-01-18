@@ -21,7 +21,7 @@ impl OAuthStateRepo {
     ) -> AppResult<()> {
         let expires_at = Utc::now() + Duration::minutes(10);
         let created_at = Utc::now();
-        
+
         sqlx::query(
             r#"
             INSERT INTO oauth_states (state_key, pkce_verifier, redirect_uri, created_at, expires_at)

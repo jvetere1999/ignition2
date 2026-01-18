@@ -7,12 +7,11 @@
 // Roadmap: Step 1 of 5 - Create tests/fixtures directory with shared database initialization
 // Status: NOT_STARTED
 
+use crate::{db::defaults, named_enum};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
-use crate::{named_enum, db::defaults};
-
 
 // ============================================================================
 // ENUMS

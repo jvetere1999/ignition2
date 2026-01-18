@@ -55,7 +55,7 @@ pub fn default_focus_mode() -> String {
 /// Business Logic: Standard Pomodoro technique duration
 /// Reference: https://en.wikipedia.org/wiki/Pomodoro_Technique
 pub fn default_focus_duration() -> i32 {
-    1500  // 25 minutes in seconds
+    1500 // 25 minutes in seconds
 }
 
 // ============================================================================
@@ -133,7 +133,12 @@ pub const VALID_CATEGORIES: &[&str] = &["bug", "feature", "general", "performanc
 pub const VALID_IDEA_CATEGORIES: &[&str] = &["feature", "learning", "general", "workflow"];
 
 /// All valid platform event types
-pub const VALID_EVENT_TYPES: &[&str] = &["quest_completed", "habit_completed", "achievement_earned", "custom"];
+pub const VALID_EVENT_TYPES: &[&str] = &[
+    "quest_completed",
+    "habit_completed",
+    "achievement_earned",
+    "custom",
+];
 
 // ============================================================================
 // CONSTANTS

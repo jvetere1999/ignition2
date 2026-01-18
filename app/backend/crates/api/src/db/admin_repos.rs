@@ -48,12 +48,11 @@ pub struct AdminClaimRepo;
 impl AdminClaimRepo {
     /// Check if any admins exist in the system
     pub async fn has_any_admins(pool: &PgPool) -> Result<bool, AppError> {
-        let count = sqlx::query_scalar::<_, i64>(
-            "SELECT COUNT(*) FROM users WHERE is_admin = TRUE"
-        )
-        .fetch_one(pool)
-        .await
-        .map_err(|e| AppError::Internal(format!("{}: {}", ERR_ADMIN_COUNT, e)))?;
+        let count =
+            sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM users WHERE is_admin = TRUE")
+                .fetch_one(pool)
+                .await
+                .map_err(|e| AppError::Internal(format!("{}: {}", ERR_ADMIN_COUNT, e)))?;
 
         Ok(count > 0)
     }
@@ -61,7 +60,7 @@ impl AdminClaimRepo {
     /// Check if a user is an admin
     pub async fn is_user_admin(pool: &PgPool, user_id: &Uuid) -> Result<bool, AppError> {
         let is_admin = sqlx::query_scalar::<_, bool>(
-            "SELECT COALESCE(is_admin, FALSE) FROM users WHERE id = $1"
+            "SELECT COALESCE(is_admin, FALSE) FROM users WHERE id = $1",
         )
         .bind(user_id)
         .fetch_optional(pool)
@@ -84,12 +83,11 @@ impl AdminClaimRepo {
 
     /// Count total admins
     pub async fn count_admins(pool: &PgPool) -> Result<i64, AppError> {
-        let count = sqlx::query_scalar::<_, i64>(
-            "SELECT COUNT(*) FROM users WHERE is_admin = TRUE"
-        )
-        .fetch_one(pool)
-        .await
-        .map_err(|e| AppError::Internal(format!("{}: {}", ERR_ADMIN_COUNT, e)))?;
+        let count =
+            sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM users WHERE is_admin = TRUE")
+                .fetch_one(pool)
+                .await
+                .map_err(|e| AppError::Internal(format!("{}: {}", ERR_ADMIN_COUNT, e)))?;
 
         Ok(count)
     }
@@ -523,11 +521,12 @@ impl AdminStatsRepo {
         .map(|r| r.count.unwrap_or(0))
         .unwrap_or(0);
 
-        let habits = sqlx::query_as::<_, CountRow>("SELECT COUNT(*) as count FROM habit_completions")
-            .fetch_one(pool)
-            .await
-            .map(|r| r.count.unwrap_or(0))
-            .unwrap_or(0);
+        let habits =
+            sqlx::query_as::<_, CountRow>("SELECT COUNT(*) as count FROM habit_completions")
+                .fetch_one(pool)
+                .await
+                .map(|r| r.count.unwrap_or(0))
+                .unwrap_or(0);
 
         let goals = sqlx::query_as::<_, CountRow>("SELECT COUNT(*) as count FROM goals")
             .fetch_one(pool)

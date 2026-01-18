@@ -16,7 +16,7 @@ use uuid::Uuid;
 /// Defines all valid event types that can trigger XP/coins/skill awards.
 /// Using an enum provides compile-time type safety and prevents typos.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, sqlx::Type)]
-#[sqlx(type_name = "text")]  // Store as TEXT in database
+#[sqlx(type_name = "text")] // Store as TEXT in database
 #[serde(rename_all = "snake_case")]
 pub enum EventType {
     /// Quest completed event
@@ -58,7 +58,7 @@ impl EventType {
 /// Defines all valid streak types tracked by the system.
 /// Using an enum provides compile-time type safety and prevents typos.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, sqlx::Type)]
-#[sqlx(type_name = "text")]  // Store as TEXT in database
+#[sqlx(type_name = "text")] // Store as TEXT in database
 #[serde(rename_all = "snake_case")]
 pub enum StreakType {
     /// Daily login streak
@@ -134,16 +134,25 @@ impl TriggerType {
     /// - Streak: "Maintain 7-day Daily streak"
     pub fn description(&self) -> String {
         match self {
-            Self::CountBased { event_type, target_count } => {
+            Self::CountBased {
+                event_type,
+                target_count,
+            } => {
                 format!("Earn {} times ({})", target_count, event_type)
             }
-            Self::Milestone { milestone_type, milestone_value } => {
+            Self::Milestone {
+                milestone_type,
+                milestone_value,
+            } => {
                 format!("Reach milestone: {} {}", milestone_type, milestone_value)
             }
             Self::Unlock { dependency_key } => {
                 format!("Unlock after earning achievement: {}", dependency_key)
             }
-            Self::Streak { streak_type, days_required } => {
+            Self::Streak {
+                streak_type,
+                days_required,
+            } => {
                 format!("Maintain {}-day {} streak", days_required, streak_type)
             }
         }

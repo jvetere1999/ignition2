@@ -1,9 +1,9 @@
 //! Database module
 //!
 //! Contains models and repositories for database operations.
-//! 
+//!
 //! ## Architecture
-//! 
+//!
 //! - `core`: Centralized database utilities with observability
 //! - `*_models`: Database entity structs (FromRow)
 //! - `*_repos`: Repository pattern for CRUD operations
@@ -13,9 +13,9 @@
 //! See [IMPORT_CONVENTIONS.md](../../IMPORT_CONVENTIONS.md) for module import standards.
 
 // PUBLIC MODULES - Core utilities
-pub mod core;     // Centralized DB utilities with observability
+pub mod core; // Centralized DB utilities with observability
 pub mod defaults; // Centralized default values for request types
-pub mod macros;   // Boilerplate reduction macros for common patterns
+pub mod macros; // Boilerplate reduction macros for common patterns
 
 // PUBLIC MODULES - Domain-specific models and repositories
 pub mod admin_models;
@@ -64,5 +64,4 @@ pub mod vault_models;
 pub mod vault_repos;
 
 // RE-EXPORTS: Convenience for route handlers and services
-pub use core::{QueryContext, db_error};
-
+pub use core::{db_error, QueryContext};

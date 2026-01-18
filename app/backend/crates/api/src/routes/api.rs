@@ -4,10 +4,7 @@
 
 use std::sync::Arc;
 
-use axum::{
-    routing::get,
-    Json, Router,
-};
+use axum::{routing::get, Json, Router};
 use serde::Serialize;
 
 use crate::state::AppState;

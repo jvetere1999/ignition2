@@ -9,7 +9,7 @@ use serde_json::json;
 
 use crate::{
     db::crypto_policy_models::{
-        CryptoPolicy, CreateCryptoPolicyRequest, DeprecateCryptoPolicyRequest,
+        CreateCryptoPolicyRequest, CryptoPolicy, DeprecateCryptoPolicyRequest,
         GetCryptoPolicyResponse,
     },
     db::crypto_policy_repos::CryptoPolicyRepo,
@@ -46,13 +46,11 @@ async fn get_current_policy(State(state): State<Arc<AppState>>) -> Response {
             };
             (StatusCode::OK, Json(response)).into_response()
         }
-        Err(_) => {
-            (
-                StatusCode::NOT_FOUND,
-                Json(json!({ "error": "No active crypto policy found" })),
-            )
-                .into_response()
-        }
+        Err(_) => (
+            StatusCode::NOT_FOUND,
+            Json(json!({ "error": "No active crypto policy found" })),
+        )
+            .into_response(),
     }
 }
 
@@ -79,13 +77,11 @@ async fn get_policy_by_version(
             };
             (StatusCode::OK, Json(response)).into_response()
         }
-        Err(_) => {
-            (
-                StatusCode::NOT_FOUND,
-                Json(json!({ "error": format!("Policy version {} not found", version) })),
-            )
-                .into_response()
-        }
+        Err(_) => (
+            StatusCode::NOT_FOUND,
+            Json(json!({ "error": format!("Policy version {} not found", version) })),
+        )
+            .into_response(),
     }
 }
 
@@ -157,7 +153,7 @@ async fn deprecate_policy(
 ) -> Response {
     let mut req = req;
     req.version = version;
-    
+
     match CryptoPolicyRepo::deprecate(&state.db, &req).await {
         Ok(policy) => {
             let response = GetCryptoPolicyResponse {

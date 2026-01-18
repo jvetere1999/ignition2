@@ -32,4 +32,5 @@ pub mod settings;
 pub mod sync;
 pub mod today;
 pub mod user;
-pub mod vault;pub mod vault_recovery;
+pub mod vault;
+pub mod vault_recovery;

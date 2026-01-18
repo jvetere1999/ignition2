@@ -61,7 +61,9 @@ impl GoogleOAuth {
             .set_pkce_challenge(pkce_challenge)
             .url();
 
-        let redirect_uri = self.client.redirect_url()
+        let redirect_uri = self
+            .client
+            .redirect_url()
             .map(|url| url.to_string())
             .unwrap_or_else(|| "http://localhost:3000/api/auth/callback/google".to_string());
 
@@ -184,7 +186,9 @@ impl AzureOAuth {
             .set_pkce_challenge(pkce_challenge)
             .url();
 
-        let redirect_uri = self.client.redirect_url()
+        let redirect_uri = self
+            .client
+            .redirect_url()
             .map(|url| url.to_string())
             .unwrap_or_else(|| "http://localhost:3000/api/auth/callback/azure".to_string());
 
@@ -284,18 +288,31 @@ impl OAuthService {
                 // Skip if credentials are empty
                 if google_config.client_id.is_empty() || google_config.client_secret.is_empty() {
                     tracing::info!(
-                        provider = "google",
+                        operation = "oauth_init",
+                        auth.provider = "google",
+                        status = "disabled",
                         "OAuth provider not configured - feature disabled"
                     );
                     None
                 } else {
                     let redirect_uri = format!("{}/auth/callback/google", base_url);
                     match GoogleOAuth::new(google_config, &redirect_uri) {
-                        Ok(google_oauth) => Some(google_oauth),
+                        Ok(google_oauth) => {
+                            tracing::info!(
+                                operation = "oauth_init",
+                                auth.provider = "google",
+                                status = "enabled",
+                                "OAuth provider initialized"
+                            );
+                            Some(google_oauth)
+                        }
                         Err(e) => {
                             tracing::warn!(
-                                error = %e,
-                                provider = "google",
+                                error.type = "oauth",
+                                error.message = %e,
+                                auth.provider = "google",
+                                operation = "oauth_init",
+                                status = "failed",
                                 "OAuth initialization failed - feature disabled"
                             );
                             None
@@ -316,11 +333,22 @@ impl OAuthService {
                     if !tenant_id.is_empty() {
                         let redirect_uri = format!("{}/auth/callback/azure", base_url);
                         match AzureOAuth::new(azure_config, tenant_id, &redirect_uri) {
-                            Ok(azure_oauth) => Some(azure_oauth),
+                            Ok(azure_oauth) => {
+                                tracing::info!(
+                                    operation = "oauth_init",
+                                    auth.provider = "azure",
+                                    status = "enabled",
+                                    "OAuth provider initialized"
+                                );
+                                Some(azure_oauth)
+                            }
                             Err(e) => {
                                 tracing::warn!(
-                                    error = %e,
-                                    provider = "azure",
+                                    error.type = "oauth",
+                                    error.message = %e,
+                                    auth.provider = "azure",
+                                    operation = "oauth_init",
+                                    status = "failed",
                                     "OAuth initialization failed - feature disabled"
                                 );
                                 None
@@ -328,7 +356,9 @@ impl OAuthService {
                         }
                     } else {
                         tracing::info!(
-                            provider = "azure",
+                            operation = "oauth_init",
+                            auth.provider = "azure",
+                            status = "disabled",
                             reason = "tenant_id_empty",
                             "OAuth provider not configured - feature disabled"
                         );
@@ -336,7 +366,9 @@ impl OAuthService {
                     }
                 } else {
                     tracing::info!(
-                        provider = "azure",
+                        operation = "oauth_init",
+                        auth.provider = "azure",
+                        status = "disabled",
                         reason = "tenant_id_missing",
                         "OAuth provider not configured - feature disabled"
                     );

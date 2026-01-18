@@ -2,11 +2,11 @@
 //!
 //! Models for exercise definitions, workouts, sessions, and training programs.
 
+use crate::named_enum;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
-use crate::named_enum;
 
 // ============================================================================
 // ENUMS

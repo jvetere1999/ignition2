@@ -235,16 +235,14 @@ async fn browse_tracks_by_email(
     .await?;
 
     match result {
-        Some((_user_id, user_email, user_name, tracks, total)) => {
-            Ok(Json(BrowseTracksResponse {
-                user_email,
-                user_name,
-                tracks,
-                total,
-                page: query.page,
-                page_size: query.page_size,
-            }))
-        }
+        Some((_user_id, user_email, user_name, tracks, total)) => Ok(Json(BrowseTracksResponse {
+            user_email,
+            user_name,
+            tracks,
+            total,
+            page: query.page,
+            page_size: query.page_size,
+        })),
         None => Err(AppError::NotFound(format!(
             "User with email '{}' not found",
             query.email
@@ -425,9 +423,10 @@ async fn init_upload(
         .await?;
 
     // Use the key returned by storage (same as the presigned URL target)
-    let r2_key = response.key.clone().ok_or_else(|| {
-        AppError::Internal("Storage did not return upload key".to_string())
-    })?;
+    let r2_key = response
+        .key
+        .clone()
+        .ok_or_else(|| AppError::Internal("Storage did not return upload key".to_string()))?;
 
     Ok(Json(InitUploadResponse {
         upload_url: response.url,
@@ -615,14 +614,8 @@ async fn start_analysis(
         "status": "stub",
         "message": "Analysis processing is a stub in v1"
     });
-    TrackAnalysisRepo::update_status(
-        &state.db,
-        analysis.id,
-        "completed",
-        Some(results),
-        None,
-    )
-    .await?;
+    TrackAnalysisRepo::update_status(&state.db, analysis.id, "completed", Some(results), None)
+        .await?;
 
     // Fetch updated analysis
     let analysis = TrackAnalysisRepo::get_latest(&state.db, id, Some(&analysis_type))

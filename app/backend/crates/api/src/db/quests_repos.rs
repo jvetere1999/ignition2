@@ -46,20 +46,20 @@ impl QuestsRepo {
                RETURNING id, user_id, source_quest_id, title, description, category, difficulty,
                          xp_reward, coin_reward, status, progress, target, is_active, is_repeatable,
                          repeat_frequency, accepted_at, completed_at, claimed_at, expires_at,
-                         last_completed_date, streak_count, created_at, updated_at"#
+                         last_completed_date, streak_count, created_at, updated_at"#,
         )
-            .bind(user_id)
-            .bind(&req.title)
-            .bind(&req.description)
-            .bind(&req.category)
-            .bind(&req.difficulty)
-            .bind(xp)
-            .bind(coins)
-            .bind(target)
-            .bind(req.is_repeatable.unwrap_or(false))
-            .bind(&req.repeat_frequency)
-            .fetch_one(pool)
-            .await?;
+        .bind(user_id)
+        .bind(&req.title)
+        .bind(&req.description)
+        .bind(&req.category)
+        .bind(&req.difficulty)
+        .bind(xp)
+        .bind(coins)
+        .bind(target)
+        .bind(req.is_repeatable.unwrap_or(false))
+        .bind(&req.repeat_frequency)
+        .fetch_one(pool)
+        .await?;
 
         Ok(quest)
     }
@@ -75,12 +75,12 @@ impl QuestsRepo {
                       xp_reward, coin_reward, status, progress, target, is_active, is_repeatable,
                       repeat_frequency, accepted_at, completed_at, claimed_at, expires_at,
                       last_completed_date, streak_count, created_at, updated_at
-               FROM user_quests WHERE id = $1 AND user_id = $2"#
+               FROM user_quests WHERE id = $1 AND user_id = $2"#,
         )
-            .bind(quest_id)
-            .bind(user_id)
-            .fetch_optional(pool)
-            .await?;
+        .bind(quest_id)
+        .bind(user_id)
+        .fetch_optional(pool)
+        .await?;
 
         Ok(quest)
     }
@@ -99,12 +99,12 @@ impl QuestsRepo {
                          last_completed_date, streak_count, created_at, updated_at
                    FROM user_quests
                    WHERE user_id = $1 AND status = $2 AND is_active = true
-                   ORDER BY created_at DESC"#
+                   ORDER BY created_at DESC"#,
             )
-                .bind(user_id)
-                .bind(status)
-                .fetch_all(pool)
-                .await?
+            .bind(user_id)
+            .bind(status)
+            .fetch_all(pool)
+            .await?
         } else {
             sqlx::query_as::<_, Quest>(
                 r#"SELECT id, user_id, source_quest_id, title, description, category, difficulty,
@@ -113,11 +113,11 @@ impl QuestsRepo {
                          last_completed_date, streak_count, created_at, updated_at
                    FROM user_quests
                    WHERE user_id = $1 AND is_active = true
-                   ORDER BY created_at DESC"#
+                   ORDER BY created_at DESC"#,
             )
-                .bind(user_id)
-                .fetch_all(pool)
-                .await?
+            .bind(user_id)
+            .fetch_all(pool)
+            .await?
         };
 
         let total = quests.len() as i64;
@@ -151,12 +151,12 @@ impl QuestsRepo {
                RETURNING id, user_id, source_quest_id, title, description, category, difficulty,
                          xp_reward, coin_reward, status, progress, target, is_active, is_repeatable,
                          repeat_frequency, accepted_at, completed_at, claimed_at, expires_at,
-                         last_completed_date, streak_count, created_at, updated_at"#
+                         last_completed_date, streak_count, created_at, updated_at"#,
         )
-            .bind(quest_id)
-            .bind(user_id)
-            .fetch_one(pool)
-            .await?;
+        .bind(quest_id)
+        .bind(user_id)
+        .fetch_one(pool)
+        .await?;
 
         Ok(updated)
     }
@@ -202,14 +202,14 @@ impl QuestsRepo {
                RETURNING id, user_id, source_quest_id, title, description, category, difficulty,
                          xp_reward, coin_reward, status, progress, target, is_active, is_repeatable,
                          repeat_frequency, accepted_at, completed_at, claimed_at, expires_at,
-                         last_completed_date, streak_count, created_at, updated_at"#
+                         last_completed_date, streak_count, created_at, updated_at"#,
         )
-            .bind(today)
-            .bind(new_streak)
-            .bind(quest_id)
-            .bind(user_id)
-            .fetch_one(pool)
-            .await?;
+        .bind(today)
+        .bind(new_streak)
+        .bind(quest_id)
+        .bind(user_id)
+        .fetch_one(pool)
+        .await?;
 
         // Award points with idempotency
         let idempotency_key = format!("quest_complete_{}_{}", quest_id, today);
@@ -269,14 +269,14 @@ impl QuestsRepo {
                RETURNING id, user_id, source_quest_id, title, description, category, difficulty,
                          xp_reward, coin_reward, status, progress, target, is_active, is_repeatable,
                          repeat_frequency, accepted_at, completed_at, claimed_at, expires_at,
-                         last_completed_date, streak_count, created_at, updated_at"#
+                         last_completed_date, streak_count, created_at, updated_at"#,
         )
-            .bind(clamped_progress)
-            .bind(next_status)
-            .bind(quest_id)
-            .bind(user_id)
-            .fetch_one(pool)
-            .await?;
+        .bind(clamped_progress)
+        .bind(next_status)
+        .bind(quest_id)
+        .bind(user_id)
+        .fetch_one(pool)
+        .await?;
 
         Ok(updated)
     }
@@ -304,12 +304,12 @@ impl QuestsRepo {
                RETURNING id, user_id, source_quest_id, title, description, category, difficulty,
                          xp_reward, coin_reward, status, progress, target, is_active, is_repeatable,
                          repeat_frequency, accepted_at, completed_at, claimed_at, expires_at,
-                         last_completed_date, streak_count, created_at, updated_at"#
+                         last_completed_date, streak_count, created_at, updated_at"#,
         )
-            .bind(quest_id)
-            .bind(user_id)
-            .fetch_one(pool)
-            .await?;
+        .bind(quest_id)
+        .bind(user_id)
+        .fetch_one(pool)
+        .await?;
 
         Ok(updated)
     }

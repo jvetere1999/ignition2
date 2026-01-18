@@ -74,7 +74,10 @@ async fn list_goals(
 ) -> Result<Json<GoalsListWrapper>, AppError> {
     let result = GoalsRepo::list(&state.db, user.id, query.status.as_deref()).await?;
 
-    Ok(Json(GoalsListWrapper { goals: result.goals, total: result.total }))
+    Ok(Json(GoalsListWrapper {
+        goals: result.goals,
+        total: result.total,
+    }))
 }
 
 /// POST /goals

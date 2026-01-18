@@ -10,9 +10,7 @@ mod tests {
     use crate::db::gamification_repos::UserProgressRepo;
     use crate::db::habits_goals_models::CreateHabitRequest;
     use crate::db::habits_goals_repos::HabitsRepo;
-    use crate::tests::fixtures::{
-        create_test_user, create_test_habit, assert_habit_exists,
-    };
+    use crate::tests::fixtures::{assert_habit_exists, create_test_habit, create_test_user};
 
     // ========================================================================
     // CREATE TESTS

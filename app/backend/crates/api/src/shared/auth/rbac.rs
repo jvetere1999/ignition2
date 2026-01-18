@@ -18,7 +18,9 @@ use crate::middleware::auth::AuthContext;
 /// ```
 pub async fn require_auth_guard(req: Request, next: Next) -> Result<Response, AppError> {
     if req.extensions().get::<AuthContext>().is_none() {
-        return Err(AppError::Unauthorized("Authentication required".to_string()));
+        return Err(AppError::Unauthorized(
+            "Authentication required".to_string(),
+        ));
     }
     Ok(next.run(req).await)
 }
@@ -30,7 +32,9 @@ pub async fn require_admin_guard(req: Request, next: Next) -> Result<Response, A
     match req.extensions().get::<AuthContext>() {
         Some(auth) if auth.is_admin() => Ok(next.run(req).await),
         Some(_) => Err(AppError::Forbidden),
-        None => Err(AppError::Unauthorized("Authentication required".to_string())),
+        None => Err(AppError::Unauthorized(
+            "Authentication required".to_string(),
+        )),
     }
 }
 
@@ -58,7 +62,9 @@ pub fn require_entitlement_guard(
             match req.extensions().get::<AuthContext>() {
                 Some(auth) if auth.entitlements.contains(&entitlement) => Ok(next.run(req).await),
                 Some(_) => Err(AppError::Forbidden),
-                None => Err(AppError::Unauthorized("Authentication required".to_string())),
+                None => Err(AppError::Unauthorized(
+                    "Authentication required".to_string(),
+                )),
             }
         })
     }
@@ -87,7 +93,9 @@ pub fn require_any_entitlement_guard(
                         Err(AppError::Forbidden)
                     }
                 }
-                None => Err(AppError::Unauthorized("Authentication required".to_string())),
+                None => Err(AppError::Unauthorized(
+                    "Authentication required".to_string(),
+                )),
             }
         })
     }
@@ -116,7 +124,9 @@ pub fn require_all_entitlements_guard(
                         Err(AppError::Forbidden)
                     }
                 }
-                None => Err(AppError::Unauthorized("Authentication required".to_string())),
+                None => Err(AppError::Unauthorized(
+                    "Authentication required".to_string(),
+                )),
             }
         })
     }

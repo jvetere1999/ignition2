@@ -105,7 +105,11 @@ impl IntoResponse for AppError {
                 error_types::UNAUTHORIZED,
                 msg.clone(),
             ),
-            AppError::Forbidden => (StatusCode::FORBIDDEN, error_types::FORBIDDEN, "forbidden".to_string()),
+            AppError::Forbidden => (
+                StatusCode::FORBIDDEN,
+                error_types::FORBIDDEN,
+                "forbidden".to_string(),
+            ),
             AppError::CsrfViolation => (
                 StatusCode::FORBIDDEN,
                 error_types::CSRF_VIOLATION,
@@ -116,7 +120,11 @@ impl IntoResponse for AppError {
                 error_types::INVALID_ORIGIN,
                 "invalid origin".to_string(),
             ),
-            AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, error_types::BAD_REQUEST, msg.clone()),
+            AppError::BadRequest(msg) => (
+                StatusCode::BAD_REQUEST,
+                error_types::BAD_REQUEST,
+                msg.clone(),
+            ),
             AppError::Validation(msg) => (
                 StatusCode::UNPROCESSABLE_ENTITY,
                 error_types::VALIDATION_ERROR,
@@ -162,7 +170,7 @@ impl IntoResponse for AppError {
                 StatusCode::INTERNAL_SERVER_ERROR,
                 error_types::STORAGE_ERROR,
                 "storage error".to_string(),
-            )
+            ),
         };
 
         let body = ErrorResponse {

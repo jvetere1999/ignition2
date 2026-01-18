@@ -1,0 +1,29 @@
+# Rust code formatting configuration
+# See: https://rust-lang.github.io/rustfmt/
+
+edition = "2021"
+max_width = 100
+
+# Import organization
+reorder_imports = true
+reorder_modules = true
+group_imports = "StdExternalCrate"  # std, external crates, then crate::
+
+# Style preferences
+use_try_shorthand = true
+use_field_init_shorthand = true
+force_explicit_abi = true
+fn_single_line = false
+fn_args_layout = "Tall"
+match_block_trailing_comma = false
+comment_width = 80
+wrap_comments = false
+
+# Spacing
+spaces_around_ranges = false
+space_before_colon = false
+space_after_colon = true
+match_arm_leading_pipes = "Never"
+
+# Stable version settings only
+unstable_features = false

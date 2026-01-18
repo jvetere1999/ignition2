@@ -22,7 +22,12 @@ use crate::state::AppState;
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/", get(list_references).post(create_reference))
-        .route("/{id}", get(get_reference).put(update_reference).delete(delete_reference))
+        .route(
+            "/{id}",
+            get(get_reference)
+                .put(update_reference)
+                .delete(delete_reference),
+        )
 }
 
 // ============================================================================
@@ -76,7 +81,14 @@ async fn list_references(
     Extension(user): Extension<User>,
     Query(query): Query<ListQuery>,
 ) -> Result<Json<ListWrapper>, AppError> {
-    let response = ReferencesRepo::list(&state.db, user.id, query.page, query.page_size, query.category).await?;
+    let response = ReferencesRepo::list(
+        &state.db,
+        user.id,
+        query.page,
+        query.page_size,
+        query.category,
+    )
+    .await?;
     Ok(Json(ListWrapper { data: response }))
 }
 
@@ -133,9 +145,6 @@ async fn delete_reference(
 ) -> Result<Json<DeleteWrapper>, AppError> {
     ReferencesRepo::delete(&state.db, user.id, id).await?;
     Ok(Json(DeleteWrapper {
-        data: DeleteReferenceResponse {
-            success: true,
-            id,
-        },
+        data: DeleteReferenceResponse { success: true, id },
     }))
 }

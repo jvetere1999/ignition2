@@ -4,8 +4,8 @@
 //! Per DEC-001=A: Force re-auth at cutover, no session migration.
 //! Per DEC-002=A: CSRF via Origin/Referer verification.
 
-use std::sync::Arc;
 use std::str::FromStr;
+use std::sync::Arc;
 
 use axum::{
     extract::{Query, State},
@@ -54,27 +54,36 @@ const ALLOWED_REDIRECT_URIS: &[&str] = &[
 /// # Returns
 /// * Ok(String) - The validated redirect URI (either from allowlist or default)
 /// * Err(AppError) - If URI is not on allowlist
-fn validate_redirect_uri(uri: Option<&str>, config: &crate::config::AppConfig) -> AppResult<String> {
+fn validate_redirect_uri(
+    uri: Option<&str>,
+    config: &crate::config::AppConfig,
+) -> AppResult<String> {
     let default = format!("{}/today", config.server.frontend_url);
     let uri = uri.unwrap_or(&default);
-    
+
     // Check if URI matches one of the allowed patterns
-    let is_valid = ALLOWED_REDIRECT_URIS.iter().any(|allowed| {
-        uri == *allowed || uri.starts_with(&format!("{}/", allowed))
-    });
-    
+    let is_valid = ALLOWED_REDIRECT_URIS
+        .iter()
+        .any(|allowed| uri == *allowed || uri.starts_with(&format!("{}/", allowed)));
+
     if !is_valid {
         tracing::warn!(
-            redirect_uri = %uri,
-            allowed_list = ?ALLOWED_REDIRECT_URIS,
+            error.type = "auth",
+            error.message = "Redirect URI not on allowlist",
+            http.redirect_uri = %uri,
+            operation = "validate_redirect_uri",
             "Rejected redirect URI - not on allowlist (open redirect attack prevented)"
         );
         return Err(AppError::Unauthorized(
             "Invalid redirect URI - not on approved list".to_string(),
         ));
     }
-    
-    tracing::debug!(redirect_uri = %uri, "Redirect URI validated successfully");
+
+    tracing::debug!(
+        http.redirect_uri = %uri,
+        operation = "validate_redirect_uri",
+        "Redirect URI validated successfully"
+    );
     Ok(uri.to_string())
 }
 
@@ -156,7 +165,7 @@ async fn signin_google(
     // SEC-001: Validate redirect_uri against ALLOWED_REDIRECT_URIS whitelist
     // Prevents open redirect vulnerability - only approved URLs allowed
     let validated_redirect = validate_redirect_uri(query.redirect_uri.as_deref(), &state.config)?;
-    
+
     // Store state in database for distributed access, with validated redirect_uri
     OAuthStateRepo::insert(
         &state.db,
@@ -166,7 +175,13 @@ async fn signin_google(
     )
     .await?;
 
-    tracing::debug!(state = %oauth_state.csrf_token, redirect_uri = %validated_redirect, "Stored OAuth state in database");
+    tracing::debug!(
+        operation = "oauth_start",
+        auth.provider = "google",
+        state_key = %oauth_state.csrf_token,
+        http.redirect_uri = %validated_redirect,
+        "OAuth state stored in database - user redirected to provider"
+    );
 
     Ok(Redirect::temporary(&auth_url).into_response())
 }
@@ -184,7 +199,9 @@ async fn signin_azure(
             let error_url = format!(
                 "{}/auth/error?error=OAuthNotConfigured&provider=Azure&details={}",
                 state.config.server.frontend_url,
-                urlencoding::encode("Azure/Microsoft OAuth credentials are not configured on the server")
+                urlencoding::encode(
+                    "Azure/Microsoft OAuth credentials are not configured on the server"
+                )
             );
             return Ok(Redirect::temporary(&error_url).into_response());
         }
@@ -205,7 +222,13 @@ async fn signin_azure(
     )
     .await?;
 
-    tracing::debug!(state = %oauth_state.csrf_token, redirect_uri = %validated_redirect, "Stored OAuth state in database");
+    tracing::debug!(
+        operation = "oauth_start",
+        auth.provider = "azure",
+        state_key = %oauth_state.csrf_token,
+        http.redirect_uri = %validated_redirect,
+        "OAuth state stored in database - user redirected to provider"
+    );
 
     Ok(Redirect::temporary(&auth_url).into_response())
 }
@@ -216,12 +239,12 @@ async fn signin_azure(
 struct OAuthCallback {
     // Success case parameters
     code: Option<String>,
-    
+
     // Error case parameters (RFC 6749 Section 4.1.2.1)
     error: Option<String>,
     error_description: Option<String>,
     error_uri: Option<String>,
-    
+
     // Always present in both cases
     state: String,
 }
@@ -234,7 +257,13 @@ async fn callback_google(
     match handle_google_callback(&state, params).await {
         Ok(response) => response,
         Err(e) => {
-            tracing::error!("Google OAuth callback error: {}", e);
+            tracing::error!(
+                error.type = "oauth",
+                error.message = %e,
+                auth.provider = "google",
+                operation = "oauth_callback",
+                "Google OAuth callback failed"
+            );
             let error_url = format!(
                 "{}/auth/error?error=OAuthCallback&provider=Google&details={}",
                 state.config.server.frontend_url,
@@ -249,19 +278,29 @@ async fn handle_google_callback(
     state: &Arc<AppState>,
     params: OAuthCallback,
 ) -> AppResult<Response> {
+    let start = std::time::Instant::now();
+
+    tracing::debug!(
+        operation = "oauth_callback",
+        auth.provider = "google",
+        state_key = %params.state,
+        "Google OAuth callback received"
+    );
+
     // RFC 6749 Section 4.1.2.1: Handle OAuth error response
     if let Some(error) = params.error {
-        let error_desc = params.error_description
-            .as_deref()
-            .unwrap_or(&error);
-        
+        let error_desc = params.error_description.as_deref().unwrap_or(&error);
+
         tracing::warn!(
-            oauth_error = %error,
-            oauth_error_description = %error_desc,
-            provider = "Google",
+            error.type = "oauth",
+            error.code = %error,
+            error.message = %error_desc,
+            auth.provider = "google",
+            operation = "oauth_callback",
+            duration_ms = start.elapsed().as_millis(),
             "OAuth authorization failed at provider"
         );
-        
+
         // Map specific OAuth errors to user-friendly messages
         let (error_code, message) = match error.as_str() {
             "access_denied" => (
@@ -276,39 +315,59 @@ async fn handle_google_callback(
                 "OAuthUnavailable",
                 "Google is temporarily unavailable. Please try again later.",
             ),
-            _ => (
-                "OAuthError",
-                "Sign-in failed. Please try again.",
-            ),
+            _ => ("OAuthError", "Sign-in failed. Please try again."),
         };
-        
+
         let error_url = format!(
             "{}/auth/error?error={}&provider=Google&details={}",
             state.config.server.frontend_url,
             error_code,
             urlencoding::encode(message)
         );
-        
+
         return Ok(Redirect::temporary(&error_url).into_response());
     }
-    
+
     // Success path: code must be present
     let code = params.code.ok_or_else(|| {
-        tracing::warn!(state_key = %params.state, "OAuth callback missing both code and error");
+        tracing::warn!(
+            state_key = %params.state,
+            operation = "oauth_callback",
+            auth.provider = "google",
+            error.type = "oauth",
+            error.message = "Missing both code and error parameters",
+            "OAuth callback missing both code and error"
+        );
         AppError::OAuthError("Invalid OAuth response: missing authorization code".to_string())
     })?;
 
-    tracing::debug!(state_key = %params.state, "Looking up OAuth state from database");
-    
+    tracing::debug!(
+        state_key = %params.state,
+        operation = "oauth_callback",
+        auth.provider = "google",
+        "Looking up OAuth state from database"
+    );
+
     // Validate state and get stored OAuth state from database
     let oauth_state_row = OAuthStateRepo::take(&state.db, &params.state)
         .await?
         .ok_or_else(|| {
-            tracing::warn!(state_key = %params.state, "OAuth state not found in database");
+            tracing::warn!(
+                state_key = %params.state,
+                operation = "oauth_callback",
+                auth.provider = "google",
+                error.type = "oauth",
+                error.message = "State not found in database",
+                "OAuth state not found in database"
+            );
             AppError::OAuthError("Invalid state parameter".to_string())
         })?;
 
-    tracing::debug!("OAuth state found, exchanging code for tokens");
+    tracing::debug!(
+        operation = "oauth_callback",
+        auth.provider = "google",
+        "OAuth state found, exchanging code for tokens"
+    );
 
     // Create OAuth service
     let oauth_service = OAuthService::new(&state.config)?;
@@ -342,22 +401,25 @@ async fn handle_google_callback(
     );
 
     // Redirect to stored redirect_uri or default to /today
-    let redirect_url = oauth_state_row.redirect_uri
+    let redirect_url = oauth_state_row
+        .redirect_uri
         .unwrap_or_else(|| format!("{}/today", state.config.server.frontend_url));
-    
+
     tracing::info!(
-        user_id = %user.id,
-        email = %user.email,
-        redirect_url = %redirect_url,
-        cookie_domain = %state.config.auth.cookie_domain,
-        "User authenticated via Google OAuth, redirecting with cookie"
+        auth.user_id = %user.id,
+        auth.email = %user.email,
+        auth.provider = "google",
+        operation = "oauth_callback",
+        http.redirect_uri = %redirect_url,
+        duration_ms = start.elapsed().as_millis(),
+        "User authenticated successfully via OAuth"
     );
 
     // Use 302 redirect with Set-Cookie header
     // The cookie domain is .ecent.online so it works across subdomains
     let cookie_header = header::HeaderValue::from_str(&cookie)
         .map_err(|e| AppError::Internal(format!("Invalid cookie header: {}", e)))?;
-    
+
     let response = Response::builder()
         .status(StatusCode::FOUND)
         .header(header::LOCATION, redirect_url)
@@ -376,7 +438,13 @@ async fn callback_azure(
     match handle_azure_callback(&state, params).await {
         Ok(response) => response,
         Err(e) => {
-            tracing::error!("Azure OAuth callback error: {}", e);
+            tracing::error!(
+                error.type = "oauth",
+                error.message = %e,
+                auth.provider = "azure",
+                operation = "oauth_callback",
+                "Azure OAuth callback failed"
+            );
             let error_url = format!(
                 "{}/auth/error?error=OAuthCallback&provider=Azure&details={}",
                 state.config.server.frontend_url,
@@ -391,19 +459,29 @@ async fn handle_azure_callback(
     state: &Arc<AppState>,
     params: OAuthCallback,
 ) -> AppResult<Response> {
+    let start = std::time::Instant::now();
+
+    tracing::debug!(
+        operation = "oauth_callback",
+        auth.provider = "azure",
+        state_key = %params.state,
+        "Azure OAuth callback received"
+    );
+
     // RFC 6749 Section 4.1.2.1: Handle OAuth error response
     if let Some(error) = params.error {
-        let error_desc = params.error_description
-            .as_deref()
-            .unwrap_or(&error);
-        
+        let error_desc = params.error_description.as_deref().unwrap_or(&error);
+
         tracing::warn!(
-            oauth_error = %error,
-            oauth_error_description = %error_desc,
-            provider = "Azure",
+            error.type = "oauth",
+            error.code = %error,
+            error.message = %error_desc,
+            auth.provider = "azure",
+            operation = "oauth_callback",
+            duration_ms = start.elapsed().as_millis(),
             "OAuth authorization failed at provider"
         );
-        
+
         // Map specific OAuth errors to user-friendly messages
         let (error_code, message) = match error.as_str() {
             "access_denied" => (
@@ -418,39 +496,59 @@ async fn handle_azure_callback(
                 "OAuthUnavailable",
                 "Azure is temporarily unavailable. Please try again later.",
             ),
-            _ => (
-                "OAuthError",
-                "Sign-in failed. Please try again.",
-            ),
+            _ => ("OAuthError", "Sign-in failed. Please try again."),
         };
-        
+
         let error_url = format!(
             "{}/auth/error?error={}&provider=Azure&details={}",
             state.config.server.frontend_url,
             error_code,
             urlencoding::encode(message)
         );
-        
+
         return Ok(Redirect::temporary(&error_url).into_response());
     }
-    
+
     // Success path: code must be present
     let code = params.code.ok_or_else(|| {
-        tracing::warn!(state_key = %params.state, "OAuth callback missing both code and error");
+        tracing::warn!(
+            state_key = %params.state,
+            operation = "oauth_callback",
+            auth.provider = "azure",
+            error.type = "oauth",
+            error.message = "Missing both code and error parameters",
+            "OAuth callback missing both code and error"
+        );
         AppError::OAuthError("Invalid OAuth response: missing authorization code".to_string())
     })?;
 
-    tracing::debug!(state_key = %params.state, "Looking up OAuth state from database");
-    
+    tracing::debug!(
+        state_key = %params.state,
+        operation = "oauth_callback",
+        auth.provider = "azure",
+        "Looking up OAuth state from database"
+    );
+
     // Validate state and get stored OAuth state from database
     let oauth_state_row = OAuthStateRepo::take(&state.db, &params.state)
         .await?
         .ok_or_else(|| {
-            tracing::warn!(state_key = %params.state, "OAuth state not found in database");
+            tracing::warn!(
+                state_key = %params.state,
+                operation = "oauth_callback",
+                auth.provider = "azure",
+                error.type = "oauth",
+                error.message = "State not found in database",
+                "OAuth state not found in database"
+            );
             AppError::OAuthError("Invalid state parameter".to_string())
         })?;
 
-    tracing::debug!("OAuth state found, exchanging code for tokens");
+    tracing::debug!(
+        operation = "oauth_callback",
+        auth.provider = "azure",
+        "OAuth state found, exchanging code for tokens"
+    );
 
     // Create OAuth service
     let oauth_service = OAuthService::new(&state.config)?;
@@ -480,53 +578,24 @@ async fn handle_azure_callback(
     );
 
     // Redirect to stored redirect_uri or default to /today
-    let redirect_url = oauth_state_row.redirect_uri
+    let redirect_url = oauth_state_row
+        .redirect_uri
         .unwrap_or_else(|| format!("{}/today", state.config.server.frontend_url));
-    
+
     tracing::info!(
-        user_id = %user.id,
-        email = %user.email,
-        redirect_url = %redirect_url,
-        provider = "Azure",
-        "User authenticated via Azure OAuth, redirecting with cookie"
+        auth.user_id = %user.id,
+        auth.email = %user.email,
+        auth.provider = "azure",
+        operation = "oauth_callback",
+        http.redirect_uri = %redirect_url,
+        duration_ms = start.elapsed().as_millis(),
+        "User authenticated successfully via OAuth"
     );
 
     // Use 302 redirect with Set-Cookie header
     let cookie_header = header::HeaderValue::from_str(&cookie)
         .map_err(|e| AppError::Internal(format!("Invalid cookie header: {}", e)))?;
-    
-    let response = Response::builder()
-        .status(StatusCode::FOUND)
-        .header(header::LOCATION, redirect_url)
-        .header(header::SET_COOKIE, cookie_header)
-        .body(axum::body::Body::empty())
-        .map_err(|e| AppError::Internal(e.to_string()))?;
 
-    Ok(response)
-}    // Create session cookie
-    let cookie = create_session_cookie(
-        &session.token,
-        &state.config.auth.cookie_domain,
-        state.config.auth.session_ttl_seconds,
-    );
-
-    // Redirect to stored redirect_uri or default to /today
-    let redirect_url = oauth_state_row.redirect_uri
-        .unwrap_or_else(|| format!("{}/today", state.config.server.frontend_url));
-    
-    tracing::info!(
-        user_id = %user.id,
-        email = %user.email,
-        redirect_url = %redirect_url,
-        cookie_domain = %state.config.auth.cookie_domain,
-        "User authenticated via Azure OAuth, redirecting with cookie"
-    );
-
-    // Use 302 redirect with Set-Cookie header
-    // The cookie domain is .ecent.online so it works across subdomains
-    let cookie_header = header::HeaderValue::from_str(&cookie)
-        .map_err(|e| AppError::Internal(format!("Invalid cookie header: {}", e)))?;
-    
     let response = Response::builder()
         .status(StatusCode::FOUND)
         .header(header::LOCATION, redirect_url)
@@ -560,11 +629,8 @@ async fn get_session(
     State(state): State<Arc<AppState>>,
     auth: Option<Extension<AuthContext>>,
 ) -> Json<SessionResponse> {
-    tracing::debug!(
-        has_auth = auth.is_some(),
-        "get_session called"
-    );
-    
+    tracing::debug!(has_auth = auth.is_some(), "get_session called");
+
     if let Some(Extension(auth_context)) = auth {
         tracing::debug!(
             user_id = %auth_context.user_id,
@@ -608,7 +674,8 @@ async fn signout(
                 auth_context.user_id,
                 None,
             )
-            .await {
+            .await
+            {
                 // Log error but continue - cookie will be cleared regardless
                 tracing::warn!(
                     error = %e,
@@ -647,7 +714,11 @@ async fn accept_tos(
     auth: Option<Extension<AuthContext>>,
     Json(payload): Json<AcceptTosRequest>,
 ) -> AppResult<Response> {
-    let auth_context = auth.ok_or(AppError::Unauthorized("Authentication required".to_string()))?.0;
+    let auth_context = auth
+        .ok_or(AppError::Unauthorized(
+            "Authentication required".to_string(),
+        ))?
+        .0;
 
     if !payload.accepted {
         return Err(AppError::BadRequest("TOS must be accepted".to_string()));

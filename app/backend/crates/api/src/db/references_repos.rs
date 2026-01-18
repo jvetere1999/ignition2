@@ -155,18 +155,12 @@ impl ReferencesRepo {
     }
 
     /// Delete reference
-    pub async fn delete(
-        db: &Pool<Postgres>,
-        user_id: Uuid,
-        ref_id: Uuid,
-    ) -> Result<(), AppError> {
-        let result = sqlx::query(
-            "DELETE FROM user_references WHERE id = $1 AND user_id = $2",
-        )
-        .bind(ref_id)
-        .bind(user_id)
-        .execute(db)
-        .await?;
+    pub async fn delete(db: &Pool<Postgres>, user_id: Uuid, ref_id: Uuid) -> Result<(), AppError> {
+        let result = sqlx::query("DELETE FROM user_references WHERE id = $1 AND user_id = $2")
+            .bind(ref_id)
+            .bind(user_id)
+            .execute(db)
+            .await?;
 
         if result.rows_affected() == 0 {
             return Err(AppError::NotFound("Reference not found".into()));

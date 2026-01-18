@@ -119,9 +119,14 @@ impl From<AppError> for ApiError {
             AppError::OAuthError(msg) => Self::new("oauth_error", msg),
             AppError::SessionExpired => Self::new("session_expired", "Session has expired"),
             AppError::Database(_) => Self::internal(),
-            AppError::DatabaseWithContext { operation, table, .. } => {
+            AppError::DatabaseWithContext {
+                operation, table, ..
+            } => {
                 // Log is already emitted by the error handler, return generic response
-                Self::new("database_error", format!("Database error in {} on {}", operation, table))
+                Self::new(
+                    "database_error",
+                    format!("Database error in {} on {}", operation, table),
+                )
             }
             AppError::Internal(_) => Self::internal(),
             AppError::Config(_) => Self::internal(),

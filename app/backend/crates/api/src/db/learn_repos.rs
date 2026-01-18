@@ -583,10 +583,7 @@ impl LearnRepo {
     }
 
     /// Identify weak areas from flashcard lapses (highest lapses first)
-    pub async fn get_weak_areas(
-        pool: &PgPool,
-        user_id: Uuid,
-    ) -> Result<Vec<WeakArea>, AppError> {
+    pub async fn get_weak_areas(pool: &PgPool, user_id: Uuid) -> Result<Vec<WeakArea>, AppError> {
         #[derive(FromRow)]
         struct Row {
             concept_id: Option<String>,
@@ -694,7 +691,10 @@ impl LearnRepo {
         Ok(count)
     }
 
-    async fn get_flashcards_due(pool: &PgPool, user_id: Uuid) -> Result<Vec<ReviewCardResponse>, AppError> {
+    async fn get_flashcards_due(
+        pool: &PgPool,
+        user_id: Uuid,
+    ) -> Result<Vec<ReviewCardResponse>, AppError> {
         #[derive(FromRow)]
         struct CardRow {
             id: Uuid,
@@ -749,7 +749,10 @@ impl LearnRepo {
             .collect())
     }
 
-    fn compute_next_review(progress: &ReviewCardResponse, grade: i32) -> (f64, f64, i32, DateTime<Utc>) {
+    fn compute_next_review(
+        progress: &ReviewCardResponse,
+        grade: i32,
+    ) -> (f64, f64, i32, DateTime<Utc>) {
         let mut interval = progress.interval_days;
         let mut ease = progress.ease_factor;
         let mut lapses = progress.lapses;
@@ -1011,7 +1014,10 @@ impl LearnRepo {
     // Recipes
     // ============================================
 
-    pub async fn list_recipes(pool: &PgPool, user_id: Uuid) -> Result<Vec<RecipeTemplateResponse>, AppError> {
+    pub async fn list_recipes(
+        pool: &PgPool,
+        user_id: Uuid,
+    ) -> Result<Vec<RecipeTemplateResponse>, AppError> {
         let rows = sqlx::query_as::<_, RecipeTemplate>(
             r#"
             SELECT id, user_id, title, synth, target_type, descriptors, mono, cpu_budget,
@@ -1096,7 +1102,10 @@ impl LearnRepo {
     // Journal
     // ============================================
 
-    pub async fn list_journal_entries(pool: &PgPool, user_id: Uuid) -> Result<Vec<JournalEntryResponse>, AppError> {
+    pub async fn list_journal_entries(
+        pool: &PgPool,
+        user_id: Uuid,
+    ) -> Result<Vec<JournalEntryResponse>, AppError> {
         let rows = sqlx::query_as::<_, JournalEntry>(
             r#"
             SELECT id, user_id, synth, patch_name, tags, notes, what_learned,
@@ -1192,7 +1201,10 @@ impl LearnRepo {
         let notes = req.notes.as_ref().or(existing.notes.as_ref());
         let what_learned = req.what_learned.as_ref().or(existing.what_learned.as_ref());
         let what_broke = req.what_broke.as_ref().or(existing.what_broke.as_ref());
-        let preset_reference = req.preset_reference.as_ref().or(existing.preset_reference.as_ref());
+        let preset_reference = req
+            .preset_reference
+            .as_ref()
+            .or(existing.preset_reference.as_ref());
 
         let row = sqlx::query_as::<_, JournalEntry>(
             r#"
@@ -1236,7 +1248,11 @@ impl LearnRepo {
         })
     }
 
-    pub async fn delete_journal_entry(pool: &PgPool, user_id: Uuid, id: Uuid) -> Result<bool, AppError> {
+    pub async fn delete_journal_entry(
+        pool: &PgPool,
+        user_id: Uuid,
+        id: Uuid,
+    ) -> Result<bool, AppError> {
         let result = sqlx::query("DELETE FROM journal_entries WHERE id = $1 AND user_id = $2")
             .bind(id)
             .bind(user_id)

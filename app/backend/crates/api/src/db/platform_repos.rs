@@ -300,10 +300,8 @@ impl DailyPlanRepo {
         req: &UpsertDailyPlanRequest,
     ) -> Result<DailyPlanResponse, AppError> {
         let now = Utc::now();
-        let items_json = serde_json::to_value(
-            req.items.as_ref().unwrap_or(&Vec::new())
-        )
-        .map_err(|e| AppError::Internal(e.to_string()))?;
+        let items_json = serde_json::to_value(req.items.as_ref().unwrap_or(&Vec::new()))
+            .map_err(|e| AppError::Internal(e.to_string()))?;
 
         let items_count = req.items.as_ref().map(|v| v.len()).unwrap_or(0) as i32;
         let completed_count = req
@@ -411,7 +409,7 @@ impl DailyPlanRepo {
             duration: Some(25),
             action_url: "/focus".to_string(),
             completed: false,
-            priority: priority,
+            priority,
         });
         priority += 1;
 
@@ -1504,7 +1502,7 @@ impl UserSettingsRepo {
             Some(s) => {
                 let theme = s.theme.clone();
                 Ok(Self::to_response(s, theme))
-            },
+            }
             None => Ok(UserSettingsResponse {
                 notifications_enabled: true,
                 email_notifications: true,

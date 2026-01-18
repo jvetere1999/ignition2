@@ -24,13 +24,13 @@ fn xp_for_level(level: i32) -> i32 {
     if level <= 0 {
         return 0;
     }
-    
+
     if level >= MAX_LEVEL {
-        return i32::MAX;  // Cap at maximum to prevent overflow
+        return i32::MAX; // Cap at maximum to prevent overflow
     }
-    
+
     let xp = (100.0 * (level as f64).powf(1.5)).floor() as i32;
-    xp.max(0)  // Ensure non-negative
+    xp.max(0) // Ensure non-negative
 }
 
 // ============================================================================
@@ -327,7 +327,10 @@ impl UserWalletRepo {
         } else {
             Ok(SpendResult {
                 success: false,
-                error: Some(format!("Insufficient coins (have {}, need {})", new_balance, amount)),
+                error: Some(format!(
+                    "Insufficient coins (have {}, need {})",
+                    new_balance, amount
+                )),
                 new_balance,
             })
         }
@@ -788,7 +791,7 @@ impl GamificationRepo {
                     .unwrap_or_else(|_| "\"custom\"".to_string())
                     .trim_matches('\"')
                     .to_string();
-                
+
                 let xp_result = UserProgressRepo::award_xp(
                     pool,
                     user_id,
@@ -814,7 +817,7 @@ impl GamificationRepo {
                     .unwrap_or_else(|_| "\"custom\"".to_string())
                     .trim_matches('\"')
                     .to_string();
-                
+
                 let coins_result = UserWalletRepo::award_coins(
                     pool,
                     user_id,

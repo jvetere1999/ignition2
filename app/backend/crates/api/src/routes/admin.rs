@@ -3,9 +3,9 @@
 //! Admin-only functionality accessible at /admin/*.
 //! Per DEC-004=B: Role-based access using DB-backed roles.
 
+use rand::Rng;
 use std::sync::Arc;
 use std::sync::OnceLock;
-use rand::Rng;
 
 use axum::{
     extract::{Path, Query, State},
@@ -33,13 +33,19 @@ fn generate_claim_key() -> String {
         .take(32)
         .map(char::from)
         .collect();
-    
-    // Log the claim key prominently
-    tracing::warn!("{}", "=".repeat(60));
-    tracing::warn!("ADMIN CLAIM KEY: {}", key);
-    tracing::warn!("Use this key to claim admin access at first launch");
-    tracing::warn!("{}", "=".repeat(60));
-    
+
+    // Log the claim key for initial setup - use eprintln for visibility, not tracing
+    eprintln!("{}", "=".repeat(60));
+    eprintln!("ADMIN CLAIM KEY: {}", key);
+    eprintln!("Use this key to claim admin access at first launch");
+    eprintln!("{}", "=".repeat(60));
+
+    tracing::warn!(
+        operation = "admin_startup",
+        component = "admin_system",
+        "ADMIN CLAIM KEY generated - check logs for key value"
+    );
+
     key
 }
 
@@ -156,6 +162,12 @@ async fn admin_claim(
     // Check if any admins exist
     let has_admins = AdminClaimRepo::has_any_admins(&state.db).await?;
     if has_admins {
+        tracing::debug!(
+            auth.user_id = %auth.user_id,
+            operation = "admin_claim",
+            status = "denied_already_exists",
+            "Admin claiming attempted but admins already exist"
+        );
         let response = ClaimResponse {
             success: false,
             message: "Admin claiming is disabled - admins already exist".to_string(),
@@ -166,9 +178,11 @@ async fn admin_claim(
     // Validate claim key
     if payload.claim_key != get_claim_key() {
         tracing::warn!(
-            "Invalid admin claim attempt by user {} with key: {}",
-            auth.user_id,
-            payload.claim_key
+            auth.user_id = %auth.user_id,
+            operation = "admin_claim",
+            error.type = "auth",
+            error.message = "Invalid claim key provided",
+            "Invalid admin claim attempt"
         );
         let response = ClaimResponse {
             success: false,
@@ -181,9 +195,10 @@ async fn admin_claim(
     AdminClaimRepo::set_user_admin(&state.db, &auth.user_id).await?;
 
     tracing::info!(
-        "User {} ({}) successfully claimed admin access",
-        auth.user_id,
-        auth.email
+        auth.user_id = %auth.user_id,
+        auth.email = %auth.email,
+        operation = "admin_claim",
+        "User claimed admin access during bootstrap"
     );
 
     // Audit log
@@ -198,13 +213,9 @@ async fn admin_claim(
 
     // Rotate session after privilege escalation (prevents session fixation)
     if !auth.is_dev_bypass {
-        let new_session = AuthService::rotate_session(
-            &state.db,
-            auth.session_id,
-            auth.user_id,
-            "admin_claimed",
-        )
-        .await?;
+        let new_session =
+            AuthService::rotate_session(&state.db, auth.session_id, auth.user_id, "admin_claimed")
+                .await?;
 
         // Return new session cookie to client
         let cookie = create_session_cookie(
@@ -214,7 +225,8 @@ async fn admin_claim(
         );
 
         tracing::info!(
-            user_id = %auth.user_id,
+            auth.user_id = %auth.user_id,
+            operation = "admin_claim",
             "Admin claimed and session rotated"
         );
 
@@ -228,8 +240,9 @@ async fn admin_claim(
             .header(header::SET_COOKIE, cookie)
             .header(header::CONTENT_TYPE, "application/json")
             .body(axum::body::Body::from(
-                serde_json::to_string(&response)
-                    .map_err(|e| AppError::Internal(format!("Failed to serialize response: {}", e)))?
+                serde_json::to_string(&response).map_err(|e| {
+                    AppError::Internal(format!("Failed to serialize response: {}", e))
+                })?,
             ))
             .map_err(|e| AppError::Internal(e.to_string()))?;
 
@@ -239,7 +252,8 @@ async fn admin_claim(
     Ok(Json(ClaimResponse {
         success: true,
         message: "Admin access granted".to_string(),
-    }).into_response())
+    })
+    .into_response())
 }
 
 // User management routes
@@ -621,9 +635,7 @@ struct TableInfo {
 }
 
 /// List all tables with row counts
-async fn list_tables(
-    State(state): State<Arc<AppState>>,
-) -> Result<Json<Vec<TableInfo>>, AppError> {
+async fn list_tables(State(state): State<Arc<AppState>>) -> Result<Json<Vec<TableInfo>>, AppError> {
     let rows = sqlx::query_as::<_, (String, i64, Option<i64>)>(
         r#"
         SELECT 
@@ -643,7 +655,11 @@ async fn list_tables(
 
     let tables: Vec<TableInfo> = rows
         .into_iter()
-        .map(|(name, row_count, size_bytes)| TableInfo { name, row_count, size_bytes })
+        .map(|(name, row_count, size_bytes)| TableInfo {
+            name,
+            row_count,
+            size_bytes,
+        })
         .collect();
 
     Ok(Json(tables))
@@ -663,12 +679,11 @@ async fn get_table_data(
     Query(query): Query<TableDataQuery>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     // Validate table name to prevent SQL injection
-    let valid_tables: Vec<String> = sqlx::query_scalar(
-        "SELECT tablename::text FROM pg_tables WHERE schemaname = 'public'"
-    )
-    .fetch_all(&state.db)
-    .await
-    .map_err(|e| AppError::Internal(format!("Failed to validate table: {}", e)))?;
+    let valid_tables: Vec<String> =
+        sqlx::query_scalar("SELECT tablename::text FROM pg_tables WHERE schemaname = 'public'")
+            .fetch_all(&state.db)
+            .await
+            .map_err(|e| AppError::Internal(format!("Failed to validate table: {}", e)))?;
 
     if !valid_tables.contains(&table) {
         return Err(AppError::NotFound(format!("Table '{}' not found", table)));
@@ -684,7 +699,7 @@ async fn get_table_data(
         FROM information_schema.columns
         WHERE table_schema = 'public' AND table_name = $1
         ORDER BY ordinal_position
-        "#
+        "#,
     )
     .bind(&table)
     .fetch_all(&state.db)
@@ -696,7 +711,7 @@ async fn get_table_data(
         "SELECT row_to_json(t) FROM (SELECT * FROM {} LIMIT {} OFFSET {}) t",
         table, limit, offset
     );
-    
+
     let rows: Vec<serde_json::Value> = sqlx::query_scalar(&sql)
         .fetch_all(&state.db)
         .await
@@ -732,18 +747,25 @@ async fn run_query(
     Json(request): Json<RunQueryRequest>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     let sql = request.sql.trim();
-    
+
     // Security: Only allow SELECT statements
     let sql_upper = sql.to_uppercase();
     if !sql_upper.starts_with("SELECT") && !sql_upper.starts_with("WITH") {
-        return Err(AppError::Validation("Only SELECT queries are allowed".to_string()));
+        return Err(AppError::Validation(
+            "Only SELECT queries are allowed".to_string(),
+        ));
     }
-    
+
     // Block dangerous keywords
-    let dangerous = ["DELETE", "UPDATE", "INSERT", "DROP", "TRUNCATE", "ALTER", "CREATE", "GRANT", "REVOKE"];
+    let dangerous = [
+        "DELETE", "UPDATE", "INSERT", "DROP", "TRUNCATE", "ALTER", "CREATE", "GRANT", "REVOKE",
+    ];
     for keyword in dangerous {
         if sql_upper.contains(keyword) {
-            return Err(AppError::Validation(format!("Query contains forbidden keyword: {}", keyword)));
+            return Err(AppError::Validation(format!(
+                "Query contains forbidden keyword: {}",
+                keyword
+            )));
         }
     }
 
@@ -756,12 +778,11 @@ async fn run_query(
 
     // Execute and return as JSON
     let start = std::time::Instant::now();
-    let rows: Vec<serde_json::Value> = sqlx::query_scalar(
-        &format!("SELECT row_to_json(t) FROM ({}) t", limited_sql)
-    )
-    .fetch_all(&state.db)
-    .await
-    .map_err(|e| AppError::Internal(format!("Query failed: {}", e)))?;
+    let rows: Vec<serde_json::Value> =
+        sqlx::query_scalar(&format!("SELECT row_to_json(t) FROM ({}) t", limited_sql))
+            .fetch_all(&state.db)
+            .await
+            .map_err(|e| AppError::Internal(format!("Query failed: {}", e)))?;
 
     let duration_ms = start.elapsed().as_millis();
 
@@ -770,7 +791,10 @@ async fn run_query(
         state.db.clone(),
         AuditEventType::AdminAction,
         Some(auth.user_id),
-        &format!("Admin ran query: {}", if sql.len() > 100 { &sql[..100] } else { sql }),
+        &format!(
+            "Admin ran query: {}",
+            if sql.len() > 100 { &sql[..100] } else { sql }
+        ),
         None,
         None,
     );
@@ -805,7 +829,20 @@ struct SessionInfo {
 async fn list_sessions(
     State(state): State<Arc<AppState>>,
 ) -> Result<Json<Vec<SessionInfo>>, AppError> {
-    let rows = sqlx::query_as::<_, (Uuid, Uuid, Option<String>, Option<String>, DateTime<Utc>, DateTime<Utc>, DateTime<Utc>, Option<String>, Option<String>)>(
+    let rows = sqlx::query_as::<
+        _,
+        (
+            Uuid,
+            Uuid,
+            Option<String>,
+            Option<String>,
+            DateTime<Utc>,
+            DateTime<Utc>,
+            DateTime<Utc>,
+            Option<String>,
+            Option<String>,
+        ),
+    >(
         r#"
         SELECT 
             s.id,
@@ -830,8 +867,8 @@ async fn list_sessions(
 
     let sessions: Vec<SessionInfo> = rows
         .into_iter()
-        .map(|(id, user_id, user_email, user_name, created_at, last_activity_at, expires_at, user_agent, ip_address)| {
-            SessionInfo {
+        .map(
+            |(
                 id,
                 user_id,
                 user_email,
@@ -841,8 +878,20 @@ async fn list_sessions(
                 expires_at,
                 user_agent,
                 ip_address,
-            }
-        })
+            )| {
+                SessionInfo {
+                    id,
+                    user_id,
+                    user_email,
+                    user_name,
+                    created_at,
+                    last_activity_at,
+                    expires_at,
+                    user_agent,
+                    ip_address,
+                }
+            },
+        )
         .collect();
 
     Ok(Json(sessions))

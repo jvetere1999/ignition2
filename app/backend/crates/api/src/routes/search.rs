@@ -6,11 +6,8 @@ use axum::{
 use std::sync::Arc;
 
 use crate::{
-    db::search_models::*,
-    db::search_repos::SearchIndexRepository,
-    error::AppError,
-    state::AppState,
-    db::models::User,
+    db::models::User, db::search_models::*, db::search_repos::SearchIndexRepository,
+    error::AppError, state::AppState,
 };
 use axum::extract::Extension;
 
@@ -134,9 +131,7 @@ async fn get_search_status(
 
     let metadata = SearchIndexRepository::get_index_metadata(&state.db, user.id)
         .await
-        .map_err(|e| {
-            AppError::Database(format!("Failed to get index metadata: {}", e))
-        })?;
+        .map_err(|e| AppError::Database(format!("Failed to get index metadata: {}", e)))?;
 
     let (items_indexed, last_indexed_at) = metadata
         .map(|m| (m.items_indexed, m.last_indexed_at))

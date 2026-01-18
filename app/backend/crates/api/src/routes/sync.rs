@@ -16,7 +16,7 @@
 //! 4. Single endpoint - one request to get all poll data
 //!
 //! DEPRECATION NOTICE:
-//! Individual endpoints (/progress, /badges, /focus-status, /plan-status, /session) are 
+//! Individual endpoints (/progress, /badges, /focus-status, /plan-status, /session) are
 //! DEPRECATED as of v1.5. Use /api/sync/poll instead to get all data in a single request.
 //! These endpoints will be removed in v2.0. They are maintained for backward compatibility only.
 
@@ -33,10 +33,10 @@ use serde::Serialize;
 use sqlx::PgPool;
 use uuid::Uuid;
 
+use crate::db::focus_repos::{FocusPauseRepo, FocusSessionRepo};
 use crate::error::AppError;
 use crate::middleware::auth::AuthContext;
 use crate::state::AppState;
-use crate::db::focus_repos::{FocusSessionRepo, FocusPauseRepo};
 
 /// Create sync routes
 pub fn router() -> Router<Arc<AppState>> {
@@ -136,10 +136,10 @@ pub struct PlanStatusData {
 // ============================================
 
 /// GET /api/sync/poll
-/// 
+///
 /// Single endpoint that returns all data needed for UI polling.
 /// Designed for 30-second interval polling.
-/// 
+///
 /// Response includes ETag header for conditional requests.
 /// Clients should use If-None-Match to avoid redundant data transfer.
 async fn poll_all(
@@ -147,7 +147,7 @@ async fn poll_all(
     Extension(auth): Extension<AuthContext>,
 ) -> Result<Response, AppError> {
     let user_id = auth.user_id;
-    
+
     // Fetch all data in parallel
     let (progress, badges, focus, plan, user, vault_lock) = tokio::try_join!(
         fetch_progress(&state.db, user_id),
@@ -178,7 +178,7 @@ async fn poll_all(
         server_time,
         etag: etag.clone(),
     };
-    
+
     // Build response with cache headers using helper
     build_json_response(&response, Some(&etag), "poll_all")
 }
@@ -188,7 +188,7 @@ async fn poll_all(
 // ============================================
 
 /// GET /api/sync/progress
-/// 
+///
 /// ⚠️ **DEPRECATED** as of v1.5. Use `/api/sync/poll` instead to get all data in a single request.
 /// This endpoint will be removed in v2.0.
 async fn get_progress(
@@ -200,7 +200,7 @@ async fn get_progress(
 }
 
 /// GET /api/sync/badges
-/// 
+///
 /// ⚠️ **DEPRECATED** as of v1.5. Use `/api/sync/poll` instead to get all data in a single request.
 /// This endpoint will be removed in v2.0.
 async fn get_badges(
@@ -212,7 +212,7 @@ async fn get_badges(
 }
 
 /// GET /api/sync/focus-status
-/// 
+///
 /// ⚠️ **DEPRECATED** as of v1.5. Use `/api/sync/poll` instead to get all data in a single request.
 /// This endpoint will be removed in v2.0.
 async fn get_focus_status(
@@ -224,7 +224,7 @@ async fn get_focus_status(
 }
 
 /// GET /api/sync/plan-status
-/// 
+///
 /// ⚠️ **DEPRECATED** as of v1.5. Use `/api/sync/poll` instead to get all data in a single request.
 /// This endpoint will be removed in v2.0.
 async fn get_plan_status(
@@ -301,18 +301,18 @@ async fn fetch_progress(pool: &PgPool, user_id: Uuid) -> Result<ProgressData, Ap
     // Default values for new users: use named constants instead of magic tuple
     // These are the starting values for any new account before any progress is made
     .unwrap_or((DEFAULT_LEVEL, DEFAULT_TOTAL_XP, DEFAULT_COINS, DEFAULT_STREAK));
-    
+
     let (level, total_xp, coins, streak_days) = row;
-    
+
     // Calculate relative XP progress within current level using extracted helper
     let xp_progress_percent = calculate_xp_progress(level, total_xp);
-    
+
     // Calculate XP values for API response
     let xp_for_current_level = calculate_xp_for_level(level);
     let xp_for_next_level = calculate_xp_for_level(level + 1);
     let xp_in_current_level = total_xp - xp_for_current_level;
     let xp_needed_for_level = xp_for_next_level - xp_for_current_level;
-    
+
     Ok(ProgressData {
         level,
         // Type casts to i64: XP and coins use i64 in API response to support future
@@ -321,7 +321,7 @@ async fn fetch_progress(pool: &PgPool, user_id: Uuid) -> Result<ProgressData, Ap
         current_xp: xp_in_current_level as i64,
         xp_to_next_level: (xp_needed_for_level - xp_in_current_level) as i64,
         xp_progress_percent,
-        coins: coins as i64,  // Coins also i64 for consistency and future expansion
+        coins: coins as i64, // Coins also i64 for consistency and future expansion
         streak_days,
     })
 }
@@ -343,8 +343,11 @@ async fn fetch_badges(pool: &PgPool, user_id: Uuid) -> Result<BadgeData, AppErro
         fetch_active_quests_count(pool, user_id),
         fetch_pending_habits_count(pool, user_id),
         fetch_overdue_items_count(pool, user_id),
-    ).map_err(|e| AppError::Database(format!("fetch_badges: failed to fetch badge counts: {}", e)))?;;
-    
+    )
+    .map_err(|e| {
+        AppError::Database(format!("fetch_badges: failed to fetch badge counts: {}", e))
+    })?;
+
     Ok(BadgeData {
         unread_inbox,
         active_quests,
@@ -365,11 +368,19 @@ async fn fetch_focus_status(pool: &PgPool, user_id: Uuid) -> Result<FocusStatusD
     let (active_session, pause_state) = tokio::try_join!(
         FocusSessionRepo::get_active_session(pool, user_id),
         FocusPauseRepo::get_pause_state(pool, user_id),
-    ).map_err(|e| AppError::Database(format!("fetch_focus_status: failed to fetch session state: {}", e)))?;;
-    
+    )
+    .map_err(|e| {
+        AppError::Database(format!(
+            "fetch_focus_status: failed to fetch session state: {}",
+            e
+        ))
+    })?;
+
     Ok(FocusStatusData {
-        active_session: active_session.map(|s| serde_json::to_value(s).unwrap_or(serde_json::Value::Null)),
-        pause_state: pause_state.map(|p| serde_json::to_value(p).unwrap_or(serde_json::Value::Null)),
+        active_session: active_session
+            .map(|s| serde_json::to_value(s).unwrap_or(serde_json::Value::Null)),
+        pause_state: pause_state
+            .map(|p| serde_json::to_value(p).unwrap_or(serde_json::Value::Null)),
     })
 }
 
@@ -383,39 +394,49 @@ async fn fetch_focus_status(pool: &PgPool, user_id: Uuid) -> Result<FocusStatusD
 async fn fetch_plan_status(pool: &PgPool, user_id: Uuid) -> Result<PlanStatusData, AppError> {
     // Get today's plan
     let today = chrono::Utc::now().format("%Y-%m-%d").to_string();
-    
+
     let plan = sqlx::query_as::<_, (serde_json::Value,)>(
         r#"
         SELECT items
         FROM daily_plans
         WHERE user_id = $1 AND date = $2::date
-        "#
+        "#,
     )
     .bind(user_id)
     .bind(&today)
     .fetch_optional(pool)
     .await
-    .map_err(|e| AppError::Database(format!("fetch_plan_status: failed to fetch daily plan: {}", e)))?;
-    
+    .map_err(|e| {
+        AppError::Database(format!(
+            "fetch_plan_status: failed to fetch daily plan: {}",
+            e
+        ))
+    })?;
+
     match plan {
         Some((items_json,)) => {
             // Parse items from JSONB array
             // Expected structure: [{"completed": bool, ...}, ...]
             // Each item MUST have a "completed" boolean field to be counted in completion stats
-            let items: Vec<serde_json::Value> = serde_json::from_value(items_json)
-                .unwrap_or_default();
-            
+            let items: Vec<serde_json::Value> =
+                serde_json::from_value(items_json).unwrap_or_default();
+
             let total = items.len() as i32;
-            let completed = items.iter()
-                .filter(|item| item.get("completed").and_then(|v| v.as_bool()).unwrap_or(false))
+            let completed = items
+                .iter()
+                .filter(|item| {
+                    item.get("completed")
+                        .and_then(|v| v.as_bool())
+                        .unwrap_or(false)
+                })
                 .count() as i32;
-            
+
             let percent = if total > 0 {
                 (completed as f32 / total as f32 * 100.0).min(100.0)
             } else {
                 0.0
             };
-            
+
             Ok(PlanStatusData {
                 has_plan: true,
                 completed,
@@ -489,21 +510,24 @@ fn build_json_response<T: serde::Serialize>(
     etag: Option<&str>,
     context: &str,
 ) -> Result<Response, AppError> {
-    let json_body = serde_json::to_string(body)
-        .map_err(|e| AppError::Internal(format!("{}: failed to serialize response: {}", context, e)))?;
-    
+    let json_body = serde_json::to_string(body).map_err(|e| {
+        AppError::Internal(format!("{}: failed to serialize response: {}", context, e))
+    })?;
+
     let mut response = Response::builder()
         .status(StatusCode::OK)
         .header(header::CONTENT_TYPE, "application/json")
         .header(header::CACHE_CONTROL, "private, max-age=10");
-    
+
     if let Some(tag) = etag {
         response = response.header(header::ETAG, format!("\"{}\"", tag));
     }
-    
+
     response
         .body(axum::body::Body::from(json_body))
-        .map_err(|e| AppError::Internal(format!("{}: failed to build HTTP response: {}", context, e)))
+        .map_err(|e| {
+            AppError::Internal(format!("{}: failed to build HTTP response: {}", context, e))
+        })
 }
 
 /// Extract response data and wrap in JSON with status code.
@@ -568,7 +592,7 @@ async fn fetch_count_simple(
         .fetch_one(pool)
         .await
         .map_err(|e| AppError::Database(format!("{}: {}", context, e)))?;
-    
+
     Ok(count as i32)
 }
 
@@ -629,7 +653,7 @@ async fn fetch_count_with_date(
             .await
     }
     .map_err(|e| AppError::Database(format!("{}: {}", context, e)))?;
-    
+
     Ok(count as i32)
 }
 
@@ -658,7 +682,7 @@ async fn fetch_count_with_timestamp(
         .fetch_one(pool)
         .await
         .map_err(|e| AppError::Database(format!("{}: {}", context, e)))?;
-    
+
     Ok(count as i32)
 }
 
@@ -674,13 +698,18 @@ async fn fetch_user_data(pool: &PgPool, user_id: Uuid) -> Result<UserData, AppEr
             tos_accepted
         FROM users
         WHERE id = $1
-        "#
+        "#,
     )
     .bind(user_id)
     .fetch_one(pool)
     .await
-    .map_err(|e| AppError::Database(format!("fetch_user_data: failed to fetch user profile: {}", e)))?;
-    
+    .map_err(|e| {
+        AppError::Database(format!(
+            "fetch_user_data: failed to fetch user profile: {}",
+            e
+        ))
+    })?;
+
     Ok(UserData {
         id: user.0,
         email: user.1,
@@ -708,14 +737,19 @@ async fn fetch_user_data(pool: &PgPool, user_id: Uuid) -> Result<UserData, AppEr
 /// Count of unprocessed inbox items (typically 0-100 per user)
 async fn fetch_unread_inbox_count(pool: &PgPool, user_id: Uuid) -> Result<i32, AppError> {
     let count = sqlx::query_scalar::<_, i64>(
-        "SELECT COUNT(*) FROM inbox_items WHERE user_id = $1 AND is_processed = $2"
+        "SELECT COUNT(*) FROM inbox_items WHERE user_id = $1 AND is_processed = $2",
     )
     .bind(user_id)
     .bind(INBOX_FILTER_UNPROCESSED)
     .fetch_one(pool)
     .await
-    .map_err(|e| AppError::Database(format!("fetch_unread_inbox_count: failed to count unprocessed items: {}", e)))?;
-    
+    .map_err(|e| {
+        AppError::Database(format!(
+            "fetch_unread_inbox_count: failed to count unprocessed items: {}",
+            e
+        ))
+    })?;
+
     Ok(count as i32)
 }
 
@@ -740,14 +774,19 @@ async fn fetch_unread_inbox_count(pool: &PgPool, user_id: Uuid) -> Result<i32, A
 /// Count of active accepted quests (typically 0-50 per user)
 async fn fetch_active_quests_count(pool: &PgPool, user_id: Uuid) -> Result<i32, AppError> {
     let count = sqlx::query_scalar::<_, i64>(
-        "SELECT COUNT(*) FROM user_quests WHERE user_id = $1 AND status = $2"
+        "SELECT COUNT(*) FROM user_quests WHERE user_id = $1 AND status = $2",
     )
     .bind(user_id)
     .bind(QUEST_STATUS_ACCEPTED)
     .fetch_one(pool)
     .await
-    .map_err(|e| AppError::Database(format!("fetch_active_quests_count: failed to count accepted quests: {}", e)))?;
-    
+    .map_err(|e| {
+        AppError::Database(format!(
+            "fetch_active_quests_count: failed to count accepted quests: {}",
+            e
+        ))
+    })?;
+
     Ok(count as i32)
 }
 
@@ -783,7 +822,7 @@ async fn fetch_active_quests_count(pool: &PgPool, user_id: Uuid) -> Result<i32, 
 /// Count of active habits not completed today (typically 0-30 per user)
 async fn fetch_pending_habits_count(pool: &PgPool, user_id: Uuid) -> Result<i32, AppError> {
     let today = today_date_string();
-    
+
     // Count habits that haven't been completed today using LEFT JOIN for better performance
     // Uses HABIT_FILTER_ACTIVE constant for consistent filtering
     // Refactored to use fetch_count_with_date() helper for cleaner code
@@ -802,8 +841,9 @@ async fn fetch_pending_habits_count(pool: &PgPool, user_id: Uuid) -> Result<i32,
         user_id,
         &today,
         Some(HABIT_FILTER_ACTIVE),
-        "fetch_pending_habits_count"
-    ).await
+        "fetch_pending_habits_count",
+    )
+    .await
 }
 
 /// Fetch the count of overdue (past deadline) quests for a user.
@@ -832,7 +872,7 @@ async fn fetch_pending_habits_count(pool: &PgPool, user_id: Uuid) -> Result<i32,
 /// Count of accepted quests past their deadline (typically 0-20 per user)
 async fn fetch_overdue_items_count(pool: &PgPool, user_id: Uuid) -> Result<i32, AppError> {
     let now = chrono::Utc::now();
-    
+
     // Count quests that are past their deadline using QUEST_STATUS_ACCEPTED constant
     fetch_count_with_timestamp(
         pool,
@@ -847,8 +887,9 @@ async fn fetch_overdue_items_count(pool: &PgPool, user_id: Uuid) -> Result<i32, 
         user_id,
         now,
         QUEST_STATUS_ACCEPTED,
-        "fetch_overdue_items_count"
-    ).await
+        "fetch_overdue_items_count",
+    )
+    .await
 }
 
 // ============================================
@@ -939,7 +980,7 @@ fn calculate_xp_progress(level: i32, total_xp: i32) -> f32 {
     let xp_for_next_level = calculate_xp_for_level(level + 1);
     let xp_in_current_level = total_xp - xp_for_current_level;
     let xp_needed_for_level = xp_for_next_level - xp_for_current_level;
-    
+
     if xp_needed_for_level > 0 {
         let percent = (xp_in_current_level as f64 / xp_needed_for_level as f64 * 100.0);
         percent.min(100.0) as f32
@@ -954,7 +995,7 @@ fn calculate_xp_for_level(level: i32) -> i32 {
     // Max safe level: 46,340 (100 * 46340^1.5 = 2,147,395,600, near i32::MAX of 2,147,483,647)
     // At level 46,341, the result would be 2,147,859,141 which overflows i32
     const MAX_SAFE_LEVEL: i32 = 46_340;
-    
+
     if level < 0 {
         // Negative levels are nonsensical in game progression
         tracing::warn!(
@@ -963,7 +1004,7 @@ fn calculate_xp_for_level(level: i32) -> i32 {
         );
         return 0;
     }
-    
+
     if level > MAX_SAFE_LEVEL {
         // Prevent overflow: cap at maximum safe level
         tracing::error!(
@@ -974,23 +1015,24 @@ fn calculate_xp_for_level(level: i32) -> i32 {
         // Return XP for max safe level instead of overflowing
         return (100.0 * (MAX_SAFE_LEVEL as f64).powf(1.5)) as i32;
     }
-    
+
     // Use f64 for precision during power calculation, then cast to i32
     // Formula: 100 * level^1.5
     (100.0 * (level as f64).powf(1.5)) as i32
 }
 
 /// Fetch vault lock state for cross-device sync
-async fn fetch_vault_lock_state(pool: &PgPool, user_id: Uuid) -> Result<Option<VaultLockData>, AppError> {
+async fn fetch_vault_lock_state(
+    pool: &PgPool,
+    user_id: Uuid,
+) -> Result<Option<VaultLockData>, AppError> {
     use crate::db::vault_repos::VaultRepo;
-    
+
     match VaultRepo::get_lock_state(pool, user_id).await {
-        Ok(Some(lock_state)) => {
-            Ok(Some(VaultLockData {
-                locked_at: lock_state.locked_at.map(|dt| dt.to_rfc3339()),
-                lock_reason: lock_state.lock_reason,
-            }))
-        }
+        Ok(Some(lock_state)) => Ok(Some(VaultLockData {
+            locked_at: lock_state.locked_at.map(|dt| dt.to_rfc3339()),
+            lock_reason: lock_state.lock_reason,
+        })),
         Ok(None) => Ok(None),
         Err(_) => Ok(None), // If vault doesn't exist, return None (not an error)
     }
@@ -1004,11 +1046,11 @@ fn generate_etag(
     plan: &PlanStatusData,
     user: &UserData,
 ) -> String {
-    use std::hash::{Hash, Hasher};
     use std::collections::hash_map::DefaultHasher;
-    
+    use std::hash::{Hash, Hasher};
+
     let mut hasher = DefaultHasher::new();
-    
+
     // Hash the key values that would indicate a change
     progress.level.hash(&mut hasher);
     progress.coins.hash(&mut hasher);
@@ -1026,7 +1068,7 @@ fn generate_etag(
     user.image.hash(&mut hasher);
     user.theme.hash(&mut hasher);
     user.tos_accepted.hash(&mut hasher);
-    
+
     format!("{:x}", hasher.finish())
 }
 

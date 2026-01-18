@@ -33,17 +33,36 @@ async fn main() -> anyhow::Result<()> {
     dotenvy::dotenv().ok();
 
     // Initialize tracing
+    // Load filter from env var with documented default
+    // See docs/LOGGING.md for configuration options
+    let default_filter = std::env::var("RUST_LOG").unwrap_or_else(|_| {
+        // Default filter for development:
+        // ignition_api = debug (our app logs)
+        // tower_http = debug (HTTP middleware logs)
+        // sqlx = warn (avoid chatty query logs)
+        "ignition_api=debug,tower_http=debug,sqlx=warn".into()
+    });
+
     tracing_subscriber::registry()
-        .with(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "ignition_api=debug,tower_http=debug".into()),
-        )
+        .with(tracing_subscriber::EnvFilter::new(default_filter))
         .with(tracing_subscriber::fmt::layer().json())
         .init();
 
+    tracing::info!(
+        operation = "startup",
+        component = "app",
+        "Initializing Ignition API"
+    );
+
     // Load configuration
     let config = AppConfig::load()?;
-    tracing::info!("Configuration loaded");
+    tracing::info!(
+        operation = "startup",
+        component = "config",
+        server_host = %config.server.host,
+        server_port = config.server.port,
+        "Configuration loaded"
+    );
 
     // Validate configuration - fail fast with clear error messages
     // TODO [SEC-004]: Ensure all required field combinations are validated
@@ -63,7 +82,13 @@ async fn main() -> anyhow::Result<()> {
         .parse()
         .expect("Invalid server address");
 
-    tracing::info!("Starting server on {}", addr);
+    tracing::info!(
+        operation = "startup",
+        component = "server",
+        http.host = %addr.ip(),
+        http.port = addr.port(),
+        "Starting server"
+    );
 
     let listener = tokio::net::TcpListener::bind(addr).await?;
     axum::serve(listener, app).await?;
@@ -166,7 +191,9 @@ fn build_router(state: Arc<AppState>) -> Router {
 
     // Apply state and middleware
     app.with_state(state.clone())
-        .layer(axum::middleware::from_fn(middleware::security_headers::add_security_headers))
+        .layer(axum::middleware::from_fn(
+            middleware::security_headers::add_security_headers,
+        ))
         .layer(middleware::cors::cors_layer(&state.config))
         .layer(TraceLayer::new_for_http())
         .layer(PropagateRequestIdLayer::x_request_id())

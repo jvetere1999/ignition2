@@ -581,7 +581,9 @@ impl WorkoutSessionRepo {
             },
             xp_awarded: xp,
             coins_awarded: coins,
-            personal_records: Self::get_personal_records(&pool, user_id, session.id).await.unwrap_or_default(),
+            personal_records: Self::get_personal_records(&pool, user_id, session.id)
+                .await
+                .unwrap_or_default(),
         })
     }
 

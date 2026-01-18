@@ -88,8 +88,14 @@ mod tests {
             Inactive => "inactive"
         });
 
-        assert_eq!(TestStatus::from_str("active").ok(), Some(TestStatus::Active));
-        assert_eq!(TestStatus::from_str("inactive").ok(), Some(TestStatus::Inactive));
+        assert_eq!(
+            TestStatus::from_str("active").ok(),
+            Some(TestStatus::Active)
+        );
+        assert_eq!(
+            TestStatus::from_str("inactive").ok(),
+            Some(TestStatus::Inactive)
+        );
         assert!(TestStatus::from_str("unknown").is_err());
     }
 
@@ -111,7 +117,7 @@ mod tests {
 // ============================================================================
 //
 // NOTE: BACK-005 - Database Model Struct Derive Macro
-// 
+//
 // Current State: 20+ struct definitions use identical derives:
 //   #[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
 //

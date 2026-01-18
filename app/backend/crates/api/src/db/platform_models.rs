@@ -2,11 +2,11 @@
 //!
 //! Models for Calendar, Daily Plan, Feedback, Infobase, Ideas, Onboarding, and User settings.
 
+use crate::db::defaults;
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
-use crate::db::defaults;
 
 // ============================================================================
 // CALENDAR

@@ -4,12 +4,12 @@
 
 use std::sync::Arc;
 
+use crate::db::learn_models::{ActivityItem, ContinueItem, WeakArea};
 use axum::{
     extract::{Extension, Path, Query, State},
     routing::{delete, get, post, put},
     Json, Router,
 };
-use crate::db::learn_models::{ActivityItem, ContinueItem, WeakArea};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -144,7 +144,6 @@ struct JournalEntryWrapper {
     entry: JournalEntryResponse,
 }
 
-
 #[derive(Debug, Deserialize)]
 struct ReviewSubmitBody {
     card_id: Uuid,
@@ -193,7 +192,9 @@ async fn list_topics(
     Extension(user): Extension<User>,
 ) -> Result<Json<TopicsWrapper>, AppError> {
     let result = LearnRepo::list_topics(&state.db, user.id).await?;
-    Ok(Json(TopicsWrapper { topics: result.topics }))
+    Ok(Json(TopicsWrapper {
+        topics: result.topics,
+    }))
 }
 
 /// GET /learn/topics/:topic_id/lessons
@@ -204,7 +205,9 @@ async fn list_lessons(
     Path(topic_id): Path<Uuid>,
 ) -> Result<Json<LessonsWrapper>, AppError> {
     let result = LearnRepo::list_lessons(&state.db, user.id, topic_id).await?;
-    Ok(Json(LessonsWrapper { lessons: result.lessons }))
+    Ok(Json(LessonsWrapper {
+        lessons: result.lessons,
+    }))
 }
 
 /// GET /learn/topics/:topic_id/drills
@@ -215,7 +218,9 @@ async fn list_drills(
     Path(topic_id): Path<Uuid>,
 ) -> Result<Json<DrillsWrapper>, AppError> {
     let result = LearnRepo::list_drills(&state.db, user.id, topic_id).await?;
-    Ok(Json(DrillsWrapper { drills: result.drills }))
+    Ok(Json(DrillsWrapper {
+        drills: result.drills,
+    }))
 }
 
 /// GET /learn/lessons/:id
@@ -336,7 +341,9 @@ async fn list_glossary(
     State(state): State<Arc<AppState>>,
     Query(query): Query<GlossaryQuery>,
 ) -> Result<Json<GlossaryWrapper>, AppError> {
-    let entries = LearnRepo::list_glossary(&state.db, query.query.as_deref(), query.category.as_deref()).await?;
+    let entries =
+        LearnRepo::list_glossary(&state.db, query.query.as_deref(), query.category.as_deref())
+            .await?;
     Ok(Json(GlossaryWrapper { entries }))
 }
 

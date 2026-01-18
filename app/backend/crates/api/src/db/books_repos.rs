@@ -199,7 +199,9 @@ impl BookRepo {
 
         // Validate page number
         if current_page < 0 {
-            return Err(AppError::BadRequest("Page number cannot be negative".to_string()));
+            return Err(AppError::BadRequest(
+                "Page number cannot be negative".to_string(),
+            ));
         }
 
         if let Some(total) = book.total_pages {

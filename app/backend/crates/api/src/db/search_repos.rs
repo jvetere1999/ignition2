@@ -13,14 +13,9 @@ impl SearchIndexRepository {
         user_id: Uuid,
     ) -> Result<Vec<SearchableContent>, sqlx::Error> {
         // Fetch all ideas for the user
-        let ideas: Vec<SearchableContent> = sqlx::query_as::<_, (
-            String,
-            String,
-            String,
-            i64,
-            i64,
-        )>(
-            "SELECT 
+        let ideas: Vec<SearchableContent> =
+            sqlx::query_as::<_, (String, String, String, i64, i64)>(
+                "SELECT 
                 'idea:' || id::text,
                 content_encrypted,
                 content_hash,
@@ -28,43 +23,34 @@ impl SearchIndexRepository {
                 EXTRACT(EPOCH FROM updated_at)::bigint
              FROM ideas
              WHERE user_id = $1 AND deleted_at IS NULL",
-        )
-        .bind(user_id)
-        .fetch_all(pool)
-        .await?
-        .into_iter()
-        .map(
-            |(
-                id,
-                encrypted_text,
-                plaintext_hash,
-                created_at_epoch,
-                updated_at_epoch,
-            )| SearchableContent {
-                id,
-                user_id,
-                content_type: ContentType::Idea,
-                encrypted_text,
-                plaintext_hash,
-                tags: vec![],
-                status: ContentStatus::Active,
-                created_at: chrono::DateTime::from_timestamp(created_at_epoch, 0)
-                    .unwrap_or_else(Utc::now),
-                updated_at: chrono::DateTime::from_timestamp(updated_at_epoch, 0)
-                    .unwrap_or_else(Utc::now),
-            },
-        )
-        .collect();
+            )
+            .bind(user_id)
+            .fetch_all(pool)
+            .await?
+            .into_iter()
+            .map(
+                |(id, encrypted_text, plaintext_hash, created_at_epoch, updated_at_epoch)| {
+                    SearchableContent {
+                        id,
+                        user_id,
+                        content_type: ContentType::Idea,
+                        encrypted_text,
+                        plaintext_hash,
+                        tags: vec![],
+                        status: ContentStatus::Active,
+                        created_at: chrono::DateTime::from_timestamp(created_at_epoch, 0)
+                            .unwrap_or_else(Utc::now),
+                        updated_at: chrono::DateTime::from_timestamp(updated_at_epoch, 0)
+                            .unwrap_or_else(Utc::now),
+                    }
+                },
+            )
+            .collect();
 
         // Fetch all infobase entries for the user
-        let infobase: Vec<SearchableContent> = sqlx::query_as::<_, (
-            String,
-            String,
-            String,
-            i64,
-            i64,
-        )>(
-            "SELECT 
+        let infobase: Vec<SearchableContent> =
+            sqlx::query_as::<_, (String, String, String, i64, i64)>(
+                "SELECT 
                 'infobase:' || id::text,
                 content_encrypted,
                 content_hash,
@@ -72,33 +58,29 @@ impl SearchIndexRepository {
                 EXTRACT(EPOCH FROM updated_at)::bigint
              FROM infobase_entries
              WHERE user_id = $1 AND deleted_at IS NULL",
-        )
-        .bind(user_id)
-        .fetch_all(pool)
-        .await?
-        .into_iter()
-        .map(
-            |(
-                id,
-                encrypted_text,
-                plaintext_hash,
-                created_at_epoch,
-                updated_at_epoch,
-            )| SearchableContent {
-                id,
-                user_id,
-                content_type: ContentType::Infobase,
-                encrypted_text,
-                plaintext_hash,
-                tags: vec![],
-                status: ContentStatus::Active,
-                created_at: chrono::DateTime::from_timestamp(created_at_epoch, 0)
-                    .unwrap_or_else(Utc::now),
-                updated_at: chrono::DateTime::from_timestamp(updated_at_epoch, 0)
-                    .unwrap_or_else(Utc::now),
-            },
-        )
-        .collect();
+            )
+            .bind(user_id)
+            .fetch_all(pool)
+            .await?
+            .into_iter()
+            .map(
+                |(id, encrypted_text, plaintext_hash, created_at_epoch, updated_at_epoch)| {
+                    SearchableContent {
+                        id,
+                        user_id,
+                        content_type: ContentType::Infobase,
+                        encrypted_text,
+                        plaintext_hash,
+                        tags: vec![],
+                        status: ContentStatus::Active,
+                        created_at: chrono::DateTime::from_timestamp(created_at_epoch, 0)
+                            .unwrap_or_else(Utc::now),
+                        updated_at: chrono::DateTime::from_timestamp(updated_at_epoch, 0)
+                            .unwrap_or_else(Utc::now),
+                    }
+                },
+            )
+            .collect();
 
         let mut all_content = ideas;
         all_content.extend(infobase);
@@ -181,19 +163,15 @@ impl SearchIndexRepository {
     }
 
     /// Get count of indexable content for a user
-    pub async fn get_content_count(
-        pool: &PgPool,
-        user_id: Uuid,
-    ) -> Result<u32, sqlx::Error> {
-        let ideas_count: (i64,) = sqlx::query_as(
-            "SELECT COUNT(*) FROM ideas WHERE user_id = $1 AND deleted_at IS NULL"
-        )
-        .bind(user_id)
-        .fetch_one(pool)
-        .await?;
+    pub async fn get_content_count(pool: &PgPool, user_id: Uuid) -> Result<u32, sqlx::Error> {
+        let ideas_count: (i64,) =
+            sqlx::query_as("SELECT COUNT(*) FROM ideas WHERE user_id = $1 AND deleted_at IS NULL")
+                .bind(user_id)
+                .fetch_one(pool)
+                .await?;
 
         let infobase_count: (i64,) = sqlx::query_as(
-            "SELECT COUNT(*) FROM infobase_entries WHERE user_id = $1 AND deleted_at IS NULL"
+            "SELECT COUNT(*) FROM infobase_entries WHERE user_id = $1 AND deleted_at IS NULL",
         )
         .bind(user_id)
         .fetch_one(pool)
@@ -244,12 +222,11 @@ impl SearchIndexRepository {
         } else if content_id.starts_with("infobase:") {
             let uuid_str = &content_id[9..];
             if let Ok(uuid) = Uuid::parse_str(uuid_str) {
-                let result: Option<(String,)> = sqlx::query_as(
-                    "SELECT content_hash FROM infobase_entries WHERE id = $1",
-                )
-                .bind(uuid)
-                .fetch_optional(pool)
-                .await?;
+                let result: Option<(String,)> =
+                    sqlx::query_as("SELECT content_hash FROM infobase_entries WHERE id = $1")
+                        .bind(uuid)
+                        .fetch_optional(pool)
+                        .await?;
 
                 if let Some((hash,)) = result {
                     return Ok(hash != expected_hash);

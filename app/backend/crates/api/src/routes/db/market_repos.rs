@@ -1,7 +1,6 @@
 /// Market repository - database queries for market module
 /// Uses sqlx runtime binding (NO compile-time macros)
-
-use sqlx::{PgPool, Error as SqlxError};
+use sqlx::{Error as SqlxError, PgPool};
 use uuid::Uuid;
 
 use super::market_models::*;
@@ -10,10 +9,8 @@ pub struct MarketRepo;
 
 impl MarketRepo {
     // ===== Market Items =====
-    
-    pub async fn get_available_items(
-        pool: &PgPool,
-    ) -> Result<Vec<MarketItem>, SqlxError> {
+
+    pub async fn get_available_items(pool: &PgPool) -> Result<Vec<MarketItem>, SqlxError> {
         sqlx::query_as::<_, MarketItem>(
             r#"
             SELECT * FROM market_items
@@ -44,10 +41,7 @@ impl MarketRepo {
 
     // ===== Wallet =====
 
-    pub async fn get_wallet(
-        pool: &PgPool,
-        user_id: Uuid,
-    ) -> Result<Option<UserWallet>, SqlxError> {
+    pub async fn get_wallet(pool: &PgPool, user_id: Uuid) -> Result<Option<UserWallet>, SqlxError> {
         sqlx::query_as::<_, UserWallet>(
             r#"
             SELECT * FROM user_wallet
@@ -109,12 +103,10 @@ impl MarketRepo {
         quantity: i32,
     ) -> Result<UserMarketPurchase, SqlxError> {
         // Get item cost
-        let item = sqlx::query_as::<_, MarketItem>(
-            r#"SELECT * FROM market_items WHERE id = $1"#,
-        )
-        .bind(item_id)
-        .fetch_one(pool)
-        .await?;
+        let item = sqlx::query_as::<_, MarketItem>(r#"SELECT * FROM market_items WHERE id = $1"#)
+            .bind(item_id)
+            .fetch_one(pool)
+            .await?;
 
         let total_cost = item.cost_coins * quantity;
 
@@ -205,10 +197,7 @@ impl MarketRepo {
         .await
     }
 
-    pub async fn claim_reward(
-        pool: &PgPool,
-        reward_id: Uuid,
-    ) -> Result<bool, SqlxError> {
+    pub async fn claim_reward(pool: &PgPool, reward_id: Uuid) -> Result<bool, SqlxError> {
         let result = sqlx::query(
             r#"
             UPDATE user_rewards

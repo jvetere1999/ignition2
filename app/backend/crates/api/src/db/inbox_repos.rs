@@ -41,12 +41,10 @@ impl InboxRepo {
             .await?
         };
 
-        let total: (i64,) = sqlx::query_as(
-            "SELECT COUNT(*) FROM inbox_items WHERE user_id = $1",
-        )
-        .bind(user_id)
-        .fetch_one(db)
-        .await?;
+        let total: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM inbox_items WHERE user_id = $1")
+            .bind(user_id)
+            .fetch_one(db)
+            .await?;
 
         let unread: (i64,) = sqlx::query_as(
             "SELECT COUNT(*) FROM inbox_items WHERE user_id = $1 AND is_processed = false AND is_archived = false",
@@ -135,10 +133,7 @@ impl InboxRepo {
     }
 
     /// Mark all items as read
-    pub async fn mark_all_read(
-        db: &Pool<Postgres>,
-        user_id: Uuid,
-    ) -> Result<i64, AppError> {
+    pub async fn mark_all_read(db: &Pool<Postgres>, user_id: Uuid) -> Result<i64, AppError> {
         let result = sqlx::query(
             "UPDATE inbox_items SET is_processed = true WHERE user_id = $1 AND is_processed = false",
         )
@@ -150,18 +145,12 @@ impl InboxRepo {
     }
 
     /// Delete inbox item
-    pub async fn delete(
-        db: &Pool<Postgres>,
-        user_id: Uuid,
-        item_id: Uuid,
-    ) -> Result<(), AppError> {
-        let result = sqlx::query(
-            "DELETE FROM inbox_items WHERE id = $1 AND user_id = $2",
-        )
-        .bind(item_id)
-        .bind(user_id)
-        .execute(db)
-        .await?;
+    pub async fn delete(db: &Pool<Postgres>, user_id: Uuid, item_id: Uuid) -> Result<(), AppError> {
+        let result = sqlx::query("DELETE FROM inbox_items WHERE id = $1 AND user_id = $2")
+            .bind(item_id)
+            .bind(user_id)
+            .execute(db)
+            .await?;
 
         if result.rows_affected() == 0 {
             return Err(AppError::NotFound("Inbox item not found".into()));
@@ -171,10 +160,7 @@ impl InboxRepo {
     }
 
     /// Get unread count
-    pub async fn unread_count(
-        db: &Pool<Postgres>,
-        user_id: Uuid,
-    ) -> Result<i64, AppError> {
+    pub async fn unread_count(db: &Pool<Postgres>, user_id: Uuid) -> Result<i64, AppError> {
         let count: (i64,) = sqlx::query_as(
             "SELECT COUNT(*) FROM inbox_items WHERE user_id = $1 AND is_processed = false AND is_archived = false",
         )

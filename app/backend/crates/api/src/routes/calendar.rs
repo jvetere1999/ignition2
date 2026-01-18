@@ -82,7 +82,9 @@ async fn list_events(
         CalendarRepo::list(&state.db, user.id).await?
     };
 
-    Ok(Json(EventsListWrapper { events: result.events }))
+    Ok(Json(EventsListWrapper {
+        events: result.events,
+    }))
 }
 
 /// GET /calendar/:id

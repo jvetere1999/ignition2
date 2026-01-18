@@ -13,7 +13,8 @@ use axum::{
 use uuid::Uuid;
 
 use crate::db::habits_goals_models::{
-    CompleteHabitResult, CreateHabitRequest, HabitAnalyticsResponse, HabitResponse, HabitsListResponse,
+    CompleteHabitResult, CreateHabitRequest, HabitAnalyticsResponse, HabitResponse,
+    HabitsListResponse,
 };
 use crate::db::habits_goals_repos::HabitsRepo;
 use crate::db::models::User;
@@ -43,7 +44,12 @@ async fn list_habits(
 ) -> Result<Json<PaginatedResponse<HabitResponse>>, AppError> {
     let result = HabitsRepo::list_active(&state.db, user.id).await?;
 
-    Ok(Json(PaginatedResponse::new(result.habits, result.total, 1, result.total)))
+    Ok(Json(PaginatedResponse::new(
+        result.habits,
+        result.total,
+        1,
+        result.total,
+    )))
 }
 
 /// GET /habits/archived
@@ -54,7 +60,12 @@ async fn list_archived_habits(
 ) -> Result<Json<PaginatedResponse<HabitResponse>>, AppError> {
     let result = HabitsRepo::list_archived(&state.db, user.id).await?;
 
-    Ok(Json(PaginatedResponse::new(result.habits, result.total, 1, result.total)))
+    Ok(Json(PaginatedResponse::new(
+        result.habits,
+        result.total,
+        1,
+        result.total,
+    )))
 }
 
 /// POST /habits

@@ -44,7 +44,7 @@ impl QueryContext {
 }
 
 /// Execute a database query with observability
-/// 
+///
 /// Wraps sqlx queries with:
 /// - Timing metrics
 /// - Structured error logging with context
@@ -80,31 +80,32 @@ where
     match result {
         Ok(value) => {
             Span::current().record("db.success", true);
-            
+
             // Log slow queries (> 100ms)
             if duration_ms > 100 {
                 tracing::warn!(
-                    operation = %ctx.operation,
-                    table = %ctx.table,
+                    db.operation = %ctx.operation,
+                    db.table = %ctx.table,
                     duration_ms = duration_ms,
+                    error.type = "performance",
                     "Slow database query detected"
                 );
             }
-            
+
             Ok(value)
         }
         Err(e) => {
             Span::current().record("db.success", false);
-            
+
             // Detailed error logging
             tracing::error!(
-                operation = %ctx.operation,
-                table = %ctx.table,
-                user_id = ?ctx.user_id,
-                entity_id = ?ctx.entity_id,
+                error.type = "database",
+                db.operation = %ctx.operation,
+                db.table = %ctx.table,
+                db.user_id = ?ctx.user_id,
+                db.entity_id = ?ctx.entity_id,
                 duration_ms = duration_ms,
-                error = %e,
-                error_debug = ?e,
+                error.message = %e,
                 "Database query failed"
             );
 
@@ -146,7 +147,7 @@ where
     match result {
         Ok(maybe_value) => {
             Span::current().record("db.found", maybe_value.is_some());
-            
+
             if duration_ms > 100 {
                 tracing::warn!(
                     operation = %ctx.operation,
@@ -155,7 +156,7 @@ where
                     "Slow database query detected"
                 );
             }
-            
+
             Ok(maybe_value)
         }
         Err(e) => {
@@ -207,7 +208,7 @@ where
     match result {
         Ok(rows) => {
             Span::current().record("db.row_count", rows.len() as i64);
-            
+
             if duration_ms > 100 {
                 tracing::warn!(
                     operation = %ctx.operation,
@@ -217,7 +218,7 @@ where
                     "Slow database query detected"
                 );
             }
-            
+
             Ok(rows)
         }
         Err(e) => {
@@ -255,7 +256,7 @@ pub fn db_error(ctx: &QueryContext, e: sqlx::Error) -> AppError {
         error_debug = ?e,
         "Database error"
     );
-    
+
     AppError::DatabaseWithContext {
         operation: ctx.operation.to_string(),
         table: ctx.table.to_string(),
@@ -273,11 +274,11 @@ mod tests {
     fn test_query_context_builder() {
         let user_id = Uuid::new_v4();
         let entity_id = Uuid::new_v4();
-        
+
         let ctx = QueryContext::new("SELECT", "reference_tracks")
             .with_user(user_id)
             .with_entity(entity_id);
-        
+
         assert_eq!(ctx.operation, "SELECT");
         assert_eq!(ctx.table, "reference_tracks");
         assert_eq!(ctx.user_id, Some(user_id));

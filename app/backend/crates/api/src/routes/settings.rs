@@ -1,7 +1,6 @@
 /// User settings API endpoints
 /// GET /api/settings - get all settings for user
 /// PATCH /api/settings - update settings
-
 use std::sync::Arc;
 
 use axum::{
@@ -10,17 +9,16 @@ use axum::{
     Extension, Json, Router,
 };
 
-use crate::middleware::auth::AuthContext;
-use crate::state::AppState;
-use crate::db::platform_repos::UserSettingsRepo;
 use crate::db::platform_models::{UpdateUserSettingsRequest, UserSettingsResponse};
+use crate::db::platform_repos::UserSettingsRepo;
 use crate::error::AppError;
+use crate::middleware::auth::AuthContext;
 use crate::shared::http::response::ApiResponse;
+use crate::state::AppState;
 
 /// Mount user settings routes
 pub fn router() -> Router<Arc<AppState>> {
-    Router::new()
-        .route("/", get(get_settings).patch(update_settings))
+    Router::new().route("/", get(get_settings).patch(update_settings))
 }
 
 /// GET /api/settings - Get all settings for authenticated user
@@ -41,4 +39,3 @@ async fn update_settings(
     let updated = UserSettingsRepo::update(&state.db, auth.user_id, &payload).await?;
     Ok(Json(ApiResponse::ok(updated)))
 }
-

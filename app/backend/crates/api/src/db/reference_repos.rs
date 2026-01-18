@@ -8,7 +8,7 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use super::core::{QueryContext, db_error};
+use super::core::{db_error, QueryContext};
 use super::reference_models::*;
 use crate::error::AppError;
 
@@ -26,9 +26,8 @@ impl ReferenceTrackRepo {
         user_id: Uuid,
         input: CreateTrackInput,
     ) -> Result<ReferenceTrack, AppError> {
-        let ctx = QueryContext::new("INSERT", "reference_tracks")
-            .with_user(user_id);
-        
+        let ctx = QueryContext::new("INSERT", "reference_tracks").with_user(user_id);
+
         let track = sqlx::query_as::<_, ReferenceTrack>(
             r#"
             INSERT INTO reference_tracks (
@@ -71,9 +70,8 @@ impl ReferenceTrackRepo {
     /// Find track by ID (no ownership check - use for internal lookups)
     #[allow(dead_code)]
     pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<ReferenceTrack>, AppError> {
-        let ctx = QueryContext::new("SELECT", "reference_tracks")
-            .with_entity(id);
-        
+        let ctx = QueryContext::new("SELECT", "reference_tracks").with_entity(id);
+
         let track =
             sqlx::query_as::<_, ReferenceTrack>("SELECT * FROM reference_tracks WHERE id = $1")
                 .bind(id)
@@ -93,7 +91,7 @@ impl ReferenceTrackRepo {
         let ctx = QueryContext::new("SELECT", "reference_tracks")
             .with_user(user_id)
             .with_entity(id);
-        
+
         let track = sqlx::query_as::<_, ReferenceTrack>(
             "SELECT * FROM reference_tracks WHERE id = $1 AND user_id = $2",
         )
@@ -113,9 +111,8 @@ impl ReferenceTrackRepo {
         page: i32,
         page_size: i32,
     ) -> Result<(Vec<ReferenceTrack>, i64), AppError> {
-        let ctx = QueryContext::new("SELECT", "reference_tracks")
-            .with_user(user_id);
-        
+        let ctx = QueryContext::new("SELECT", "reference_tracks").with_user(user_id);
+
         let offset = (page - 1) * page_size;
 
         let tracks = sqlx::query_as::<_, ReferenceTrack>(
@@ -151,15 +148,14 @@ impl ReferenceTrackRepo {
         page_size: i32,
     ) -> Result<Option<(Uuid, String, Option<String>, Vec<ReferenceTrack>, i64)>, AppError> {
         let ctx = QueryContext::new("SELECT", "reference_tracks");
-        
+
         // First find the user by email
-        let user: Option<(Uuid, String, Option<String>)> = sqlx::query_as(
-            "SELECT id, email, name FROM users WHERE email = $1",
-        )
-        .bind(email)
-        .fetch_optional(pool)
-        .await
-        .map_err(|e| db_error(&QueryContext::new("SELECT", "users"), e))?;
+        let user: Option<(Uuid, String, Option<String>)> =
+            sqlx::query_as("SELECT id, email, name FROM users WHERE email = $1")
+                .bind(email)
+                .fetch_optional(pool)
+                .await
+                .map_err(|e| db_error(&QueryContext::new("SELECT", "users"), e))?;
 
         let Some((user_id, user_email, user_name)) = user else {
             return Ok(None);
@@ -381,8 +377,7 @@ pub struct TrackAnalysisRepo;
 impl TrackAnalysisRepo {
     /// Get analysis by ID
     pub async fn get_by_id(pool: &PgPool, id: Uuid) -> Result<Option<TrackAnalysis>, AppError> {
-        let ctx = QueryContext::new("SELECT", "track_analyses")
-            .with_entity(id);
+        let ctx = QueryContext::new("SELECT", "track_analyses").with_entity(id);
 
         let analysis =
             sqlx::query_as::<_, TrackAnalysis>("SELECT * FROM track_analyses WHERE id = $1")
@@ -400,8 +395,7 @@ impl TrackAnalysisRepo {
         track_id: Uuid,
         analysis_type: &str,
     ) -> Result<TrackAnalysis, AppError> {
-        let ctx = QueryContext::new("INSERT", "track_analyses")
-            .with_entity(track_id);
+        let ctx = QueryContext::new("INSERT", "track_analyses").with_entity(track_id);
 
         let analysis = sqlx::query_as::<_, TrackAnalysis>(
             r#"
@@ -425,8 +419,7 @@ impl TrackAnalysisRepo {
         track_id: Uuid,
         analysis_type: Option<&str>,
     ) -> Result<Option<TrackAnalysis>, AppError> {
-        let ctx = QueryContext::new("SELECT", "track_analyses")
-            .with_entity(track_id);
+        let ctx = QueryContext::new("SELECT", "track_analyses").with_entity(track_id);
 
         let analysis = if let Some(atype) = analysis_type {
             sqlx::query_as::<_, TrackAnalysis>(
@@ -468,8 +461,7 @@ impl TrackAnalysisRepo {
         results: Option<serde_json::Value>,
         error_message: Option<&str>,
     ) -> Result<(), AppError> {
-        let ctx = QueryContext::new("UPDATE", "track_analyses")
-            .with_entity(id);
+        let ctx = QueryContext::new("UPDATE", "track_analyses").with_entity(id);
 
         let completed_at = if status == "completed" {
             Some(chrono::Utc::now())
@@ -501,8 +493,7 @@ impl TrackAnalysisRepo {
 
     /// Mark analysis as started
     pub async fn mark_started(pool: &PgPool, id: Uuid) -> Result<(), AppError> {
-        let ctx = QueryContext::new("UPDATE", "track_analyses")
-            .with_entity(id);
+        let ctx = QueryContext::new("UPDATE", "track_analyses").with_entity(id);
 
         sqlx::query(
             r#"

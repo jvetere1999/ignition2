@@ -146,9 +146,12 @@ async fn start_session(
 ) -> Result<(StatusCode, Json<SessionResponse>), AppError> {
     let session = FocusSessionRepo::start_session(&state.db, user.id, &req).await?;
 
-    Ok((StatusCode::CREATED, Json(SessionResponse {
-        session: session.into(),
-    })))
+    Ok((
+        StatusCode::CREATED,
+        Json(SessionResponse {
+            session: session.into(),
+        }),
+    ))
 }
 
 /// GET /focus/stats
@@ -273,7 +276,9 @@ async fn list_libraries(
     Query(query): Query<ListSessionsQuery>,
 ) -> Result<Json<LibrariesWrapper>, AppError> {
     let response = FocusLibraryRepo::list(&state.db, user.id, query.page, query.page_size).await?;
-    Ok(Json(LibrariesWrapper { libraries: response.libraries }))
+    Ok(Json(LibrariesWrapper {
+        libraries: response.libraries,
+    }))
 }
 
 /// POST /focus/libraries
@@ -288,9 +293,12 @@ async fn create_library(
     }
 
     let library = FocusLibraryRepo::create(&state.db, user.id, &req).await?;
-    Ok((StatusCode::CREATED, Json(LibraryWrapper {
-        library: FocusLibraryResponse::from(library),
-    })))
+    Ok((
+        StatusCode::CREATED,
+        Json(LibraryWrapper {
+            library: FocusLibraryResponse::from(library),
+        }),
+    ))
 }
 
 /// GET /focus/libraries/:id

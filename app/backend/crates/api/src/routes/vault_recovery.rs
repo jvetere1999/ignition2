@@ -1,16 +1,10 @@
-use axum::{
-    extract::State,
-    routing::post,
-    Extension, Json, Router,
-};
+use axum::{extract::State, routing::post, Extension, Json, Router};
 use serde_json::json;
 use std::sync::Arc;
 
 use crate::{
     db::{
-        recovery_codes_models::*,
-        recovery_codes_repos::RecoveryCodesRepo,
-        vault_repos::VaultRepo,
+        recovery_codes_models::*, recovery_codes_repos::RecoveryCodesRepo, vault_repos::VaultRepo,
     },
     error::AppError,
     middleware::auth::AuthContext,
@@ -48,9 +42,7 @@ async fn generate_recovery_codes(
         .await
         .map_err(|e| {
             tracing::error!("Failed to generate recovery codes: {:?}", e);
-            AppError::Internal(
-                "Failed to generate recovery codes".to_string(),
-            )
+            AppError::Internal("Failed to generate recovery codes".to_string())
         })?;
 
     tracing::info!(
@@ -90,22 +82,13 @@ async fn reset_passphrase_with_code(
     }
 
     // Find and use the recovery code
-    let recovery_code = RecoveryCodesRepo::validate_and_use_code(
-        &state.db,
-        &payload.code,
-    )
-    .await
-    .map_err(|e| {
-        tracing::error!("Failed to validate recovery code: {:?}", e);
-        AppError::Internal(
-            "Failed to validate recovery code".to_string(),
-        )
-    })?
-    .ok_or_else(|| {
-        AppError::BadRequest(
-            "Invalid or already used recovery code".to_string(),
-        )
-    })?;
+    let recovery_code = RecoveryCodesRepo::validate_and_use_code(&state.db, &payload.code)
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to validate recovery code: {:?}", e);
+            AppError::Internal("Failed to validate recovery code".to_string())
+        })?
+        .ok_or_else(|| AppError::BadRequest("Invalid or already used recovery code".to_string()))?;
 
     // Get the vault
     let vault = VaultRepo::get_by_user_id(&state.db, recovery_code.created_by)
@@ -117,13 +100,10 @@ async fn reset_passphrase_with_code(
         .ok_or_else(|| AppError::NotFound("Vault not found".to_string()))?;
 
     // Hash the new passphrase using bcrypt
-    let hashed = bcrypt::hash(&payload.new_passphrase, 12)
-        .map_err(|e| {
-            tracing::error!("Failed to hash passphrase: {:?}", e);
-            AppError::Internal(
-                "Failed to hash passphrase".to_string(),
-            )
-        })?;
+    let hashed = bcrypt::hash(&payload.new_passphrase, 12).map_err(|e| {
+        tracing::error!("Failed to hash passphrase: {:?}", e);
+        AppError::Internal("Failed to hash passphrase".to_string())
+    })?;
 
     // Update vault passphrase
     sqlx::query(
@@ -139,9 +119,7 @@ async fn reset_passphrase_with_code(
     .await
     .map_err(|e| {
         tracing::error!("Failed to update vault passphrase: {:?}", e);
-        AppError::Internal(
-            "Failed to update passphrase".to_string(),
-        )
+        AppError::Internal("Failed to update passphrase".to_string())
     })?;
 
     tracing::warn!(
@@ -180,9 +158,7 @@ async fn change_passphrase_authenticated(
     let passphrase_valid = bcrypt::verify(&payload.current_passphrase, &vault.passphrase_hash)
         .map_err(|e| {
             tracing::error!("Bcrypt verification failed: {:?}", e);
-            AppError::Internal(
-                "Failed to verify passphrase".to_string(),
-            )
+            AppError::Internal("Failed to verify passphrase".to_string())
         })?;
 
     if !passphrase_valid {
@@ -199,13 +175,10 @@ async fn change_passphrase_authenticated(
     }
 
     // Hash new passphrase
-    let hashed = bcrypt::hash(&payload.new_passphrase, 12)
-        .map_err(|e| {
-            tracing::error!("Failed to hash passphrase: {:?}", e);
-            AppError::Internal(
-                "Failed to hash passphrase".to_string(),
-            )
-        })?;
+    let hashed = bcrypt::hash(&payload.new_passphrase, 12).map_err(|e| {
+        tracing::error!("Failed to hash passphrase: {:?}", e);
+        AppError::Internal("Failed to hash passphrase".to_string())
+    })?;
 
     // Update vault passphrase
     sqlx::query(
@@ -221,9 +194,7 @@ async fn change_passphrase_authenticated(
     .await
     .map_err(|e| {
         tracing::error!("Failed to update vault passphrase: {:?}", e);
-        AppError::Internal(
-            "Failed to update passphrase".to_string(),
-        )
+        AppError::Internal("Failed to update passphrase".to_string())
     })?;
 
     // Revoke all recovery codes when passphrase changes
@@ -242,4 +213,3 @@ async fn change_passphrase_authenticated(
         }
     })))
 }
-

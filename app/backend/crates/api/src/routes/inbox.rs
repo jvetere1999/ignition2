@@ -22,7 +22,12 @@ use crate::state::AppState;
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/", get(list_inbox).post(create_inbox_item))
-        .route("/{id}", get(get_inbox_item).put(update_inbox_item).delete(delete_inbox_item))
+        .route(
+            "/{id}",
+            get(get_inbox_item)
+                .put(update_inbox_item)
+                .delete(delete_inbox_item),
+        )
 }
 
 // ============================================================================
@@ -77,7 +82,14 @@ async fn list_inbox(
     Extension(user): Extension<User>,
     Query(query): Query<ListQuery>,
 ) -> Result<Json<ListWrapper>, AppError> {
-    let response = InboxRepo::list(&state.db, user.id, query.page, query.page_size, query.include_archived).await?;
+    let response = InboxRepo::list(
+        &state.db,
+        user.id,
+        query.page,
+        query.page_size,
+        query.include_archived,
+    )
+    .await?;
     Ok(Json(ListWrapper { data: response }))
 }
 
@@ -137,9 +149,6 @@ async fn delete_inbox_item(
 ) -> Result<Json<DeleteWrapper>, AppError> {
     InboxRepo::delete(&state.db, user.id, id).await?;
     Ok(Json(DeleteWrapper {
-        data: DeleteInboxResponse {
-            success: true,
-            id,
-        },
+        data: DeleteInboxResponse { success: true, id },
     }))
 }

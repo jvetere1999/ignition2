@@ -2,11 +2,11 @@
 //!
 //! Models for learning system (topics, lessons, drills, progress).
 
+use crate::named_enum;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
-use crate::named_enum;
 
 // ============================================================================
 // ENUMS
@@ -184,9 +184,9 @@ pub struct RecipeTemplate {
     pub updated_at: DateTime<Utc>,
 }
 
-// ============================================================================ 
+// ============================================================================
 // Aggregates for overview
-// ============================================================================ 
+// ============================================================================
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ContinueItem {

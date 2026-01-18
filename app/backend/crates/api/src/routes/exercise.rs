@@ -142,7 +142,9 @@ async fn list_exercises(
     Query(query): Query<ListExercisesQuery>,
 ) -> Result<Json<ExercisesListWrapper>, AppError> {
     let result = ExerciseRepo::list(&state.db, user.id, query.category.as_deref()).await?;
-    Ok(Json(ExercisesListWrapper { exercises: result.exercises }))
+    Ok(Json(ExercisesListWrapper {
+        exercises: result.exercises,
+    }))
 }
 
 /// POST /exercise
@@ -220,7 +222,10 @@ async fn list_workouts(
 ) -> Result<Json<WorkoutsListWrapper>, AppError> {
     let result =
         WorkoutRepo::list(&state.db, user.id, query.templates_only.unwrap_or(false)).await?;
-    Ok(Json(WorkoutsListWrapper { workouts: result.workouts, total: result.total }))
+    Ok(Json(WorkoutsListWrapper {
+        workouts: result.workouts,
+        total: result.total,
+    }))
 }
 
 /// POST /exercise/workouts
@@ -231,17 +236,20 @@ async fn create_workout(
     Json(req): Json<CreateWorkoutRequest>,
 ) -> Result<(StatusCode, Json<WorkoutWrapper>), AppError> {
     let workout = WorkoutRepo::create(&state.db, user.id, &req).await?;
-    Ok((StatusCode::CREATED, Json(WorkoutWrapper {
-        workout: WorkoutResponse {
-            id: workout.id,
-            name: workout.name,
-            description: workout.description,
-            estimated_duration: workout.estimated_duration,
-            is_template: workout.is_template,
-            exercises: vec![],
-            created_at: workout.created_at,
-        },
-    })))
+    Ok((
+        StatusCode::CREATED,
+        Json(WorkoutWrapper {
+            workout: WorkoutResponse {
+                id: workout.id,
+                name: workout.name,
+                description: workout.description,
+                estimated_duration: workout.estimated_duration,
+                is_template: workout.is_template,
+                exercises: vec![],
+                created_at: workout.created_at,
+            },
+        }),
+    ))
 }
 
 /// GET /exercise/workouts/:id
@@ -283,7 +291,9 @@ async fn list_sessions(
 ) -> Result<Json<SessionsListWrapper>, AppError> {
     let limit = query.limit.unwrap_or(20).min(100);
     let result = WorkoutSessionRepo::list(&state.db, user.id, limit).await?;
-    Ok(Json(SessionsListWrapper { sessions: result.sessions }))
+    Ok(Json(SessionsListWrapper {
+        sessions: result.sessions,
+    }))
 }
 
 /// POST /exercise/sessions
@@ -413,7 +423,9 @@ async fn list_programs(
     Extension(user): Extension<User>,
 ) -> Result<Json<ProgramsListWrapper>, AppError> {
     let result = ProgramRepo::list(&state.db, user.id).await?;
-    Ok(Json(ProgramsListWrapper { programs: result.programs }))
+    Ok(Json(ProgramsListWrapper {
+        programs: result.programs,
+    }))
 }
 
 /// POST /exercise/programs

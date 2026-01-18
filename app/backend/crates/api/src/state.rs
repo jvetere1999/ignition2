@@ -26,18 +26,24 @@ impl AppState {
         // Log the database URL (redacted for security)
         let db_url = &config.database.url;
         tracing::debug!(
+            operation = "startup",
+            component = "database",
             db_url_length = db_url.len(),
             "DATABASE_URL received"
         );
-        
+
         if db_url.is_empty() || db_url == "postgres://localhost/ignition" {
             tracing::error!(
-                db_url = %db_url,
-                "DATABASE_URL not configured"
+                error.type = "config",
+                error.message = "DATABASE_URL not configured",
+                operation = "startup",
+                "Database configuration missing"
             );
-            return Err(anyhow::anyhow!("DATABASE_URL environment variable not configured"));
+            return Err(anyhow::anyhow!(
+                "DATABASE_URL environment variable not configured"
+            ));
         }
-        
+
         let redacted_url = if db_url.contains('@') {
             let parts: Vec<&str> = db_url.splitn(2, '@').collect();
             format!("***@{}", parts.get(1).unwrap_or(&"unknown"))
@@ -45,6 +51,8 @@ impl AppState {
             "***".to_string()
         };
         tracing::info!(
+            operation = "startup",
+            component = "database",
             redacted_url = %redacted_url,
             "Connecting to database"
         );
@@ -59,34 +67,48 @@ impl AppState {
             .await
             .map_err(|e| {
                 tracing::error!(
-                    error = %e,
+                    error.type = "connection",
+                    error.message = %e,
                     operation = "database_connection",
+                    db.pool_size = config.database.pool_size,
                     "Failed to connect to database"
                 );
                 e
             })?;
 
         tracing::info!(
-            pool_size = config.database.pool_size,
+            operation = "startup",
+            component = "database",
+            db.pool_size = config.database.pool_size,
             "Database connection pool created"
         );
 
         // ✓ Migrations are now handled by the deployment pipeline (wipe-and-rebuild-neon job)
         // ✓ Backend no longer runs migrations on startup to avoid conflicts
         // ✓ Database schema is verified and ready before container deployment
-        tracing::info!("Database ready - migrations pre-applied by deployment pipeline");
+        tracing::info!(
+            operation = "startup",
+            component = "migrations",
+            "Database ready - migrations pre-applied by deployment pipeline"
+        );
 
         // Create storage client if configured
         let storage = if config.storage.endpoint.is_some() {
             match StorageClient::new(&config.storage).await {
                 Ok(client) => {
-                    tracing::debug!("Storage client initialized successfully");
+                    tracing::debug!(
+                        operation = "startup",
+                        component = "storage",
+                        "Storage client initialized successfully"
+                    );
                     Some(client)
                 }
                 Err(e) => {
                     tracing::warn!(
-                        error = %e,
-                        feature = "storage_client",
+                        error.type = "storage",
+                        error.message = %e,
+                        operation = "startup",
+                        component = "storage",
                         "Storage client initialization failed - using fallback"
                     );
                     None
@@ -94,7 +116,9 @@ impl AppState {
             }
         } else {
             tracing::info!(
-                feature = "storage_client",
+                operation = "startup",
+                component = "storage",
+                status = "disabled",
                 "Storage not configured - feature disabled"
             );
             None
@@ -114,25 +138,21 @@ impl AppState {
         // Migrations are embedded at compile time
         // Path relative to Cargo.toml: app/backend/migrations
         let migrator = sqlx::migrate!("../../migrations");
-        
+
         // Get current migration count before running
-        let before = sqlx::query_scalar::<_, i64>(
-            "SELECT COUNT(*) FROM _sqlx_migrations"
-        )
-        .fetch_one(db)
-        .await
-        .unwrap_or(0);
+        let before = sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM _sqlx_migrations")
+            .fetch_one(db)
+            .await
+            .unwrap_or(0);
 
         // Run all pending migrations
         migrator.run(db).await?;
 
         // Get count after running
-        let after = sqlx::query_scalar::<_, i64>(
-            "SELECT COUNT(*) FROM _sqlx_migrations"
-        )
-        .fetch_one(db)
-        .await
-        .unwrap_or(0);
+        let after = sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM _sqlx_migrations")
+            .fetch_one(db)
+            .await
+            .unwrap_or(0);
 
         Ok((after - before) as usize)
     }
@@ -140,7 +160,7 @@ impl AppState {
     /// Get the current database schema version
     pub async fn get_schema_version(&self) -> Option<i64> {
         sqlx::query_scalar::<_, i64>(
-            "SELECT version FROM _sqlx_migrations ORDER BY version DESC LIMIT 1"
+            "SELECT version FROM _sqlx_migrations ORDER BY version DESC LIMIT 1",
         )
         .fetch_optional(&self.db)
         .await

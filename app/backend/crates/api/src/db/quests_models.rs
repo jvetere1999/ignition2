@@ -2,11 +2,11 @@
 //!
 //! Models for quest system (user quests + universal quests).
 
+use crate::named_enum;
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
-use crate::named_enum;
 
 // ============================================================================
 // ENUMS

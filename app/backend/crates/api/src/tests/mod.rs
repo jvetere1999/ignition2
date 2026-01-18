@@ -1,37 +1,18 @@
 //! Test modules
+//!
+//! Tests are organized by type:
+//! - `integration/`: Database + endpoint tests (most tests)
+//! - `unit/`: Isolated component tests (no database)
+//! - `golden/`: Deterministic behavior tests
 
 #[cfg(test)]
-pub mod fixtures;
+pub mod common;
 
 #[cfg(test)]
-mod auth_tests;
+pub mod integration;
 
 #[cfg(test)]
-mod focus_tests;
+pub mod unit;
 
 #[cfg(test)]
-mod frames_tests;
-
-#[cfg(test)]
-mod gamification_tests;
-
-#[cfg(test)]
-mod goals_tests;
-
-#[cfg(test)]
-mod habits_tests;
-
-#[cfg(test)]
-mod quests_tests;
-
-#[cfg(test)]
-mod reference_tests;
-
-#[cfg(test)]
-mod reference_golden_tests;
-
-#[cfg(test)]
-mod storage_tests;
-
-#[cfg(test)]
-mod template_tests;
+pub mod golden;

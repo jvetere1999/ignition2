@@ -57,7 +57,7 @@ pub struct IndexToken {
     pub word_token: String,
     pub token_type: TokenType,
     pub positions: Vec<usize>, // character positions in original text
-    pub frequency: u32,         // count of occurrences
+    pub frequency: u32,        // count of occurrences
 }
 
 /// Type of token (word, phrase, tag, chord)
@@ -79,9 +79,9 @@ pub enum TokenType {
 pub struct TrieNode {
     pub prefix: String,
     pub node_type: TrieNodeType,
-    pub children: Vec<String>, // prefixes of child nodes
+    pub children: Vec<String>,    // prefixes of child nodes
     pub content_ids: Vec<String>, // content containing this word
-    pub frequency: u32,         // total occurrences across all content
+    pub frequency: u32,           // total occurrences across all content
 }
 
 /// Type of trie node
@@ -346,10 +346,7 @@ mod tests {
         let mut trie = Trie::new();
         trie.insert("hello", "idea:1".to_string());
 
-        assert_eq!(
-            trie.get_node("h").unwrap().node_type,
-            TrieNodeType::Prefix
-        );
+        assert_eq!(trie.get_node("h").unwrap().node_type, TrieNodeType::Prefix);
         assert_eq!(
             trie.get_node("hello").unwrap().node_type,
             TrieNodeType::Word

@@ -1,6 +1,6 @@
+use crate::db::generated::RecoveryCodes;
 use sqlx::PgPool;
 use uuid::Uuid;
-use crate::db::generated::RecoveryCodes;
 
 /// Recovery codes repository - handles persistence of recovery codes
 pub struct RecoveryCodesRepo;
@@ -15,7 +15,7 @@ impl RecoveryCodesRepo {
         count: usize,
     ) -> Result<Vec<String>, sqlx::Error> {
         use rand::Rng;
-        
+
         let codes: Vec<String> = (0..count)
             .map(|_| {
                 // Generate 12 random alphanumeric characters
@@ -30,7 +30,7 @@ impl RecoveryCodesRepo {
                         }
                     })
                     .collect();
-                
+
                 // Format as XXXX-XXXX-XXXX
                 format!("{}-{}-{}", &chars[0..4], &chars[4..8], &chars[8..12])
             })
@@ -109,10 +109,7 @@ impl RecoveryCodesRepo {
     }
 
     /// Get recovery code count for a vault (used and unused)
-    pub async fn get_code_count(
-        pool: &PgPool,
-        vault_id: Uuid,
-    ) -> Result<(i64, i64), sqlx::Error> {
+    pub async fn get_code_count(pool: &PgPool, vault_id: Uuid) -> Result<(i64, i64), sqlx::Error> {
         #[derive(sqlx::FromRow)]
         struct CodeCounts {
             unused_count: Option<i64>,
@@ -132,14 +129,14 @@ impl RecoveryCodesRepo {
         .fetch_one(pool)
         .await?;
 
-        Ok((counts.unused_count.unwrap_or(0), counts.used_count.unwrap_or(0)))
+        Ok((
+            counts.unused_count.unwrap_or(0),
+            counts.used_count.unwrap_or(0),
+        ))
     }
 
     /// Revoke all recovery codes for a vault (mark as used)
-    pub async fn revoke_all_codes(
-        pool: &PgPool,
-        vault_id: Uuid,
-    ) -> Result<u64, sqlx::Error> {
+    pub async fn revoke_all_codes(pool: &PgPool, vault_id: Uuid) -> Result<u64, sqlx::Error> {
         let result = sqlx::query(
             r#"
             UPDATE recovery_codes

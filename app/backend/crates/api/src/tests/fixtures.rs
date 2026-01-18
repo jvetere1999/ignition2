@@ -5,15 +5,13 @@
 
 #[cfg(test)]
 mod fixtures {
-    use sqlx::PgPool;
-    use uuid::Uuid;
     use crate::db::{
-        gamification_repos::UserProgressRepo,
-        habits_goals_models::CreateHabitRequest,
-        habits_goals_repos::HabitsRepo,
-        quests_models::CreateQuestRequest,
+        gamification_repos::UserProgressRepo, habits_goals_models::CreateHabitRequest,
+        habits_goals_repos::HabitsRepo, quests_models::CreateQuestRequest,
         quests_repos::QuestsRepo,
     };
+    use sqlx::PgPool;
+    use uuid::Uuid;
 
     // ========================================================================
     // USER FIXTURES
@@ -190,7 +188,7 @@ mod fixtures {
         async fn test_create_test_user_with_email(pool: PgPool) {
             let email = "custom@example.com";
             let user_id = create_test_user_with_email(&pool, email).await;
-            
+
             let row = sqlx::query("SELECT email FROM users WHERE id = $1")
                 .bind(user_id)
                 .fetch_one(&pool)

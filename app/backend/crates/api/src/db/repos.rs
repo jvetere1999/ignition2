@@ -301,7 +301,7 @@ impl SessionRepo {
         let timeout_duration = Duration::minutes(inactivity_timeout_minutes as i64);
         let now = chrono::Utc::now();
         let time_since_activity = now - session.last_activity_at;
-        
+
         time_since_activity > timeout_duration
     }
 

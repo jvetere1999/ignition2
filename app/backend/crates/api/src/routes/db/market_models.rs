@@ -1,10 +1,9 @@
+use chrono::{DateTime, Utc};
 /// Market models for Extended scope (MVP + Full + Extended features)
 /// Replaces localStorage market state with PostgreSQL-backed system
-
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 use sqlx::FromRow;
-use chrono::{DateTime, Utc};
+use uuid::Uuid;
 
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct MarketItem {

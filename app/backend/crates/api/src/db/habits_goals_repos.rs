@@ -30,7 +30,7 @@ fn generate_milestone_idempotency_key(milestone_id: Uuid) -> String {
 async fn award_points_for_event(
     pool: &PgPool,
     user_id: Uuid,
-    event_type: EventType,  // Changed from &str to EventType
+    event_type: EventType, // Changed from &str to EventType
     event_id: Uuid,
     xp: Option<i32>,
     coins: Option<i32>,
@@ -45,7 +45,7 @@ async fn award_points_for_event(
             coins,
             skill_stars: None,
             skill_key: None,
-            event_type,  // EventType enum passed directly
+            event_type, // EventType enum passed directly
             event_id: Some(event_id),
             reason: Some(reason),
             idempotency_key: Some(idempotency_key),
@@ -160,10 +160,16 @@ impl HabitsRepo {
 
         let total = responses.len() as i64;
 
-        Ok(HabitsListResponse { habits: responses, total })
+        Ok(HabitsListResponse {
+            habits: responses,
+            total,
+        })
     }
 
-    pub async fn list_archived(pool: &PgPool, user_id: Uuid) -> Result<HabitsListResponse, AppError> {
+    pub async fn list_archived(
+        pool: &PgPool,
+        user_id: Uuid,
+    ) -> Result<HabitsListResponse, AppError> {
         // Get archived habits
         let habits = sqlx::query_as::<_, Habit>(
             r#"SELECT id, user_id, name, description, frequency, target_count, custom_days,
@@ -180,7 +186,7 @@ impl HabitsRepo {
         let responses = habits
             .into_iter()
             .map(|h| HabitResponse {
-                completed_today: false,  // Archived habits can't be completed
+                completed_today: false, // Archived habits can't be completed
                 id: h.id,
                 name: h.name,
                 description: h.description,
@@ -198,7 +204,10 @@ impl HabitsRepo {
 
         let total = responses.len() as i64;
 
-        Ok(HabitsListResponse { habits: responses, total })
+        Ok(HabitsListResponse {
+            habits: responses,
+            total,
+        })
     }
 
     pub async fn get_analytics(
@@ -396,11 +405,7 @@ impl HabitsRepo {
     }
 
     /// Archive a habit (soft delete)
-    pub async fn archive(
-        pool: &PgPool,
-        habit_id: Uuid,
-        user_id: Uuid,
-    ) -> Result<(), AppError> {
+    pub async fn archive(pool: &PgPool, habit_id: Uuid, user_id: Uuid) -> Result<(), AppError> {
         let result = sqlx::query(
             r#"UPDATE habits
                SET is_active = false, updated_at = NOW()
@@ -696,11 +701,7 @@ impl GoalsRepo {
     }
 
     /// Delete a goal and its milestones
-    pub async fn delete(
-        pool: &PgPool,
-        goal_id: Uuid,
-        user_id: Uuid,
-    ) -> Result<(), AppError> {
+    pub async fn delete(pool: &PgPool, goal_id: Uuid, user_id: Uuid) -> Result<(), AppError> {
         // Remove milestones first
         sqlx::query("DELETE FROM goal_milestones WHERE goal_id = $1")
             .bind(goal_id)

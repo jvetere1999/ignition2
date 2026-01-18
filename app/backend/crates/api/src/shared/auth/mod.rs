@@ -6,4 +6,3 @@ pub mod csrf;
 pub mod extractor;
 pub mod origin;
 pub mod rbac;
-

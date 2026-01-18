@@ -58,7 +58,12 @@ async fn list_quests(
 ) -> Result<Json<PaginatedResponse<QuestResponse>>, AppError> {
     let result = QuestsRepo::list(&state.db, user.id, query.status.as_deref()).await?;
 
-    Ok(Json(PaginatedResponse::new(result.quests, result.total, 1, result.total)))
+    Ok(Json(PaginatedResponse::new(
+        result.quests,
+        result.total,
+        1,
+        result.total,
+    )))
 }
 
 /// POST /quests

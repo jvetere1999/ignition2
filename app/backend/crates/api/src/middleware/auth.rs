@@ -52,13 +52,10 @@ impl AuthContext {
     }
 
     /// Create AuthContext from database using session token
-    /// 
+    ///
     /// Consolidates the session lookup, user fetch, and entitlement loading
     /// into a single operation with consistent error handling.
-    pub async fn from_token(
-        db: &sqlx::PgPool,
-        token: &str,
-    ) -> Result<Self, AppError> {
+    pub async fn from_token(db: &sqlx::PgPool, token: &str) -> Result<Self, AppError> {
         // Look up session in database
         let session = SessionRepo::find_by_token(db, token)
             .await?
@@ -142,7 +139,9 @@ pub async fn require_auth(
     let auth_context = req
         .extensions()
         .get::<AuthContext>()
-        .ok_or(AppError::Unauthorized("Authentication required".to_string()))?
+        .ok_or(AppError::Unauthorized(
+            "Authentication required".to_string(),
+        ))?
         .clone();
 
     let user = UserRepo::find_by_id(&state.db, auth_context.user_id)
@@ -168,7 +167,9 @@ pub async fn require_admin(req: Request, next: Next) -> Result<Response, AppErro
     match req.extensions().get::<AuthContext>() {
         Some(auth) if auth.is_admin() => Ok(next.run(req).await),
         Some(_) => Err(AppError::Forbidden),
-        None => Err(AppError::Unauthorized("Authentication required".to_string())),
+        None => Err(AppError::Unauthorized(
+            "Authentication required".to_string(),
+        )),
     }
 }
 
@@ -189,23 +190,21 @@ pub fn require_entitlement(
             match req.extensions().get::<AuthContext>() {
                 Some(auth) if auth.has_entitlement(entitlement) => Ok(next.run(req).await),
                 Some(_) => Err(AppError::Forbidden),
-                None => Err(AppError::Unauthorized("Authentication required".to_string())),
+                None => Err(AppError::Unauthorized(
+                    "Authentication required".to_string(),
+                )),
             }
         })
     }
 }
 
 /// Initialize AuthContext from session token
-/// 
+///
 /// This function consolidates the session lookup, user fetch, and activity logging
 /// into a single point of logic. It replaces scattered session handling code.
-/// 
+///
 /// Includes timeout enforcement: returns 401 if session has been inactive too long.
-async fn init_auth_context(
-    state: &Arc<AppState>,
-    req: &mut Request,
-    token: &str,
-) {
+async fn init_auth_context(state: &Arc<AppState>, req: &mut Request, token: &str) {
     tracing::debug!(
         token_preview = %&token[..token.len().min(10)],
         "Looking up session in database"
@@ -221,7 +220,10 @@ async fn init_auth_context(
             );
 
             // TIMEOUT CHECK: Return 401 if session has been inactive too long
-            if SessionRepo::is_inactive(&session, state.config.auth.session_inactivity_timeout_minutes) {
+            if SessionRepo::is_inactive(
+                &session,
+                state.config.auth.session_inactivity_timeout_minutes,
+            ) {
                 tracing::warn!(
                     session_id = %session.id,
                     user_id = %session.user_id,
@@ -291,32 +293,24 @@ async fn init_auth_context(
 /// Extract session token from cookie header
 fn extract_session_token(req: &Request) -> Option<String> {
     let cookie_header = req.headers().get(header::COOKIE);
-    
-    cookie_header?
-        .to_str()
-        .ok()?
-        .split(';')
-        .find_map(|cookie| {
-            let cookie = cookie.trim();
-            if cookie.starts_with(SESSION_COOKIE_NAME) {
-                cookie
-                    .strip_prefix(&format!("{}=", SESSION_COOKIE_NAME))
-                    .map(|s| s.to_string())
-            } else {
-                None
-            }
-        })
+
+    cookie_header?.to_str().ok()?.split(';').find_map(|cookie| {
+        let cookie = cookie.trim();
+        if cookie.starts_with(SESSION_COOKIE_NAME) {
+            cookie
+                .strip_prefix(&format!("{}=", SESSION_COOKIE_NAME))
+                .map(|s| s.to_string())
+        } else {
+            None
+        }
+    })
 }
 
 /// Log session and user activity asynchronously with error handling
-/// 
+///
 /// Updates are fire-and-forget but errors are logged for observability.
 /// This ensures activity tracking doesn't impact request latency.
-fn log_activity_update(
-    db: &sqlx::PgPool,
-    session_id: Uuid,
-    user_id: Uuid,
-) {
+fn log_activity_update(db: &sqlx::PgPool, session_id: Uuid, user_id: Uuid) {
     let db = db.clone();
     tokio::spawn(async move {
         // Update session last activity

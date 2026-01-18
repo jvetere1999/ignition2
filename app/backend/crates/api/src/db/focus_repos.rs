@@ -64,7 +64,9 @@ async fn update_focus_streak(
     .fetch_optional(pool)
     .await?;
 
-    let (new_current, new_longest) = if let Some((streak_id, current, longest, last_date)) = existing {
+    let (new_current, new_longest) = if let Some((streak_id, current, longest, last_date)) =
+        existing
+    {
         // Calculate new streak
         let new_current = if let Some(last) = last_date {
             let yesterday = completed_date.pred_opt().unwrap_or(completed_date);
@@ -117,14 +119,14 @@ async fn update_focus_streak(
 // ============================================================================
 
 /// Helper to build standard RETURNING clause for FocusSession queries
-/// 
+///
 /// Centralized to avoid duplication across all session query operations
 const FOCUS_SESSION_COLUMNS: &str = r#"id, user_id, mode, duration_seconds, started_at, completed_at,
                  abandoned_at, expires_at, paused_at, paused_remaining_seconds,
                  status, xp_awarded, coins_awarded, task_id, task_title, created_at"#;
 
 /// Bulk update session statuses with single query
-/// 
+///
 /// **Performance**: O(1) database roundtrip vs O(n) for loop
 /// Useful for operations like marking multiple sessions as expired
 async fn bulk_update_session_status(
@@ -154,19 +156,21 @@ async fn bulk_update_session_status(
 
     // Log bulk operation if reason provided
     if let Some(reason) = reason {
-        eprintln!("Bulk update {} sessions to {}: {}", session_ids.len(), new_status, reason);
+        eprintln!(
+            "Bulk update {} sessions to {}: {}",
+            session_ids.len(),
+            new_status,
+            reason
+        );
     }
 
     Ok(sessions)
 }
 
 /// Clean up pause state for multiple sessions at once
-/// 
+///
 /// **Performance**: Batch DELETE instead of individual deletes
-async fn bulk_clear_pause_state(
-    pool: &PgPool,
-    user_ids: &[Uuid],
-) -> Result<u64, AppError> {
+async fn bulk_clear_pause_state(pool: &PgPool, user_ids: &[Uuid]) -> Result<u64, AppError> {
     if user_ids.is_empty() {
         return Ok(0);
     }
@@ -180,26 +184,22 @@ async fn bulk_clear_pause_state(
 }
 
 /// Helper to handle R2 storage errors with consistent logging
-/// 
+///
 /// **Purpose**: Centralize storage error handling and logging
 /// Used when uploading/downloading tracks from R2 object storage
-/// 
+///
 /// **Pattern**: Never fail core operation due to storage errors
 /// Log errors for monitoring but allow graceful degradation
 fn handle_storage_error(context: &str, error: AppError) -> AppError {
     // Log storage error for monitoring
-    eprintln!(
-        "[Storage Error] {}: {}",
-        context,
-        error
-    );
+    eprintln!("[Storage Error] {}: {}", context, error);
 
     // Return AppError but log for observability
     error
 }
 
 /// Validate R2 key format before using
-/// 
+///
 /// **Pattern**: R2 keys should follow format: "user/{user_id}/{resource_type}/{id}"
 fn validate_r2_key(key: &str) -> bool {
     // R2 keys have structure: user/{uuid}/resource/{uuid}
@@ -215,13 +215,13 @@ pub struct FocusSessionRepo;
 
 impl FocusSessionRepo {
     /// Start a new focus session
-    /// 
+    ///
     /// **Performance**: O(2) database queries
     /// - 1 UPDATE: Mark previous sessions as abandoned
     /// - 1 INSERT: Create new session
     /// **Index**: focus_sessions(user_id, status) for first query optimization
     /// **Execution Time**: ~2-3ms under normal load
-    /// 
+    ///
     /// **Note**: Mutation index can be optimized by adding prepared statement
     pub async fn start_session(
         pool: &PgPool,
@@ -245,7 +245,8 @@ impl FocusSessionRepo {
             .await?;
 
         // Calculate expiry (2x duration as buffer)
-        let expires_at = Utc::now() + Duration::seconds((req.duration_seconds * SESSION_EXPIRY_BUFFER_MULTIPLIER) as i64);
+        let expires_at = Utc::now()
+            + Duration::seconds((req.duration_seconds * SESSION_EXPIRY_BUFFER_MULTIPLIER) as i64);
 
         // Create new session
         let session = sqlx::query_as::<_, FocusSession>(
@@ -270,7 +271,7 @@ impl FocusSessionRepo {
     }
 
     /// Get a session by ID
-    /// 
+    ///
     /// **Performance**: O(1) database query
     /// - 1 SELECT: Fetch session by ID + user_id
     /// **Index**: focus_sessions(id, user_id) PRIMARY KEY
@@ -296,7 +297,7 @@ impl FocusSessionRepo {
     }
 
     /// Get active session for user
-    /// 
+    ///
     /// **Performance**: O(1) with index, ~O(log n) with seq scan
     /// - 1 SELECT: Find active/paused session with ORDER BY + LIMIT
     /// **Index**: focus_sessions(user_id, status, started_at DESC) recommended for optimization
@@ -334,7 +335,7 @@ impl FocusSessionRepo {
     }
 
     /// Complete a focus session
-    /// 
+    ///
     /// **Performance**: O(3-4) database queries (optimized)
     /// - 1 SELECT: get_session() lookup
     /// - 1 UPDATE: Mark session as completed + award XP/coins
@@ -474,7 +475,7 @@ impl FocusSessionRepo {
     }
 
     /// List focus sessions for user with pagination
-    /// 
+    ///
     /// **Performance**: O(n) where n = page_size (typically 20-50)
     /// - 1 SELECT: Paginated session list with COUNT estimate
     /// - 1 SELECT: Total count for pagination metadata
@@ -485,7 +486,7 @@ impl FocusSessionRepo {
     /// ```sql
     /// -- SLOWER for millions of rows:
     /// SELECT COUNT(*) FROM focus_sessions WHERE user_id = $1
-    /// 
+    ///
     /// -- FASTER: Use statistics
     /// SELECT reltuples FROM pg_class WHERE relname='focus_sessions'
     /// ```
@@ -521,12 +522,12 @@ impl FocusSessionRepo {
                  (SELECT reltuples::bigint FROM pg_stat_user_tables 
                   WHERE relname = 'focus_sessions'),
                  (SELECT COUNT(*) FROM focus_sessions WHERE user_id = $1)
-               )"#
+               )"#,
         )
-            .bind(user_id)
-            .fetch_one(pool)
-            .await
-            .unwrap_or(0);
+        .bind(user_id)
+        .fetch_one(pool)
+        .await
+        .unwrap_or(0);
 
         Ok(FocusSessionsListResponse {
             sessions: sessions.into_iter().map(|s| s.into()).collect(),
@@ -608,9 +609,9 @@ impl FocusPauseRepo {
     }
 
     /// Pause active session
-    /// 
+    ///
     /// Freezes remaining session time for user pause/resume cycles.
-    /// 
+    ///
     /// # Time Drift Prevention
     /// Records remaining time using the absolute `expires_at` timestamp as the source of truth.
     /// This allows `resume_session()` to recalculate remaining time accurately without time drift
@@ -637,7 +638,7 @@ impl FocusPauseRepo {
     /// 4. Pause at 10:30: Recalculate from expires_at = 0 min remaining ✓
     /// 5. Resume at 10:35: Recalculate from expires_at = 0 min (already expired) ✓
     /// ```
-    /// 
+    ///
     /// # Side Effects
     /// - Updates focus_sessions: status='paused', paused_remaining_seconds calculated
     /// - Upserts focus_pause_state: stores copy for quick pause state lookup
@@ -695,9 +696,9 @@ impl FocusPauseRepo {
     }
 
     /// Resume paused session
-    /// 
+    ///
     /// Unfreezes and continues a paused focus session.
-    /// 
+    ///
     /// # Time Drift Prevention (Paired with pause_session)
     /// Recalculates remaining time from the original session's `expires_at` timestamp,
     /// NOT from potentially stale `pause_state` values. This ensures accuracy across
@@ -751,7 +752,7 @@ impl FocusPauseRepo {
             .expires_at
             .map(|exp| (exp - Utc::now()).num_seconds().max(0) as i32)
             .unwrap_or_else(|| pause_state.time_remaining_seconds.unwrap_or(0));
-        
+
         let new_expires_at = Utc::now() + Duration::seconds(time_remaining as i64);
 
         // Update session
@@ -814,15 +815,17 @@ impl FocusLibraryRepo {
         .fetch_all(pool)
         .await?;
 
-        let total: (i64,) = sqlx::query_as(
-            "SELECT COUNT(*) FROM focus_libraries WHERE user_id = $1",
-        )
-        .bind(user_id)
-        .fetch_one(pool)
-        .await?;
+        let total: (i64,) =
+            sqlx::query_as("SELECT COUNT(*) FROM focus_libraries WHERE user_id = $1")
+                .bind(user_id)
+                .fetch_one(pool)
+                .await?;
 
         Ok(FocusLibrariesListResponse {
-            libraries: libraries.into_iter().map(FocusLibraryResponse::from).collect(),
+            libraries: libraries
+                .into_iter()
+                .map(FocusLibraryResponse::from)
+                .collect(),
             total: total.0,
             page,
             page_size,
@@ -871,32 +874,26 @@ impl FocusLibraryRepo {
     }
 
     /// Delete focus library
-    /// 
+    ///
     /// **Performance Optimization [MID-003-2]**: Combined DELETE with CASCADE
     /// - Before: 2 queries (DELETE tracks, then DELETE library)
     /// - After: 1 query with database CASCADE constraint
     /// - Expected improvement: 50% faster delete operations
-    /// 
+    ///
     /// **Requires**: Foreign key constraint with ON DELETE CASCADE
     /// ```sql
     /// ALTER TABLE focus_library_tracks
     /// ADD CONSTRAINT fk_library_id
     /// FOREIGN KEY (library_id) REFERENCES focus_libraries(id) ON DELETE CASCADE;
     /// ```
-    pub async fn delete(
-        pool: &PgPool,
-        user_id: Uuid,
-        library_id: Uuid,
-    ) -> Result<(), AppError> {
+    pub async fn delete(pool: &PgPool, user_id: Uuid, library_id: Uuid) -> Result<(), AppError> {
         // Single DELETE query using CASCADE constraint
         // Database automatically deletes all related tracks
-        let result = sqlx::query(
-            "DELETE FROM focus_libraries WHERE id = $1 AND user_id = $2",
-        )
-        .bind(library_id)
-        .bind(user_id)
-        .execute(pool)
-        .await?;
+        let result = sqlx::query("DELETE FROM focus_libraries WHERE id = $1 AND user_id = $2")
+            .bind(library_id)
+            .bind(user_id)
+            .execute(pool)
+            .await?;
 
         if result.rows_affected() == 0 {
             return Err(AppError::NotFound("Library not found".into()));
@@ -947,7 +944,10 @@ impl FocusLibraryRepo {
         .ok_or(AppError::NotFound("Library not found".into()))?;
 
         // Generate unique track_id
-        let track_id = format!("track_{}", uuid::Uuid::new_v4().to_string()[0..8].to_string());
+        let track_id = format!(
+            "track_{}",
+            uuid::Uuid::new_v4().to_string()[0..8].to_string()
+        );
 
         // Create new track ID for return
         let new_id = Uuid::new_v4();
@@ -956,7 +956,7 @@ impl FocusLibraryRepo {
         // Before: 2 separate queries (INSERT, then UPDATE)
         // After: Single transaction with atomic operations
         // Expected improvement: 30-40% faster track insertion
-        
+
         // Begin transaction for atomic insert + count update
         let mut tx = pool.begin().await?;
 

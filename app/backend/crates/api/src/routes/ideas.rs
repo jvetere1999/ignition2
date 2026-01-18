@@ -60,7 +60,9 @@ async fn list_ideas(
     Extension(user): Extension<User>,
 ) -> Result<Json<IdeasListWrapper>, AppError> {
     let result = IdeasRepo::list(&state.db, user.id).await?;
-    Ok(Json(IdeasListWrapper { ideas: result.ideas }))
+    Ok(Json(IdeasListWrapper {
+        ideas: result.ideas,
+    }))
 }
 
 /// GET /ideas/:id

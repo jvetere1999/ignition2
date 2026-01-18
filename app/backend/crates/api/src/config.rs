@@ -48,15 +48,15 @@ fn default_database_url() -> String {
         .ok()
         .filter(|s| !s.is_empty() && s != "undefined")
         .unwrap_or_else(|| "postgres://localhost/ignition".to_string());
-    
+
     // Log what we got (redacted for security)
     let redacted = if db_url.len() > 30 {
-        format!("{}...{}", &db_url[..15], &db_url[db_url.len()-10..])
+        format!("{}...{}", &db_url[..15], &db_url[db_url.len() - 10..])
     } else {
         "***".to_string()
     };
     tracing::info!("DATABASE_URL from env: {}", redacted);
-    
+
     db_url
 }
 
@@ -183,7 +183,11 @@ impl AppConfig {
         // Debug: Log all AUTH_* and STORAGE_* env vars at startup (with secrets redacted)
         tracing::info!("=== Config Loading: Environment Variables ===");
         for (key, value) in std::env::vars() {
-            if key.starts_with("AUTH_") || key.starts_with("STORAGE_") || key.starts_with("DATABASE") || key.starts_with("SERVER_") {
+            if key.starts_with("AUTH_")
+                || key.starts_with("STORAGE_")
+                || key.starts_with("DATABASE")
+                || key.starts_with("SERVER_")
+            {
                 let display_value = Self::redact_sensitive_value(&key, &value);
                 tracing::debug!("  {}: {}", key, display_value);
             }
@@ -226,7 +230,7 @@ impl AppConfig {
 
         // Deserialize but handle potential empty url from env override
         let mut app_config: Self = config.try_deserialize()?;
-        
+
         // If url is empty after deserialization (env var was empty string), use our fallback
         if app_config.database.url.is_empty() || app_config.database.url == "undefined" {
             app_config.database.url = database_url;
@@ -242,13 +246,19 @@ impl AppConfig {
         }
         if let Ok(frontend_url) = std::env::var("SERVER_FRONTEND_URL") {
             if !frontend_url.is_empty() {
-                tracing::info!("Loading SERVER_FRONTEND_URL from environment: {}", frontend_url);
+                tracing::info!(
+                    "Loading SERVER_FRONTEND_URL from environment: {}",
+                    frontend_url
+                );
                 app_config.server.frontend_url = frontend_url;
             }
         }
         if let Ok(cookie_domain) = std::env::var("AUTH_COOKIE_DOMAIN") {
             if !cookie_domain.is_empty() {
-                tracing::info!("Loading AUTH_COOKIE_DOMAIN from environment: {}", cookie_domain);
+                tracing::info!(
+                    "Loading AUTH_COOKIE_DOMAIN from environment: {}",
+                    cookie_domain
+                );
                 app_config.auth.cookie_domain = cookie_domain;
             }
         }
@@ -257,9 +267,11 @@ impl AppConfig {
         // so AUTH_OAUTH_GOOGLE_CLIENT_ID becomes auth.oauth.google.client.id instead of
         // auth.oauth.google.client_id. We need to manually read these env vars.
         let google_client_id = std::env::var("AUTH_OAUTH_GOOGLE_CLIENT_ID").unwrap_or_default();
-        let google_client_secret = std::env::var("AUTH_OAUTH_GOOGLE_CLIENT_SECRET").unwrap_or_default();
-        let google_redirect_uri = std::env::var("AUTH_OAUTH_GOOGLE_REDIRECT_URI").unwrap_or_default();
-        
+        let google_client_secret =
+            std::env::var("AUTH_OAUTH_GOOGLE_CLIENT_SECRET").unwrap_or_default();
+        let google_redirect_uri =
+            std::env::var("AUTH_OAUTH_GOOGLE_REDIRECT_URI").unwrap_or_default();
+
         if !google_client_id.is_empty() && !google_client_secret.is_empty() {
             tracing::info!("Loading Google OAuth from environment variables");
             let google_config = OAuthProviderConfig {
@@ -277,11 +289,15 @@ impl AppConfig {
         }
 
         let azure_client_id = std::env::var("AUTH_OAUTH_AZURE_CLIENT_ID").unwrap_or_default();
-        let azure_client_secret = std::env::var("AUTH_OAUTH_AZURE_CLIENT_SECRET").unwrap_or_default();
+        let azure_client_secret =
+            std::env::var("AUTH_OAUTH_AZURE_CLIENT_SECRET").unwrap_or_default();
         let azure_redirect_uri = std::env::var("AUTH_OAUTH_AZURE_REDIRECT_URI").unwrap_or_default();
         let azure_tenant_id = std::env::var("AUTH_OAUTH_AZURE_TENANT_ID").unwrap_or_default();
 
-        if !azure_client_id.is_empty() && !azure_client_secret.is_empty() && !azure_tenant_id.is_empty() {
+        if !azure_client_id.is_empty()
+            && !azure_client_secret.is_empty()
+            && !azure_tenant_id.is_empty()
+        {
             tracing::info!("Loading Azure OAuth from environment variables");
             let azure_config = OAuthProviderConfig {
                 client_id: azure_client_id,
@@ -299,18 +315,30 @@ impl AppConfig {
 
         // Manual Storage override - same issue as OAuth: separator("_") splits ALL underscores,
         // so STORAGE_ACCESS_KEY_ID becomes storage.access.key.id instead of storage.access_key_id.
-        let storage_endpoint = std::env::var("STORAGE_ENDPOINT").ok().filter(|s| !s.is_empty());
-        let storage_bucket = std::env::var("STORAGE_BUCKET").ok().filter(|s| !s.is_empty());
-        let storage_access_key = std::env::var("STORAGE_ACCESS_KEY_ID").ok().filter(|s| !s.is_empty());
-        let storage_secret_key = std::env::var("STORAGE_SECRET_ACCESS_KEY").ok().filter(|s| !s.is_empty());
-        let storage_region = std::env::var("STORAGE_REGION").ok().filter(|s| !s.is_empty());
+        let storage_endpoint = std::env::var("STORAGE_ENDPOINT")
+            .ok()
+            .filter(|s| !s.is_empty());
+        let storage_bucket = std::env::var("STORAGE_BUCKET")
+            .ok()
+            .filter(|s| !s.is_empty());
+        let storage_access_key = std::env::var("STORAGE_ACCESS_KEY_ID")
+            .ok()
+            .filter(|s| !s.is_empty());
+        let storage_secret_key = std::env::var("STORAGE_SECRET_ACCESS_KEY")
+            .ok()
+            .filter(|s| !s.is_empty());
+        let storage_region = std::env::var("STORAGE_REGION")
+            .ok()
+            .filter(|s| !s.is_empty());
 
         if storage_endpoint.is_some() || storage_access_key.is_some() {
             tracing::info!("Loading Storage config from environment variables");
             app_config.storage.endpoint = storage_endpoint.or(app_config.storage.endpoint);
             app_config.storage.bucket = storage_bucket.or(app_config.storage.bucket);
-            app_config.storage.access_key_id = storage_access_key.or(app_config.storage.access_key_id);
-            app_config.storage.secret_access_key = storage_secret_key.or(app_config.storage.secret_access_key);
+            app_config.storage.access_key_id =
+                storage_access_key.or(app_config.storage.access_key_id);
+            app_config.storage.secret_access_key =
+                storage_secret_key.or(app_config.storage.secret_access_key);
             if let Some(region) = storage_region {
                 app_config.storage.region = region;
             }
@@ -324,11 +352,16 @@ impl AppConfig {
     fn redact_sensitive_value(key: &str, value: &str) -> String {
         // List of key patterns that indicate sensitive values
         let sensitive_patterns = [
-            "SECRET", "PASSWORD", "KEY", "TOKEN",
-            "CREDENTIAL", "API_KEY", "OAUTH",
-            "DATABASE_URL",  // Entire URL might have password
+            "SECRET",
+            "PASSWORD",
+            "KEY",
+            "TOKEN",
+            "CREDENTIAL",
+            "API_KEY",
+            "OAUTH",
+            "DATABASE_URL", // Entire URL might have password
         ];
-        
+
         // Check if key matches any sensitive pattern
         for pattern in &sensitive_patterns {
             if key.contains(pattern) {
@@ -339,20 +372,20 @@ impl AppConfig {
                 };
             }
         }
-        
+
         // Non-sensitive values can be shown (with truncation for long values)
         if value.len() > 100 {
-            format!("{}...{}", &value[..50], &value[value.len()-50..])
+            format!("{}...{}", &value[..50], &value[value.len() - 50..])
         } else {
             value.to_string()
         }
     }
 
     /// Validate configuration for required fields and combinations
-    /// 
+    ///
     /// **Purpose**: Fail fast at startup with clear error messages
     /// instead of runtime failures later.
-    /// 
+    ///
     /// **Checks**:
     /// 1. Database URL is not empty
     /// 2. Server configuration is valid (host, port, URLs)
@@ -360,14 +393,14 @@ impl AppConfig {
     /// 4. CORS origins are configured
     /// 5. In production: Public URL and frontend URL use HTTPS
     /// 6. In production: OAuth is configured
-    /// 
+    ///
     /// **Returns**: Err with specific message for first validation failure
     pub fn validate(&self) -> anyhow::Result<()> {
         // TODO [SEC-004]: Validate all required field combinations
         // Reference: backend_configuration_patterns.md#cfg-2-missing-validation-of-required-fields
         // Roadmap: Step 1 of 3
         // Status: IN_PROGRESS
-        
+
         // 1. Database URL validation
         if self.database.url.is_empty() || self.database.url == "undefined" {
             return Err(anyhow::anyhow!(
@@ -375,9 +408,11 @@ impl AppConfig {
                  Set DATABASE_URL environment variable or provide config/default.toml"
             ));
         }
-        
+
         // Validate database URL format is PostgreSQL
-        if !self.database.url.starts_with("postgres://") && !self.database.url.starts_with("postgresql://") {
+        if !self.database.url.starts_with("postgres://")
+            && !self.database.url.starts_with("postgresql://")
+        {
             return Err(anyhow::anyhow!(
                 "Invalid configuration: DATABASE_URL must be PostgreSQL URI (postgres:// or postgresql://). \
                  Got: {}",
@@ -467,11 +502,15 @@ impl AppConfig {
 
             // In production, at least one OAuth provider should be configured
             if let Some(oauth) = &self.auth.oauth {
-                let has_google = oauth.google.as_ref()
+                let has_google = oauth
+                    .google
+                    .as_ref()
                     .map(|g| !g.client_id.is_empty() && !g.client_secret.is_empty())
                     .unwrap_or(false);
-                
-                let has_azure = oauth.azure.as_ref()
+
+                let has_azure = oauth
+                    .azure
+                    .as_ref()
                     .map(|a| !a.client_id.is_empty() && !a.client_secret.is_empty())
                     .unwrap_or(false);
 

@@ -4,6 +4,7 @@
 
 /// Test that health endpoint is accessible without auth
 #[tokio::test]
+#[ignore = "Requires database setup for full integration test"]
 async fn test_health_no_auth_required() {
     // This test validates /health is accessible
     // Full integration test requires database setup
@@ -12,6 +13,7 @@ async fn test_health_no_auth_required() {
 
 /// Test that CSRF check rejects POST without Origin
 #[tokio::test]
+#[ignore = "Requires database setup for full integration test"]
 async fn test_csrf_rejects_post_without_origin() {
     // CSRF middleware should reject POST requests without Origin/Referer
     // when targeting state-changing endpoints
@@ -20,6 +22,7 @@ async fn test_csrf_rejects_post_without_origin() {
 
 /// Test that CSRF check allows GET without Origin
 #[tokio::test]
+#[ignore = "Requires database setup for full integration test"]
 async fn test_csrf_allows_get_without_origin() {
     // GET requests should not require CSRF validation
     assert!(true);
@@ -27,6 +30,7 @@ async fn test_csrf_allows_get_without_origin() {
 
 /// Test that admin endpoints require admin role
 #[tokio::test]
+#[ignore = "Requires database setup for full integration test"]
 async fn test_admin_requires_role() {
     // Admin endpoints should return 403 for non-admin users
     assert!(true);
@@ -158,6 +162,7 @@ fn test_csrf_valid_origins() {
 
 /// Test account linking policy - same email links accounts
 #[tokio::test]
+#[ignore = "Requires database setup for full integration test"]
 async fn test_account_linking_same_email() {
     // When a user logs in with Google then Azure using same email,
     // both accounts should link to the same user.
@@ -167,6 +172,7 @@ async fn test_account_linking_same_email() {
 
 /// Test session rotation on privilege change
 #[tokio::test]
+#[ignore = "Requires database setup for full integration test"]
 async fn test_session_rotation_on_privilege_change() {
     // Session token should be rotated when:
     // - User verifies age
