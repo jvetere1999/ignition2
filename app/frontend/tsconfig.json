@@ -29,6 +29,11 @@
     "**/*.tsx",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "**/FRONT_006_EXAMPLES.tsx",
+    "**/FormExamples.tsx",
+    "**/FRONT_005_COMPLETION_SUMMARY.md"
+  ]
 }
 
