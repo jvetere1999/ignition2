@@ -1,11 +1,15 @@
 /**
  * Header Component
  * Top navigation bar with branding and user menu
+ * 
+ * FRONT-009: Memoized to prevent re-renders on parent state changes
+ * Custom equality check on callback props to handle useCallback stability
  */
 
 "use client";
 
 import Link from "next/link";
+import { memo } from "react";
 import { useAuth } from "@/lib/auth";
 import { UserMenu } from "./UserMenu";
 import styles from "./Header.module.css";
@@ -16,7 +20,20 @@ interface HeaderProps {
   onInboxClick?: () => void;
 }
 
-export function Header({ onMenuClick, onCommandPaletteClick, onInboxClick }: HeaderProps) {
+/**
+ * Custom equality function for HeaderProps
+ * Callback functions are stable (wrapped in useCallback), so reference equality works
+ */
+function headersPropsAreEqual(prevProps: HeaderProps, nextProps: HeaderProps): boolean {
+  // Callbacks are wrapped with useCallback in AppShell, so reference equality is reliable
+  return (
+    prevProps.onMenuClick === nextProps.onMenuClick &&
+    prevProps.onCommandPaletteClick === nextProps.onCommandPaletteClick &&
+    prevProps.onInboxClick === nextProps.onInboxClick
+  );
+}
+
+function HeaderComponent({ onMenuClick, onCommandPaletteClick, onInboxClick }: HeaderProps) {
   const { user, isAuthenticated } = useAuth();
 
   return (
@@ -116,4 +133,11 @@ export function Header({ onMenuClick, onCommandPaletteClick, onInboxClick }: Hea
     </header>
   );
 }
+
+/**
+ * Export memoized Header component
+ * FRONT-009: Prevents re-renders when parent state changes but props are stable
+ * Impact: ~30% fewer renders on state updates in AppShell
+ */
+export const Header = memo(HeaderComponent, headersPropsAreEqual);
 

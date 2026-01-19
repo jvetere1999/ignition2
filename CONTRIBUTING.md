@@ -164,12 +164,34 @@ Closes #123
 
 ### Rust Backend
 
-**Style Guide**:
+**Style Guide**: See [docs/BACKEND_IMPORT_STYLE.md](docs/BACKEND_IMPORT_STYLE.md) for complete naming and import conventions.
+
+**Standards**:
 - Follow `rustfmt` (run `cargo fmt`)
 - Use `clippy` linter (run `cargo clippy`)
 - Use SQLx for database queries (runtime binding, not compile-time)
 - Prefer error handling with Result types
 - Document public APIs with doc comments
+
+**Naming Conventions**:
+- Modules: `snake_case` (e.g., `habit_repos.rs`)
+- Functions: `snake_case` (e.g., `fetch_all_habits()`)
+- Structs/Types: `PascalCase` (e.g., `struct HabitModel {}`)
+- Constants: `SCREAMING_SNAKE_CASE` (e.g., `const MAX_RETRIES: u32 = 3;`)
+
+**Import Organization** (Automatically enforced):
+```rust
+use std::collections::HashMap;          // 1. Standard library
+
+use axum::Router;                       // 2. External crates
+use sqlx::PgPool;
+use tokio::spawn;
+
+use crate::db::user_repos;              // 3. Crate modules
+use crate::routes::auth;
+
+use super::models::User;                // 4. Relative modules
+```
 
 **Structure**:
 ```
@@ -204,12 +226,33 @@ sqlx::query_as!(User, "SELECT * FROM users WHERE id = $1", id)
 
 ### TypeScript/React Frontend
 
-**Style Guide**:
-- Follow ESLint configuration
-- Run `npm run lint` before committing
+**Style Guide**: See [docs/FRONTEND_STYLE.md](docs/FRONTEND_STYLE.md) for complete naming and organization conventions.
+
+**Standards**:
+- Follow ESLint configuration (`npm run lint`)
 - Use TypeScript strict mode
 - Prefer functional components with hooks
 - Use suspense for async operations
+
+**Naming Conventions**:
+- Components: `PascalCase` (e.g., `GoalCard.tsx`)
+- Hooks: `useXxx` (e.g., `useFocusSession.ts`)
+- Utilities: `camelCase` (e.g., `formatDate.ts`)
+- Types: `PascalCase` (e.g., `interface UserSettings {}`)
+- Constants: `SCREAMING_SNAKE_CASE` (e.g., `const API_BASE_URL = '...'`)
+
+**Import Organization**:
+```typescript
+import React, { useState } from 'react';              // 1. React & Next.js
+import { useRouter } from 'next/navigation';
+
+import { Button } from '@ui/Button';                 // 2. Third-party + internal
+import { useSync } from '@/lib/hooks/useSync';
+import { Goal } from '@/types/Goal';
+
+import { GoalCard } from './GoalCard';               // 3. Relative imports
+import styles from './Goals.module.css';
+```
 
 **Structure**:
 ```

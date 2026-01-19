@@ -12,6 +12,22 @@ use super::gamification_repos::GamificationRepo;
 use crate::error::AppError;
 
 // ============================================================================
+// STATUS CONSTANTS (Type-safe focus session status values)
+// ============================================================================
+
+/// Focus session is currently active (running)
+const SESSION_STATUS_ACTIVE: &str = "active";
+
+/// Focus session is paused
+const SESSION_STATUS_PAUSED: &str = "paused";
+
+/// Focus session completed successfully
+const SESSION_STATUS_COMPLETED: &str = "completed";
+
+/// Focus session was abandoned by user
+const SESSION_STATUS_ABANDONED: &str = "abandoned";
+
+// ============================================================================
 // REWARD CALCULATION CONSTANTS
 // ============================================================================
 
@@ -231,10 +247,13 @@ impl FocusSessionRepo {
         // Abandon any existing active session
         sqlx::query(
             r#"UPDATE focus_sessions
-               SET status = 'abandoned', abandoned_at = NOW()
-               WHERE user_id = $1 AND status IN ('active', 'paused')"#,
+               SET status = $1, abandoned_at = NOW()
+               WHERE user_id = $2 AND status IN ($3, $4)"#,
         )
+        .bind(SESSION_STATUS_ABANDONED)
         .bind(user_id)
+        .bind(SESSION_STATUS_ACTIVE)
+        .bind(SESSION_STATUS_PAUSED)
         .execute(pool)
         .await?;
 
@@ -352,7 +371,7 @@ impl FocusSessionRepo {
         let session = Self::get_session(pool, session_id, user_id).await?;
         let session = session.ok_or_else(|| AppError::NotFound("Session not found".to_string()))?;
 
-        if session.status != "active" && session.status != "paused" {
+        if session.status != SESSION_STATUS_ACTIVE && session.status != SESSION_STATUS_PAUSED {
             return Err(AppError::BadRequest(format!(
                 "Session cannot be completed (status: {})",
                 session.status
@@ -375,12 +394,13 @@ impl FocusSessionRepo {
         // TODO [MID-003-1]: Consider batch_complete_sessions() for bulk operations
         let query = format!(
             r#"UPDATE focus_sessions
-               SET status = 'completed', completed_at = NOW(), xp_awarded = $1, coins_awarded = $2
-               WHERE id = $3 AND user_id = $4
+               SET status = $1, completed_at = NOW(), xp_awarded = $2, coins_awarded = $3
+               WHERE id = $4 AND user_id = $5
                RETURNING {}"#,
             FOCUS_SESSION_COLUMNS
         );
         let updated = sqlx::query_as::<_, FocusSession>(&query)
+            .bind(SESSION_STATUS_COMPLETED)
             .bind(xp)
             .bind(coins)
             .bind(session_id)
@@ -445,7 +465,7 @@ impl FocusSessionRepo {
         let session = Self::get_session(pool, session_id, user_id).await?;
         let session = session.ok_or_else(|| AppError::NotFound("Session not found".to_string()))?;
 
-        if session.status != "active" && session.status != "paused" {
+        if session.status != SESSION_STATUS_ACTIVE && session.status != SESSION_STATUS_PAUSED {
             return Err(AppError::BadRequest(format!(
                 "Session cannot be abandoned (status: {})",
                 session.status
@@ -454,12 +474,13 @@ impl FocusSessionRepo {
 
         let query = format!(
             r#"UPDATE focus_sessions
-               SET status = 'abandoned', abandoned_at = NOW()
-               WHERE id = $1 AND user_id = $2
+               SET status = $1, abandoned_at = NOW()
+               WHERE id = $2 AND user_id = $3
                RETURNING {}"#,
             FOCUS_SESSION_COLUMNS
         );
         let updated = sqlx::query_as::<_, FocusSession>(&query)
+            .bind(SESSION_STATUS_ABANDONED)
             .bind(session_id)
             .bind(user_id)
             .fetch_one(pool)

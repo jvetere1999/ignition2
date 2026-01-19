@@ -4,6 +4,7 @@ use crate::db::vault_models::{
 use crate::db::vault_repos::VaultRepo;
 use crate::error::AppError;
 use crate::middleware::auth::AuthContext;
+use crate::middleware::trust_boundary::*;
 use crate::state::AppState;
 use axum::{
     extract::{Extension, Json, State},
@@ -22,6 +23,10 @@ pub fn router() -> Router<Arc<AppState>> {
 
 /// POST /api/vault/lock
 /// Lock user's vault with specified reason
+///
+/// # Trust Boundary
+/// server_trusted!() - This is server-side business logic that manages vault state.
+/// No cryptographic operations occur here; the actual vault content remains encrypted server-side.
 async fn lock_vault(
     State(state): State<Arc<AppState>>,
     Extension(auth): Extension<AuthContext>,
@@ -59,6 +64,18 @@ async fn lock_vault(
 
 /// POST /api/vault/unlock
 /// Unlock user's vault with passphrase verification
+///
+/// # Trust Boundary
+/// e2ee_boundary!() - This endpoint crosses the E2EE boundary by:
+/// 1. Accepting plaintext passphrase from client
+/// 2. Verifying it against stored bcrypt hash (security-critical)
+/// 3. On success, vault state changes to unlocked (can now be queried for content)
+///
+/// Security notes:
+/// - Uses bcrypt cost 12 for password verification (time-safe comparison)
+/// - Never logs plaintext passphrase (see logging standards)
+/// - Returns generic error message (doesn't reveal if vault exists)
+/// - Uses advisory lock to prevent concurrent unlock attempts
 async fn unlock_vault(
     State(state): State<Arc<AppState>>,
     Extension(auth): Extension<AuthContext>,

@@ -7,7 +7,7 @@ mod tests {
     use sqlx::PgPool;
     use uuid::Uuid;
 
-    use crate::db::gamification_models::AwardPointsInput;
+    use crate::db::gamification_models::{AwardPointsInput, EventType};
     use crate::db::gamification_repos::{
         AchievementsRepo, GamificationRepo, StreaksRepo, UserProgressRepo, UserWalletRepo,
     };
@@ -22,12 +22,11 @@ mod tests {
         let user_id = create_test_user(&pool).await;
 
         let result =
-            UserProgressRepo::award_xp(&pool, user_id, 50, "test", None, Some("Test award"), None)
+            UserProgressRepo::award_xp(&pool, user_id, 50, EventType::Custom, None, Some("Test award"), None)
                 .await
                 .expect("Failed to award XP");
 
-        assert!(result.success);
-        assert!(!result.already_awarded);
+        assert!(result.already_awarded == false);
         assert_eq!(result.new_balance, 50);
         assert_eq!(result.new_level, Some(1));
         assert_eq!(result.leveled_up, Some(false));
@@ -38,12 +37,12 @@ mod tests {
         let user_id = create_test_user(&pool).await;
 
         // First award
-        UserProgressRepo::award_xp(&pool, user_id, 30, "test", None, None, None)
+        UserProgressRepo::award_xp(&pool, user_id, 30, EventType::Custom, None, None, None)
             .await
             .expect("Failed to award XP");
 
         // Second award
-        let result = UserProgressRepo::award_xp(&pool, user_id, 40, "test", None, None, None)
+        let result = UserProgressRepo::award_xp(&pool, user_id, 40, EventType::Custom, None, None, None)
             .await
             .expect("Failed to award XP");
 

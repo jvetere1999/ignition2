@@ -12,6 +12,7 @@ use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 mod config;
+mod cache;
 mod db;
 mod error;
 mod middleware;

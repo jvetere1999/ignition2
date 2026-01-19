@@ -83,6 +83,90 @@ impl StreakType {
     }
 }
 
+/// Skill category - classifies skills by domain
+///
+/// Skills are grouped into categories to help users discover and organize skills
+/// relevant to their goals and interests.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, sqlx::Type)]
+#[sqlx(type_name = "text")] // Store as TEXT in database
+#[serde(rename_all = "snake_case")]
+pub enum SkillCategory {
+    /// Health and fitness related skills
+    Health,
+    /// Learning and education related skills
+    Learning,
+    /// Productivity and efficiency related skills
+    Productivity,
+    /// Creative and artistic skills
+    Creativity,
+    /// Social and interpersonal skills
+    Social,
+    /// Finance and money management skills
+    Finance,
+    /// Wellness and mindfulness skills
+    Wellness,
+    /// Other miscellaneous skills
+    Other,
+}
+
+impl SkillCategory {
+    /// Get human-readable display name
+    pub fn display_name(&self) -> &str {
+        match self {
+            Self::Health => "Health & Fitness",
+            Self::Learning => "Learning",
+            Self::Productivity => "Productivity",
+            Self::Creativity => "Creativity",
+            Self::Social => "Social",
+            Self::Finance => "Finance",
+            Self::Wellness => "Wellness",
+            Self::Other => "Other",
+        }
+    }
+}
+
+/// Achievement category - classifies achievements by type
+///
+/// Different achievement types convey different meanings and prestige levels.
+/// Categories help organize achievements in the UI.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, sqlx::Type)]
+#[sqlx(type_name = "text")] // Store as TEXT in database
+#[serde(rename_all = "snake_case")]
+pub enum AchievementCategory {
+    /// Milestone achievements (level milestones, etc.)
+    Milestone,
+    /// Challenge achievements (complete specific challenges)
+    Challenge,
+    /// Hidden secret achievements
+    Secret,
+    /// Seasonal limited-time achievements
+    Seasonal,
+    /// Progression and advancement achievements
+    Progression,
+    /// Skill mastery achievements
+    Skill,
+    /// Community and social achievements
+    Community,
+    /// First-time/early-bird achievements
+    FirstTime,
+}
+
+impl AchievementCategory {
+    /// Get human-readable display name
+    pub fn display_name(&self) -> &str {
+        match self {
+            Self::Milestone => "Milestone",
+            Self::Challenge => "Challenge",
+            Self::Secret => "Secret",
+            Self::Seasonal => "Seasonal",
+            Self::Progression => "Progression",
+            Self::Skill => "Skill",
+            Self::Community => "Community",
+            Self::FirstTime => "First Time",
+        }
+    }
+}
+
 /// Achievement trigger type - defines how achievements are earned.
 ///
 /// Different achievement types have different trigger mechanisms:
@@ -261,13 +345,29 @@ pub struct PointsLedgerEntry {
 // ============================================================================
 
 /// Skill definition - admin-managed skill catalog
+///
+/// Defines available skills that users can level up.
+/// Categories help organize skills by domain (Health, Learning, Productivity, etc.).
+///
+/// **Example**:
+/// ```json
+/// {
+///   "key": "meditation",
+///   "name": "Meditation",
+///   "description": "Practice mindfulness and meditation",
+///   "category": "wellness",
+///   "max_level": 10,
+///   "stars_per_level": 100
+/// }
+/// ```
 #[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
 pub struct SkillDefinition {
     pub id: Uuid,
     pub key: String,
     pub name: String,
     pub description: Option<String>,
-    pub category: String,
+    /// Skill category (type-safe enum)
+    pub category: SkillCategory,
     pub icon: Option<String>,
     pub max_level: i32,
     pub stars_per_level: i32,
@@ -314,7 +414,7 @@ pub struct UserSkill {
 ///   "key": "social_butterfly",
 ///   "name": "Social Butterfly",
 ///   "description": "Send 50 messages",
-///   "category": "Social",
+///   "category": "community",
 ///   "trigger_type": "CountBased",
 ///   "trigger_config": {
 ///     "event_type": "message_sent",
@@ -331,7 +431,8 @@ pub struct AchievementDefinition {
     pub key: String,
     pub name: String,
     pub description: Option<String>,
-    pub category: String,
+    /// Achievement category (type-safe enum)
+    pub category: AchievementCategory,
     pub icon: Option<String>,
     /// Achievement trigger mechanism (serialized as JSON string in database)
     /// Deserialized to TriggerType for type-safe handling

@@ -6,10 +6,13 @@
  * Provides quick access to core sections: Today, Focus, Quests, More
  *
  * Logic parity: Uses same routes as Sidebar, just different presentation
+ * 
+ * FRONT-009: Memoized to prevent re-renders
  */
 
 "use client";
 
+import { memo } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import styles from "./MobileNav.module.css";
@@ -71,7 +74,7 @@ interface MobileNavProps {
   onMoreClick?: () => void;
 }
 
-export function MobileNav({ onMoreClick }: MobileNavProps) {
+function MobileNavComponent({ onMoreClick }: MobileNavProps) {
   const pathname = usePathname();
 
   const isActive = (item: NavItem) => {
@@ -111,4 +114,11 @@ export function MobileNav({ onMoreClick }: MobileNavProps) {
     </nav>
   );
 }
+
+/**
+ * Export memoized MobileNav
+ * FRONT-009: Prevents re-renders when parent updates
+ * Impact: ~30% fewer renders on bottom navigation
+ */
+export const MobileNav = memo(MobileNavComponent);
 

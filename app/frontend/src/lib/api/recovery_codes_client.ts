@@ -138,6 +138,33 @@ export async function changePassphrase(
   );
 }
 
+// Recovery codes list response types
+export interface RecoveryCodeMetadata {
+  code: string;
+  used: boolean;
+  created_at: string;
+  used_at?: string | null;
+}
+
+export interface ListRecoveryCodesResponse {
+  codes: RecoveryCodeMetadata[];
+  vault_id: string;
+  total_count: number;
+  unused_count: number;
+}
+
+/**
+ * List recovery codes with metadata (authenticated)
+ * Shows which codes have been used
+ * @returns Promise with list of recovery codes
+ */
+export async function listRecoveryCodes(): Promise<ListRecoveryCodesResponse> {
+  return apiRequest<ListRecoveryCodesResponse>(
+    '/api/vault/recovery-codes/list',
+    'POST'
+  );
+}
+
 /**
  * Type guard for API error responses
  */

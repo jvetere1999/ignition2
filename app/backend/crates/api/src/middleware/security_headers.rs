@@ -8,17 +8,27 @@
 //! - Strict-Transport-Security: max-age=31536000 (HTTPS enforcement)
 //! - X-XSS-Protection: 1; mode=block (XSS filter, deprecated but supported by older browsers)
 //! - Referrer-Policy: strict-origin-when-cross-origin (control referrer leakage)
+//! - Cache-Control: Intelligent caching based on endpoint type (PERF-001)
+//! - X-Cache-Version: API version header for cache invalidation
 
-use axum::{body::Body, http::Response, middleware::Next};
+use axum::{body::Body, http::{Response, Method}, middleware::Next};
+use std::time::{SystemTime, UNIX_EPOCH};
 
-/// Middleware to add security headers to all responses
+/// Middleware to add security headers and cache headers to all responses
 ///
 /// **Performance**: Minimal - single pass to add HTTP headers
-/// **Headers Added**: 6 security headers per response
-/// **Standards**: OWASP Top 10, NIST recommendations
+/// **Headers Added**: 7+ security headers + cache headers per response
+/// **Standards**: OWASP Top 10, NIST recommendations, HTTP Caching (RFC 7234)
 pub async fn add_security_headers(request: axum::extract::Request, next: Next) -> Response<Body> {
+    let path = request.uri().path().to_string();
+    let method = request.method().clone();
+    
     let mut response = next.run(request).await;
     let headers = response.headers_mut();
+
+    // ========================================================================
+    // SECURITY HEADERS
+    // ========================================================================
 
     // Content-Security-Policy: Prevent XSS, injection attacks, and unauthorized resource loading
     // TODO [SEC-005]: Allow dynamic CSP based on environment and feature flags
@@ -69,6 +79,103 @@ pub async fn add_security_headers(request: axum::extract::Request, next: Next) -
         "Referrer-Policy",
         "strict-origin-when-cross-origin".parse().unwrap(),
     );
+
+    // ========================================================================
+    // CACHE HEADERS - PERF-001: Browser Caching
+    // ========================================================================
+    // TODO [PERF-001]: Browser Caching Implementation
+    // Reference: MEDIUM_TASKS_EXECUTION_PLAN.md#perf-001-browser-caching
+    // Roadmap: Step 1 of 4 - Configure Cache-Control headers by endpoint type
+    // Status: IN_PROGRESS
+
+    // Determine cache strategy based on endpoint path and method
+    let cache_control = match (method.clone(), path.as_str()) {
+        // ====================================================================
+        // STATIC/LONG-LIVED DATA - Cache for 1 hour
+        // ====================================================================
+        // Rarely changes: onboarding, frameworks, metadata
+        (Method::GET, p) if p.contains("/onboarding/")
+            || p.contains("/learn/metadata")
+            || p.contains("/learn/frameworks") =>
+        {
+            "public, max-age=3600, s-maxage=3600" // 1 hour
+        }
+
+        // ====================================================================
+        // SEMI-STABLE DATA - Cache for 5 minutes
+        // ====================================================================
+        // Changes occasionally: habits, goals, exercises, reference content
+        (Method::GET, p) if p.contains("/habits/")
+            || p.contains("/goals/")
+            || p.contains("/exercise/")
+            || p.contains("/reference/")
+            || p.contains("/references/")
+            || p.contains("/quests/") =>
+        {
+            "private, max-age=300, s-maxage=300" // 5 minutes
+        }
+
+        // ====================================================================
+        // USER-SPECIFIC DATA - Cache for 1 minute
+        // ====================================================================
+        // Changes frequently but user-specific: user profile, progress, stats
+        (Method::GET, p) if p.contains("/user/")
+            || p.contains("/admin/stats")
+            || p.contains("/calendar/")
+            || p.contains("/daily-plan/")
+            || p.contains("/progress/") =>
+        {
+            "private, max-age=60" // 1 minute
+        }
+
+        // ====================================================================
+        // REAL-TIME DATA - No caching
+        // ====================================================================
+        // Changes very frequently: focus sessions, inbox, streaming data
+        (Method::GET, p) if p.contains("/focus/")
+            || p.contains("/inbox/")
+            || p.contains("/notifications/") =>
+        {
+            "no-cache, no-store, must-revalidate" // No caching
+        }
+
+        // ====================================================================
+        // POST/PUT/DELETE - Never cache mutations
+        // ====================================================================
+        (Method::POST, _) | (Method::PUT, _) | (Method::DELETE, _) | (Method::PATCH, _) => {
+            "no-cache, no-store, must-revalidate"
+        }
+
+        // ====================================================================
+        // DEFAULT - Conservative caching
+        // ====================================================================
+        _ => "private, max-age=60", // 1 minute for unknown endpoints
+    };
+
+    headers.insert("Cache-Control", cache_control.parse().unwrap());
+
+    // ========================================================================
+    // CACHE INVALIDATION - X-Cache-Version header
+    // ========================================================================
+    // TODO [PERF-001]: Cache Invalidation Strategy
+    // Reference: MEDIUM_TASKS_EXECUTION_PLAN.md#phase-3-add-cache-invalidation
+    // Roadmap: Step 3 of 4 - Add version headers for client cache invalidation
+    // Status: PENDING (depends on Phase 2: Service Worker setup)
+    
+    // Version header for cache invalidation strategy
+    // Increment this when API response format changes to force cache refresh
+    // Client will check this version on startup and clear cache if mismatch
+    let cache_version = "1";
+    headers.insert("X-Cache-Version", cache_version.parse().unwrap());
+
+    // Add timestamp for debugging cache behavior
+    if let Ok(duration) = SystemTime::now().duration_since(UNIX_EPOCH) {
+        let timestamp = duration.as_secs();
+        headers.insert(
+            "X-Response-Time",
+            timestamp.to_string().parse().unwrap_or_else(|_| "unknown".parse().unwrap()),
+        );
+    }
 
     response
 }

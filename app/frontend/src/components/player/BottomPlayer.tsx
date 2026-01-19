@@ -1,11 +1,14 @@
 /**
  * BottomPlayer Component
  * Global persistent audio player that appears at the bottom of the screen
+ * 
+ * FRONT-008: AudioVisualizerRave (565 lines) is lazy-loaded to reduce initial bundle
  */
 
 "use client";
 
 import { useEffect, useRef, useCallback, useState } from "react";
+import dynamic from "next/dynamic";
 import {
   usePlayerStore,
   useCurrentTrack,
@@ -30,11 +33,15 @@ import {
   formatTime,
 } from "@/lib/player";
 import { Waveform } from "./Waveform";
-import { AudioVisualizer } from "./AudioVisualizerRave";
 import styles from "./BottomPlayer.module.css";
 
+// FRONT-008: Lazy-load heavy visualizer (565 lines)
+const AudioVisualizer = dynamic(
+  () => import("./AudioVisualizerRave").then(mod => mod.AudioVisualizer),
+  { ssr: false }
+);
+
 // Lazy import to avoid circular dependency
-import dynamic from "next/dynamic";
 const TrackAnalysisPopup = dynamic(
   () => import("./TrackAnalysisPopup").then((mod) => mod.TrackAnalysisPopup),
   { ssr: false }

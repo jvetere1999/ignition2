@@ -75,7 +75,7 @@ impl UserProgressRepo {
         pool: &PgPool,
         user_id: Uuid,
         xp: i32,
-        event_type: &str,
+        event_type: EventType,
         event_id: Option<Uuid>,
         reason: Option<&str>,
         idempotency_key: Option<&str>,
@@ -207,7 +207,7 @@ impl UserWalletRepo {
         pool: &PgPool,
         user_id: Uuid,
         coins: i32,
-        event_type: &str,
+        event_type: EventType,
         event_id: Option<Uuid>,
         reason: Option<&str>,
         idempotency_key: Option<&str>,
@@ -551,7 +551,7 @@ impl AchievementsRepo {
                     pool,
                     user_id,
                     reward_xp,
-                    "achievement_unlock",
+                    EventType::AchievementEarned,
                     None,
                     Some(&format!("Achievement: {}", achievement_key)),
                     Some(&idempotency_key),
@@ -564,7 +564,7 @@ impl AchievementsRepo {
                     pool,
                     user_id,
                     reward_coins,
-                    "achievement_unlock",
+                    EventType::AchievementEarned,
                     None,
                     Some(&format!("Achievement: {}", achievement_key)),
                     Some(&idempotency_key),
@@ -786,17 +786,11 @@ impl GamificationRepo {
         // Award XP if specified
         if let Some(xp) = input.xp {
             if xp > 0 {
-                // Serialize EventType to string (snake_case format via serde)
-                let event_type_str = serde_json::to_string(&input.event_type)
-                    .unwrap_or_else(|_| "\"custom\"".to_string())
-                    .trim_matches('\"')
-                    .to_string();
-
                 let xp_result = UserProgressRepo::award_xp(
                     pool,
                     user_id,
                     xp,
-                    &event_type_str,
+                    input.event_type,
                     input.event_id,
                     input.reason.as_deref(),
                     input.idempotency_key.as_deref(),
@@ -812,17 +806,11 @@ impl GamificationRepo {
         // Award coins if specified
         if let Some(coins) = input.coins {
             if coins > 0 {
-                // Serialize EventType to string (snake_case format via serde)
-                let event_type_str = serde_json::to_string(&input.event_type)
-                    .unwrap_or_else(|_| "\"custom\"".to_string())
-                    .trim_matches('\"')
-                    .to_string();
-
                 let coins_result = UserWalletRepo::award_coins(
                     pool,
                     user_id,
                     coins,
-                    &event_type_str,
+                    input.event_type,
                     input.event_id,
                     input.reason.as_deref(),
                     input.idempotency_key.as_deref(),

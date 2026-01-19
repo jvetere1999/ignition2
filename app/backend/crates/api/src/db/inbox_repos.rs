@@ -41,13 +41,15 @@ impl InboxRepo {
             .await?
         };
 
-        let total: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM inbox_items WHERE user_id = $1")
-            .bind(user_id)
-            .fetch_one(db)
-            .await?;
-
-        let unread: (i64,) = sqlx::query_as(
-            "SELECT COUNT(*) FROM inbox_items WHERE user_id = $1 AND is_processed = false AND is_archived = false",
+        // Optimization [BACK-013]: Batch COUNT queries into single query
+        // Before: 2 separate COUNT(*) queries (sequential)
+        // After: 1 combined query with FILTER for counts (batched)
+        // Performance: ~2x faster (1 query instead of 2)
+        let counts: (i64, i64) = sqlx::query_as(
+            r#"SELECT 
+                COUNT(*) as total,
+                COUNT(*) FILTER (WHERE is_processed = false AND is_archived = false) as unread
+               FROM inbox_items WHERE user_id = $1"#
         )
         .bind(user_id)
         .fetch_one(db)
@@ -55,8 +57,8 @@ impl InboxRepo {
 
         Ok(InboxListResponse {
             items: items.into_iter().map(InboxResponse::from).collect(),
-            total: total.0,
-            unread_count: unread.0,
+            total: counts.0,
+            unread_count: counts.1,
             page,
             page_size,
         })

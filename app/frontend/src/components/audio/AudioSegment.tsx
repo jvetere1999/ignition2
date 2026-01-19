@@ -48,7 +48,7 @@ import {
   useRef,
   useCallback,
 } from "react";
-import Image from "next/image";
+import { OptimizedImage } from "@/lib/images/optimization";
 import type {
   VisualizerAdapter,
   VisualizerContext,
@@ -816,13 +816,13 @@ export function AudioSegment({
       {/* Metadata overlay */}
       <div className={styles.metadataOverlay}>
         {artwork && (
-          <Image
+          <OptimizedImage
             src={artwork}
             alt={title}
             width={48}
             height={48}
             className={styles.artwork}
-            unoptimized
+            priority={false}
           />
         )}
         <div className={styles.trackInfo}>

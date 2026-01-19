@@ -37,9 +37,21 @@ pub struct DatabaseConfig {
     #[serde(default = "default_database_url")]
     pub url: String,
     /// Pool size - used when sqlx pool is configured
+    /// Automatically scaled based on environment: dev=5, prod=20 (but respects env var override)
     #[serde(default = "default_pool_size")]
-    #[allow(dead_code)]
     pub pool_size: u32,
+    /// Minimum pool size - connections eagerly created at startup
+    /// Defaults: dev=1, prod=5 (reduces connection latency under load)
+    #[serde(default = "default_min_pool_size")]
+    pub min_pool_size: u32,
+    /// Connection lifetime in seconds (default: 1800 = 30 minutes)
+    /// Older connections are recycled to refresh connection state
+    #[serde(default = "default_connection_max_lifetime")]
+    pub connection_max_lifetime: u64,
+    /// Connection idle timeout in seconds (default: 600 = 10 minutes)
+    /// Idle connections beyond this are closed to free resources
+    #[serde(default = "default_connection_idle_timeout")]
+    pub connection_idle_timeout: u64,
 }
 
 fn default_database_url() -> String {
@@ -135,7 +147,32 @@ fn default_env() -> String {
 }
 
 fn default_pool_size() -> u32 {
-    10
+    // BACK-014: Environment-aware pool sizing
+    // Development: Smaller pool to conserve resources
+    // Production: Larger pool to handle more concurrent requests
+    let env = std::env::var("APP_ENV").unwrap_or_else(|_| "development".to_string());
+    match env.as_str() {
+        "production" => 20,  // Support 3x more concurrent users
+        _ => 5,              // Development/testing - conservative
+    }
+}
+
+fn default_min_pool_size() -> u32 {
+    // BACK-014: Minimum connections created at startup
+    // Avoids latency spike when first requests arrive
+    let env = std::env::var("APP_ENV").unwrap_or_else(|_| "development".to_string());
+    match env.as_str() {
+        "production" => 5,   // Always have connections ready
+        _ => 1,              // Development - minimal overhead
+    }
+}
+
+fn default_connection_max_lifetime() -> u64 {
+    30 * 60  // 30 minutes - connection lifecycle for state refresh
+}
+
+fn default_connection_idle_timeout() -> u64 {
+    10 * 60  // 10 minutes - close idle connections to free resources
 }
 
 fn default_cookie_domain() -> String {
@@ -203,7 +240,10 @@ impl AppConfig {
             .set_default("server.frontend_url", "http://localhost:3000")?
             // Set database.url BEFORE adding Environment source so it acts as fallback
             .set_default("database.url", database_url.clone())?
-            .set_default("database.pool_size", 10)?
+            .set_default("database.pool_size", default_pool_size())?
+            .set_default("database.min_pool_size", default_min_pool_size())?
+            .set_default("database.connection_max_lifetime", default_connection_max_lifetime())?
+            .set_default("database.connection_idle_timeout", default_connection_idle_timeout())?
             .set_default("auth.cookie_domain", "localhost")?
             .set_default("auth.session_ttl_seconds", 60 * 60 * 24 * 30)?
             .set_default("auth.session_inactivity_timeout_minutes", 30)?

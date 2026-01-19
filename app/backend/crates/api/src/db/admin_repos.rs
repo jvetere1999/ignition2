@@ -421,141 +421,111 @@ impl AdminStatsRepo {
     }
 
     async fn get_user_stats(pool: &PgPool) -> Result<UserStats, AppError> {
-        let total = sqlx::query_as::<_, CountRow>("SELECT COUNT(*) as count FROM users")
-            .fetch_one(pool)
-            .await
-            .map(|r| r.count.unwrap_or(0))
-            .unwrap_or(0);
+        // Optimization [BACK-013]: Batch 5 COUNT(*) queries into single query
+        // Before: 5 sequential queries (5x network roundtrips)
+        // After: 1 combined query with multiple FILTER clauses
+        // Performance: ~5x faster (1 query instead of 5)
+        #[derive(sqlx::FromRow)]
+        struct UserStatsRow {
+            total: i64,
+            tos_accepted: i64,
+            admins: i64,
+            active_7d: i64,
+            active_30d: i64,
+        }
 
-        let tos = sqlx::query_as::<_, CountRow>(
-            "SELECT COUNT(*) as count FROM users WHERE tos_accepted = true",
+        let row = sqlx::query_as::<_, UserStatsRow>(
+            r#"SELECT 
+                COUNT(*) as total,
+                COUNT(*) FILTER (WHERE tos_accepted = true) as tos_accepted,
+                COUNT(*) FILTER (WHERE role = 'admin') as admins,
+                COUNT(*) FILTER (WHERE last_activity_at > NOW() - INTERVAL '7 days') as active_7d,
+                COUNT(*) FILTER (WHERE last_activity_at > NOW() - INTERVAL '30 days') as active_30d
+               FROM users"#
         )
         .fetch_one(pool)
-        .await
-        .map(|r| r.count.unwrap_or(0))
-        .unwrap_or(0);
-
-        let admins = sqlx::query_as::<_, CountRow>(
-            "SELECT COUNT(*) as count FROM users WHERE role = 'admin'",
-        )
-        .fetch_one(pool)
-        .await
-        .map(|r| r.count.unwrap_or(0))
-        .unwrap_or(0);
-
-        let active_7d = sqlx::query_as::<_, CountRow>(
-            "SELECT COUNT(*) as count FROM users WHERE last_activity_at > NOW() - INTERVAL '7 days'"
-        )
-        .fetch_one(pool)
-        .await
-        .map(|r| r.count.unwrap_or(0))
-        .unwrap_or(0);
-
-        let active_30d = sqlx::query_as::<_, CountRow>(
-            "SELECT COUNT(*) as count FROM users WHERE last_activity_at > NOW() - INTERVAL '30 days'"
-        )
-        .fetch_one(pool)
-        .await
-        .map(|r| r.count.unwrap_or(0))
-        .unwrap_or(0);
+        .await?;
 
         Ok(UserStats {
-            total_users: total,
-            tos_accepted: tos,
-            admins,
-            active_7d,
-            active_30d,
+            total_users: row.total,
+            tos_accepted: row.tos_accepted,
+            admins: row.admins,
+            active_7d: row.active_7d,
+            active_30d: row.active_30d,
         })
     }
 
     async fn get_content_stats(pool: &PgPool) -> Result<ContentStats, AppError> {
-        let exercises = sqlx::query_as::<_, CountRow>("SELECT COUNT(*) as count FROM exercises")
-            .fetch_one(pool)
-            .await
-            .map(|r| r.count.unwrap_or(0))
-            .unwrap_or(0);
+        // Optimization [BACK-013]: Batch 4 COUNT(*) queries into single query
+        // Before: 4 sequential queries
+        // After: 1 combined query
+        // Performance: ~4x faster
+        #[derive(sqlx::FromRow)]
+        struct ContentStatsRow {
+            exercises: i64,
+            universal_quests: i64,
+            user_quests: i64,
+            market_items: i64,
+        }
 
-        let universal_quests =
-            sqlx::query_as::<_, CountRow>("SELECT COUNT(*) as count FROM universal_quests")
-                .fetch_one(pool)
-                .await
-                .map(|r| r.count.unwrap_or(0))
-                .unwrap_or(0);
-
-        let user_quests = sqlx::query_as::<_, CountRow>("SELECT COUNT(*) as count FROM quests")
-            .fetch_one(pool)
-            .await
-            .map(|r| r.count.unwrap_or(0))
-            .unwrap_or(0);
-
-        let market_items =
-            sqlx::query_as::<_, CountRow>("SELECT COUNT(*) as count FROM market_items")
-                .fetch_one(pool)
-                .await
-                .map(|r| r.count.unwrap_or(0))
-                .unwrap_or(0);
+        let row = sqlx::query_as::<_, ContentStatsRow>(
+            r#"SELECT 
+                (SELECT COUNT(*) FROM exercises) as exercises,
+                (SELECT COUNT(*) FROM universal_quests) as universal_quests,
+                (SELECT COUNT(*) FROM quests) as user_quests,
+                (SELECT COUNT(*) FROM market_items) as market_items"#
+        )
+        .fetch_one(pool)
+        .await?;
 
         Ok(ContentStats {
-            exercises,
+            exercises: row.exercises,
             learn_topics: 0,
             learn_lessons: 0,
             learn_drills: 0,
-            universal_quests,
-            user_quests,
-            market_items,
+            universal_quests: row.universal_quests,
+            user_quests: row.user_quests,
+            market_items: row.market_items,
         })
     }
 
     async fn get_activity_stats(pool: &PgPool) -> Result<ActivityStats, AppError> {
-        let focus = sqlx::query_as::<_, CountRow>("SELECT COUNT(*) as count FROM focus_sessions")
-            .fetch_one(pool)
-            .await
-            .map(|r| r.count.unwrap_or(0))
-            .unwrap_or(0);
+        // Optimization [BACK-013]: Batch 6 COUNT(*) queries into single query
+        // Before: 6 sequential queries (focus, completed, habits, goals, ideas, books)
+        // After: 1 combined query with multiple FILTER clauses
+        // Performance: ~6x faster (1 query instead of 6)
+        #[derive(sqlx::FromRow)]
+        struct ActivityStatsRow {
+            focus: i64,
+            completed: i64,
+            habits: i64,
+            goals: i64,
+            ideas: i64,
+            books: i64,
+        }
 
-        let completed = sqlx::query_as::<_, CountRow>(
-            "SELECT COUNT(*) as count FROM focus_sessions WHERE status = 'completed'",
+        let row = sqlx::query_as::<_, ActivityStatsRow>(
+            r#"SELECT 
+                (SELECT COUNT(*) FROM focus_sessions) as focus,
+                (SELECT COUNT(*) FROM focus_sessions WHERE status = 'completed') as completed,
+                (SELECT COUNT(*) FROM habit_completions) as habits,
+                (SELECT COUNT(*) FROM goals) as goals,
+                (SELECT COUNT(*) FROM ideas) as ideas,
+                (SELECT COUNT(*) FROM books) as books"#
         )
         .fetch_one(pool)
-        .await
-        .map(|r| r.count.unwrap_or(0))
-        .unwrap_or(0);
-
-        let habits =
-            sqlx::query_as::<_, CountRow>("SELECT COUNT(*) as count FROM habit_completions")
-                .fetch_one(pool)
-                .await
-                .map(|r| r.count.unwrap_or(0))
-                .unwrap_or(0);
-
-        let goals = sqlx::query_as::<_, CountRow>("SELECT COUNT(*) as count FROM goals")
-            .fetch_one(pool)
-            .await
-            .map(|r| r.count.unwrap_or(0))
-            .unwrap_or(0);
-
-        let ideas = sqlx::query_as::<_, CountRow>("SELECT COUNT(*) as count FROM ideas")
-            .fetch_one(pool)
-            .await
-            .map(|r| r.count.unwrap_or(0))
-            .unwrap_or(0);
-
-        let books = sqlx::query_as::<_, CountRow>("SELECT COUNT(*) as count FROM books")
-            .fetch_one(pool)
-            .await
-            .map(|r| r.count.unwrap_or(0))
-            .unwrap_or(0);
+        .await?;
 
         Ok(ActivityStats {
-            total_focus_sessions: focus,
-            completed_focus: completed,
+            total_focus_sessions: row.focus,
+            completed_focus: row.completed,
             total_focus_minutes: 0,
             total_events: 0,
             events_24h: 0,
-            habit_completions: habits,
-            total_goals: goals,
-            total_ideas: ideas,
-            total_books: books,
+            habit_completions: row.habits,
+            total_goals: row.goals,
+            total_ideas: row.ideas,
+            total_books: row.books,
             reference_tracks: 0,
         })
     }

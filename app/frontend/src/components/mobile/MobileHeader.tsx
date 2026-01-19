@@ -6,6 +6,7 @@
  */
 
 import type { AuthUser } from "@/lib/auth/api-auth";
+import { OptimizedImage } from "@/lib/images/optimization";
 
 type User = AuthUser;
 import styles from "./MobileHeader.module.css";
@@ -29,7 +30,14 @@ export function MobileHeader({ isScrolled, user }: MobileHeaderProps) {
         {user && (
           <button className={styles.avatar}>
             {user.image ? (
-              <img src={user.image} alt={user.name || "User"} />
+              <OptimizedImage
+                src={user.image}
+                alt={user.name || "User"}
+                width={40}
+                height={40}
+                priority={false}
+                className={styles.image}
+              />
             ) : (
               <span>{user.name?.charAt(0) || user.email?.charAt(0) || "?"}</span>
             )}

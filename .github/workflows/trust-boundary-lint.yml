@@ -1,0 +1,35 @@
+name: Trust Boundary Linter
+
+on:
+  pull_request:
+    paths:
+      - "app/backend/crates/api/src/**/*.rs"
+      - ".github/workflows/trust-boundary-lint.yml"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    name: Check Trust Boundaries
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Run Trust Boundary Linter
+        run: |
+          chmod +x scripts/trust-boundary-linter.sh
+          scripts/trust-boundary-linter.sh
+        working-directory: ${{ github.workspace }}
+      
+      - name: Comment on PR if failed
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## ⚠️ Trust Boundary Violation Detected\n\nYour PR contains unmarked cryptographic functions. This is a security requirement to prevent E2EE regressions.\n\n**What to do:**\n1. Add one of these markers BEFORE the function:\n   - \`// server_trusted - Server-side business logic\`\n   - \`// client_private - Client-side crypto\`\n   - \`// e2ee_boundary - E2EE boundary (decrypt/encrypt)\`\n2. See docs: [Trust Boundaries](../../app/backend/crates/api/src/middleware/trust_boundary.rs)\n3. Re-push changes to re-run check\n\nFor questions, contact security team.`
+            })

@@ -6,6 +6,7 @@ use std::time::Duration;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 
+use crate::cache::QueryCache;
 use crate::config::AppConfig;
 use crate::storage::StorageClient;
 
@@ -18,6 +19,8 @@ pub struct AppState {
     pub db: PgPool,
     /// Storage client (R2/S3) - optional, only available if configured
     pub storage: Option<StorageClient>,
+    /// Query result cache (BACK-015) - reduces expensive query repetition
+    pub cache: QueryCache,
 }
 
 impl AppState {
@@ -58,11 +61,17 @@ impl AppState {
         );
 
         // Create database pool with explicit timeout settings
-        // Cloudflare containers may have network latency, so we use conservative timeouts
+        // BACK-014: Connection pool optimization for scalability
+        // - max_connections: Environment-aware sizing (5 dev, 20 prod)
+        // - min_connections: Eagerly created at startup to reduce latency
+        // - max_lifetime: Recycle connections every 30 min for state refresh
+        // - idle_timeout: Close idle connections after 10 min to free resources
         let db = PgPoolOptions::new()
             .max_connections(config.database.pool_size)
+            .min_connections(config.database.min_pool_size)
+            .max_lifetime(std::time::Duration::from_secs(config.database.connection_max_lifetime))
+            .idle_timeout(std::time::Duration::from_secs(config.database.connection_idle_timeout))
             .acquire_timeout(Duration::from_secs(30))
-            .idle_timeout(Duration::from_secs(600))
             .connect(&config.database.url)
             .await
             .map_err(|e| {
@@ -70,7 +79,10 @@ impl AppState {
                     error.type = "connection",
                     error.message = %e,
                     operation = "database_connection",
-                    db.pool_size = config.database.pool_size,
+                    db.max_connections = config.database.pool_size,
+                    db.min_connections = config.database.min_pool_size,
+                    db.max_lifetime_secs = config.database.connection_max_lifetime,
+                    db.idle_timeout_secs = config.database.connection_idle_timeout,
                     "Failed to connect to database"
                 );
                 e
@@ -79,8 +91,11 @@ impl AppState {
         tracing::info!(
             operation = "startup",
             component = "database",
-            db.pool_size = config.database.pool_size,
-            "Database connection pool created"
+            db.max_connections = config.database.pool_size,
+            db.min_connections = config.database.min_pool_size,
+            db.max_lifetime_secs = config.database.connection_max_lifetime,
+            db.idle_timeout_secs = config.database.connection_idle_timeout,
+            "Database connection pool created (BACK-014: optimized for scalability)"
         );
 
         // ✓ Migrations are now handled by the deployment pipeline (wipe-and-rebuild-neon job)
@@ -128,6 +143,7 @@ impl AppState {
             config: Arc::new(config.clone()),
             db,
             storage,
+            cache: QueryCache::new(),
         })
     }
 

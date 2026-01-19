@@ -3,20 +3,40 @@
  * Main layout wrapper with header and navigation
  *
  * Includes FocusStateProvider for deduplicating focus session polling
+ * 
+ * FRONT-008: Lazy-loaded components for code splitting
+ * - UnifiedBottomBar: 1056 lines - loaded on client-side hydration
+ * - Omnibar: 553 lines - loaded on demand when opened
  */
 
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { useAuth } from "@/lib/auth";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
-import { UnifiedBottomBar } from "./UnifiedBottomBar";
 import { MobileNav } from "./MobileNav";
-import { Omnibar } from "./Omnibar";
 import { TOSModal } from "./TOSModal";
 import { FocusStateProvider } from "@/lib/focus";
 import styles from "./AppShell.module.css";
+
+// FRONT-008: Lazy-load heavy shell components
+const UnifiedBottomBar = dynamic(
+  () => import("./UnifiedBottomBar").then(mod => mod.UnifiedBottomBar),
+  { 
+    ssr: false,
+    loading: () => <div style={{ height: "80px" }} /> // Placeholder for bottom bar height
+  }
+);
+
+const Omnibar = dynamic(
+  () => import("./Omnibar").then(mod => mod.Omnibar),
+  {
+    ssr: false,
+    loading: () => null // Don't show loading state for command palette
+  }
+);
 
 interface AppShellProps {
   children: React.ReactNode;

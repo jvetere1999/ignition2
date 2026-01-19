@@ -8,6 +8,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { OptimizedImage } from "@/lib/images/optimization";
 import { signOut } from "@/lib/auth/api-auth";
 import { useTheme, type Theme } from "@/lib/theme";
 import { isAdminEmail } from "@/lib/admin";
@@ -76,12 +77,13 @@ export function UserMenu({ user }: UserMenuProps) {
         aria-haspopup="true"
       >
         {user.image ? (
-          <Image
+          <OptimizedImage
             src={user.image}
             alt="User avatar"
             className={styles.avatar}
             width={32}
             height={32}
+            priority={false}
           />
         ) : (
           <span className={styles.avatarFallback}>{initials}</span>
