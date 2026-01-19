@@ -515,6 +515,345 @@
       "rust_type": "Vaults",
       "ts_type": "Vaults"
     },
+    "daw_project_files": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "project_name": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "file_path": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "file_size": {
+          "type": "BIGINT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "file_hash": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "content_type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "storage_key": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "encrypted": {
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "true"
+        },
+        "current_version_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "version_count": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "1"
+        },
+        "last_modified_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "DawProjectFiles",
+      "ts_type": "DawProjectFiles"
+    },
+    "daw_project_versions": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "project_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "version_number": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "file_size": {
+          "type": "BIGINT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "file_hash": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "storage_key": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "change_description": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "DawProjectVersions",
+      "ts_type": "DawProjectVersions"
+    },
+    "upload_sessions": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "project_name": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "content_type": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "total_size": {
+          "type": "BIGINT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "chunks_received": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "0"
+        },
+        "total_chunks": {
+          "type": "INTEGER",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "status": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "'uploading'"
+        },
+        "storage_key": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "expires_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "UploadSessions",
+      "ts_type": "UploadSessions"
+    },
+    "daw_audit_log": {
+      "fields": {
+        "id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": true
+        },
+        "project_id": {
+          "type": "UUID",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "action": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "project_name": {
+          "type": "TEXT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "file_size": {
+          "type": "BIGINT",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "details": {
+          "type": "JSONB",
+          "nullable": true,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "DawAuditLog",
+      "ts_type": "DawAuditLog"
+    },
     "crypto_policies": {
       "fields": {
         "version": {

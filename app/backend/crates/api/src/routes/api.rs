@@ -65,6 +65,10 @@ pub fn router() -> Router<Arc<AppState>> {
         .nest("/today", super::today::router())
         // Crypto policy module - E2EE algorithm versioning & management
         .nest("/crypto-policy", super::crypto_policy::router())
+        // DAW project file tracking - versioning and upload management
+        .nest("/daw", super::daw_projects::router())
+        // Privacy modes module - Private vs Standard work classification
+        .nest("/privacy", super::privacy_modes::router())
         // Search module - client-side encrypted search index
         .nest("/search", super::search::router())
         // Vault module - E2EE vault lock/unlock

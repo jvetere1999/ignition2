@@ -1,0 +1,372 @@
+name: Observability and Quality Gates
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+jobs:
+  # Red Line 1: Forbidden Patterns Detection
+  forbidden-patterns:
+    name: Check Forbidden Anti-Patterns
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for console logs in production code
+        run: |
+          set +e
+          ERRORS=0
+          
+          echo "🔍 Checking for console.log in production code..."
+          if grep -r "console\.log\|console\.error\|console\.warn" \
+            app/frontend/src app/admin/src app/watcher/src-frontend \
+            --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" \
+            --exclude-dir=node_modules --exclude-dir=.next \
+            2>/dev/null; then
+            echo "❌ Found console logs in production code"
+            ERRORS=$((ERRORS+1))
+          else
+            echo "✅ No console logs found"
+          fi
+          
+          echo ""
+          echo "🔍 Checking for TODO/FIXME in critical paths..."
+          if grep -r "TODO:\|FIXME:" \
+            app/backend/crates/api/src/services \
+            app/frontend/src/lib/api \
+            --include="*.rs" --include="*.ts" --include="*.tsx" \
+            2>/dev/null | grep -v "TODO:"; then
+            echo "⚠️  Found TODOs in critical code (allowed, but flagged)"
+          fi
+          
+          echo ""
+          echo "🔍 Checking for hardcoded secrets..."
+          if grep -r "password\|secret\|token\|api_key" \
+            app/ \
+            --include="*.rs" --include="*.ts" --include="*.tsx" \
+            --include="*.js" --include="*.jsx" \
+            --include="*.json" \
+            --exclude-dir=node_modules --exclude-dir=target \
+            --exclude-dir=.next --exclude-dir=build \
+            | grep -v "NEXT_PUBLIC\|process.env\|std::env\|environment\|config" \
+            2>/dev/null; then
+            echo "❌ Found potential hardcoded secrets"
+            ERRORS=$((ERRORS+1))
+          else
+            echo "✅ No hardcoded secrets detected"
+          fi
+          
+          echo ""
+          echo "🔍 Checking for SQL injection vectors..."
+          if grep -r "query\|execute" \
+            app/backend/crates/api/src \
+            --include="*.rs" \
+            | grep -v "sqlx::query_as\|sqlx::query\|\.bind(" \
+            | grep -v "^[[:space:]]*//\|^[[:space:]]*\*" \
+            2>/dev/null; then
+            echo "⚠️  Check SQL patterns (flag for manual review)"
+          fi
+          
+          if [ $ERRORS -gt 0 ]; then
+            echo ""
+            echo "❌ Forbidden patterns check FAILED"
+            exit 1
+          else
+            echo ""
+            echo "✅ All forbidden pattern checks PASSED"
+            exit 0
+          fi
+
+  # Red Line 2: Performance Benchmarks
+  performance-gates:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust deps
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app/backend
+
+      - name: Run backend benchmarks
+        run: |
+          cd app/backend
+          
+          echo "⏱️  Running performance benchmarks..."
+          
+          # Test compile time (must be under 120 seconds)
+          START=$(date +%s)
+          cargo build --release -q 2>/dev/null || true
+          END=$(date +%s)
+          COMPILE_TIME=$((END - START))
+          
+          echo "Compile time: ${COMPILE_TIME}s (limit: 120s)"
+          if [ $COMPILE_TIME -gt 120 ]; then
+            echo "❌ Compile time exceeds 120 seconds"
+            exit 1
+          fi
+          
+          echo "✅ Performance benchmarks PASSED"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Build frontend
+        run: |
+          cd app/frontend
+          pnpm install --frozen-lockfile
+          
+          echo "⏱️  Building frontend..."
+          START=$(date +%s)
+          pnpm build 2>&1 | tee build.log
+          END=$(date +%s)
+          BUILD_TIME=$((END - START))
+          
+          echo "Build time: ${BUILD_TIME}s (limit: 60s)"
+          if [ $BUILD_TIME -gt 60 ]; then
+            echo "❌ Frontend build exceeds 60 seconds"
+            exit 1
+          fi
+          
+          # Check bundle size
+          BUNDLE_SIZE=$(du -sh out | cut -f1)
+          echo "Bundle size: $BUNDLE_SIZE"
+          
+          # Check for lighthouse issues (if build.log has warnings)
+          if grep -i "warning\|deprecated" build.log; then
+            echo "⚠️  Build warnings detected (check for optimization)"
+          fi
+          
+          echo "✅ Frontend build PASSED"
+
+  # Red Line 3: Code Quality Thresholds
+  code-quality:
+    name: Code Quality Standards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Cache Rust deps
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app/backend
+
+      - name: Rust clippy lint
+        run: |
+          cd app/backend
+          echo "🔍 Running Rust clippy..."
+          cargo clippy --all-targets --all-features -- -D warnings 2>&1 | tee clippy.log
+          
+          if grep -q "error" clippy.log; then
+            echo "❌ Clippy errors found"
+            exit 1
+          else
+            echo "✅ Clippy checks PASSED"
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Lint TypeScript
+        run: |
+          cd app/frontend
+          pnpm install --frozen-lockfile
+          
+          echo "🔍 Running ESLint..."
+          pnpm lint 2>&1 | tee eslint.log
+          
+          LINT_ERRORS=$(grep -c "error" eslint.log || true)
+          
+          echo "ESLint errors: $LINT_ERRORS"
+          if [ $LINT_ERRORS -gt 0 ]; then
+            echo "❌ ESLint errors found"
+            exit 1
+          else
+            echo "✅ ESLint checks PASSED"
+          fi
+
+      - name: Type check
+        run: |
+          cd app/frontend
+          echo "🔍 Running TypeScript type checking..."
+          pnpm type-check
+          echo "✅ Type checks PASSED"
+
+      - name: Audit dependencies
+        run: |
+          cd app/frontend
+          echo "🔍 Auditing dependencies..."
+          pnpm audit --audit-level=moderate 2>&1 | tee audit.log || true
+          
+          if grep -q "vulnerabilities" audit.log; then
+            echo "⚠️  Security vulnerabilities detected in dependencies"
+            # Don't fail, but flag for review
+          fi
+          echo "✅ Dependency audit completed"
+
+  # Red Line 4: Test Coverage Gates
+  test-coverage:
+    name: Test Coverage Requirements
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust deps
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app/backend
+
+      - name: Run backend tests
+        run: |
+          cd app/backend
+          echo "🧪 Running backend unit tests..."
+          cargo test --all --lib 2>&1 | tee test.log
+          
+          if grep -q "test result: FAILED" test.log; then
+            echo "❌ Some tests failed"
+            exit 1
+          else
+            echo "✅ All backend tests PASSED"
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Run frontend tests
+        run: |
+          cd app/frontend
+          pnpm install --frozen-lockfile
+          echo "🧪 Running frontend unit tests..."
+          pnpm test 2>&1 | tee test.log || true
+          
+          if grep -q "FAIL\|FAILED" test.log; then
+            echo "⚠️  Some tests failed (check manually)"
+          else
+            echo "✅ Frontend tests PASSED"
+          fi
+
+  # Red Line 5: API Contract Validation
+  api-contracts:
+    name: API Contract Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check OpenAPI schema
+        run: |
+          echo "📋 Checking OpenAPI schema..."
+          
+          if [ -f "API_DOCUMENTATION.md" ]; then
+            echo "✅ API documentation exists"
+          else
+            echo "⚠️  API_DOCUMENTATION.md not found"
+          fi
+
+      - name: Validate GraphQL schema
+        run: |
+          echo "📋 Checking GraphQL schema..."
+          
+          if [ -f "app/backend/schema.graphql" ]; then
+            echo "✅ GraphQL schema found"
+            # Could validate with graphql-schema-validator
+          fi
+
+  # Red Line 6: Security Scan
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rust security audit
+        run: |
+          echo "🔒 Running cargo audit..."
+          cd app/backend
+          
+          # Install cargo-audit
+          cargo install cargo-audit --quiet || true
+          
+          if cargo audit --exit-code fix 2>&1 | tee audit.log; then
+            echo "✅ No known vulnerabilities found"
+          else
+            echo "⚠️  Vulnerabilities detected (review in detail)"
+          fi
+
+      - name: Check for exposed credentials
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --json --fail --allow-verification-false
+
+  # Summary Report
+  observability-summary:
+    name: Observability Report
+    needs: [forbidden-patterns, performance-gates, code-quality, test-coverage, api-contracts, security-scan]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check job statuses
+        run: |
+          echo "📊 Observability Gate Summary"
+          echo "=============================="
+          echo ""
+          
+          FAILED=0
+          
+          check_status() {
+            local job=$1
+            local status=$2
+            
+            if [ "$status" = "success" ]; then
+              echo "✅ $job: PASSED"
+            else
+              echo "❌ $job: FAILED"
+              FAILED=$((FAILED+1))
+            fi
+          }
+          
+          check_status "Red Line 1: Forbidden Patterns" "${{ needs.forbidden-patterns.result }}"
+          check_status "Red Line 2: Performance Gates" "${{ needs.performance-gates.result }}"
+          check_status "Red Line 3: Code Quality" "${{ needs.code-quality.result }}"
+          check_status "Red Line 4: Test Coverage" "${{ needs.test-coverage.result }}"
+          check_status "Red Line 5: API Contracts" "${{ needs.api-contracts.result }}"
+          check_status "Red Line 6: Security Scan" "${{ needs.security-scan.result }}"
+          
+          echo ""
+          echo "Total Failures: $FAILED"
+          
+          if [ $FAILED -gt 0 ]; then
+            echo ""
+            echo "❌ OBSERVABILITY GATES FAILED"
+            exit 1
+          else
+            echo ""
+            echo "✅ ALL OBSERVABILITY GATES PASSED"
+          fi

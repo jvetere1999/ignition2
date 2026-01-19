@@ -1256,6 +1256,7 @@ dependencies = [
  "chrono",
  "config",
  "dotenvy",
+ "hmac",
  "oauth2",
  "paste",
  "rand 0.8.5",

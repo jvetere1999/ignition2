@@ -1,0 +1,174 @@
+name: Build and Release DAW Watcher
+
+on:
+  push:
+    tags:
+      - "watcher-v*"
+
+jobs:
+  build:
+    name: Build DAW Watcher
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact: DAW Watcher.dmg
+            artifact_path: src-tauri/target/release/bundle/dmg/DAW\ Watcher.dmg
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact: DAW Watcher Intel.dmg
+            artifact_path: src-tauri/target/release/bundle/dmg/DAW\ Watcher.dmg
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact: DAW Watcher.msi
+            artifact_path: src-tauri/target/release/bundle/msi/DAW\ Watcher_*_x64.msi
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macos'
+        run: |
+          brew install webkit2gtk
+
+      - name: Install dependencies (Windows)
+        if: runner.os == 'windows'
+        run: |
+          choco install -y visualstudio2022community visualstudio2022-workload-nativedesktop
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install frontend dependencies
+        working-directory: app/watcher/src-frontend
+        run: pnpm install
+
+      - name: Build Tauri app
+        working-directory: app/watcher
+        run: cargo tauri build --target ${{ matrix.target }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}-build
+          path: app/watcher/${{ matrix.artifact_path }}
+          if-no-files-found: error
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: Get tag info
+        id: tag_info
+        run: |
+          TAG=${{ github.ref }}
+          echo "tag=${TAG#refs/tags/}" >> $GITHUB_OUTPUT
+          echo "version=${TAG#refs/tags/watcher-}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.tag_info.outputs.tag }}
+          name: DAW Watcher ${{ steps.tag_info.outputs.version }}
+          body: |
+            # DAW Watcher ${{ steps.tag_info.outputs.version }}
+
+            ## Changes
+            See commit history for details.
+
+            ## Installation
+
+            ### macOS
+            1. Download the latest `.dmg` file for your architecture:
+               - **Apple Silicon (M1/M2/M3):** `DAW Watcher.dmg`
+               - **Intel Mac:** `DAW Watcher Intel.dmg`
+            2. Double-click to mount the disk image
+            3. Drag "DAW Watcher" to the Applications folder
+            4. Launch from Applications
+
+            ### Windows
+            1. Download the `.msi` installer
+            2. Run the installer and follow the prompts
+            3. Launch from Start Menu or Desktop shortcut
+
+            ## Features
+            - 🎵 Multi-DAW support (Ableton, FL Studio, Logic, Cubase, Pro Tools)
+            - 🔒 End-to-end AES-256-GCM encryption
+            - 📁 Automatic file change detection
+            - 💾 Chunked uploads with resume support
+            - ⚡ Minimal resource usage (4-5MB, ~30MB memory)
+            - 🎯 System tray background operation
+
+            ## System Requirements
+
+            ### macOS
+            - macOS 10.13+
+            - Apple Silicon (M1/M2/M3) or Intel processor
+            - 50 MB free disk space
+
+            ### Windows
+            - Windows 10 or later
+            - x86_64 architecture
+            - 50 MB free disk space
+
+            ## Support
+            For issues and feature requests, visit: https://github.com/passionateos/passion-os-next
+
+          files: |
+            artifacts/**/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  notify:
+    name: Notify Release
+    needs: release
+    runs-on: ubuntu-latest
+    if: success()
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Post to Slack (Optional)
+        if: vars.SLACK_WEBHOOK_URL != ''
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "🎉 DAW Watcher released",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*DAW Watcher ${{ github.ref_name }}* released\n${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

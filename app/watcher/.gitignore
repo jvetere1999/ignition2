@@ -1,0 +1,35 @@
+# Rust
+/target/
+Cargo.lock
+**/*.rs.bk
+
+# Tauri
+/src-tauri/target/
+.tauri/
+
+# Node
+node_modules/
+dist/
+.pnpm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build
+*.dmg
+*.app
+*.exe
+dist_electron/
+
+# Configuration
+src-tauri/tauri.conf.json.backup

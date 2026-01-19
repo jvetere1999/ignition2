@@ -36,6 +36,7 @@ url = "2.5"
 rand = { version = "0.8", default-features = false, features = ["std", "std_rng"] }
 base64 = "0.22"
 sha2 = { version = "0.10", default-features = false, features = ["std"] }
+hmac = { version = "0.12", default-features = false, features = ["std"] }
 bcrypt = "0.16"
 
 # Serialization
