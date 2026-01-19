@@ -1,5 +1,6 @@
 name: Deploy to Production
 
+# Force deployment Jan 19 2026 after build setup fixes
 on:
   push:
     branches: [production]
