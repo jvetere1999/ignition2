@@ -103,7 +103,7 @@
 }
 
 .terms a:hover {
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 .backLink {
@@ -138,7 +138,7 @@
   content: '';
   flex: 1;
   height: 1px;
-  background-color: var(--color-border);
+  background-color: var(--color-border-primary);
 }
 
 .linkText {
