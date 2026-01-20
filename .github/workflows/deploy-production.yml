@@ -156,6 +156,112 @@ jobs:
           retention-days: 1
           compression-level: 0
 
+  build-watcher:
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: app/watcher/package-lock.json
+      
+      - name: Setup Rust with cargo cache
+        uses: dtolnay/rust-toolchain@stable
+      
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('app/watcher/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
+      
+      - name: Cache cargo build
+        uses: actions/cache@v4
+        with:
+          path: app/watcher/target
+          key: ${{ runner.os }}-cargo-build-watcher-${{ hashFiles('app/watcher/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-build-watcher-
+      
+      - name: Build watcher frontend
+        working-directory: ./app/watcher/src-frontend
+        run: |
+          npm ci
+          npm run build || {
+            echo "✗ Watcher frontend build failed"
+            exit 1
+          }
+          echo "✓ Watcher frontend builds successfully"
+      
+      - name: Build watcher Tauri app
+        working-directory: ./app/watcher
+        run: |
+          npm ci
+          npm run build || {
+            echo "✗ Watcher build failed"
+            exit 1
+          }
+          echo "✓ Watcher builds successfully"
+      
+      - name: Upload watcher build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: watcher-build
+          path: app/watcher/src-tauri/target/release/
+          retention-days: 1
+
+  prebuild-tests:
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
+    needs: build-checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      
+      - name: Download frontend build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: .
+      
+      - name: Download admin build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: admin-build
+          path: .
+      
+      - name: Decompress for testing
+        run: |
+          tar -xzf .next-frontend.tar.gz -C app/frontend
+          tar -xzf .next-admin.tar.gz -C app/admin
+      
+      - name: Smoke test frontend build
+        run: |
+          if [ -f "app/frontend/.next/server/app/page.js" ]; then
+            echo "✓ Frontend build structure valid"
+          else
+            echo "✗ Frontend build missing expected files"
+            exit 1
+          fi
+      
+      - name: Smoke test admin build
+        run: |
+          if [ -f "app/admin/.next/server/app/page.js" ]; then
+            echo "✓ Admin build structure valid"
+          else
+            echo "✗ Admin build missing expected files"
+            exit 1
+          fi
+
   wipe-and-rebuild-neon:
     if: |
       github.event_name == 'workflow_dispatch' ||
@@ -278,8 +384,8 @@ jobs:
         run: flyctl logs --app ignition-api --no-tail | tail -50
 
   deploy-frontend:
-    if: always() && needs.build-and-deploy-backend.result == 'success'
-    needs: [build-checks, build-and-deploy-backend]
+    if: always() && needs.build-checks.result == 'success'
+    needs: build-checks
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -329,8 +435,8 @@ jobs:
           exit 1
 
   deploy-admin:
-    if: always() && needs.build-and-deploy-backend.result == 'success'
-    needs: [build-checks, build-and-deploy-backend]
+    if: always() && needs.build-checks.result == 'success'
+    needs: build-checks
     runs-on: ubuntu-latest
     environment:
       name: production
