@@ -342,27 +342,16 @@ jobs:
         with:
           node-version: '22'
       
-      - name: Download frontend build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-build
-          path: .
-      
-      - name: Decompress frontend build
-        run: |
-          tar -xzf .next-frontend.tar.gz -C app/frontend
-          rm .next-frontend.tar.gz
-      
-      - name: Install frontend dependencies for deploy only
-        working-directory: ./app/frontend
-        run: |
-          npm ci --only=prod
-      
-      - name: Deploy to Cloudflare Workers
+      - name: Build and Deploy Frontend
         working-directory: ./app/frontend
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: npx wrangler deploy
+        run: |
+          rm -rf node_modules package-lock.json
+          npm cache clean --force
+          npm install
+          npm run build:worker --no-telemetry
+          npx wrangler deploy
       
       - name: Verify frontend
         run: |
@@ -393,27 +382,16 @@ jobs:
         with:
           node-version: '22'
       
-      - name: Download admin build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: admin-build
-          path: .
-      
-      - name: Decompress admin build
-        run: |
-          tar -xzf .next-admin.tar.gz -C app/admin
-          rm .next-admin.tar.gz
-      
-      - name: Install admin dependencies for deploy only
-        working-directory: ./app/admin
-        run: |
-          npm ci --only=prod
-      
-      - name: Deploy to Cloudflare Workers
+      - name: Build and Deploy Admin
         working-directory: ./app/admin
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: npx wrangler deploy
+        run: |
+          rm -rf node_modules package-lock.json
+          npm cache clean --force
+          npm install
+          npm run build:worker --no-telemetry
+          npx wrangler deploy
 
   post-deployment-tests:
     if: always()
@@ -527,8 +505,7 @@ jobs:
       - name: Generate valid RGBA icons
         working-directory: app/watcher
         run: |
-          chmod +x create_valid_icons.sh
-          ./create_valid_icons.sh
+          python3 ../../create_icons_valid.py
 
       - name: Build Tauri app
         working-directory: app/watcher
