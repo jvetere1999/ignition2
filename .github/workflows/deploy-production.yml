@@ -213,7 +213,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: watcher-build
-          path: app/watcher/src-tauri/target/release/
+          path: app/watcher/target/release/
           retention-days: 1
 
   prebuild-tests:
