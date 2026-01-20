@@ -104,7 +104,7 @@ jobs:
         with:
           node-version: '22'
       
-      - name: Verify frontend builds
+      - name: Verify and build frontend
         working-directory: ./app/frontend
         run: |
           rm -rf node_modules package-lock.json
@@ -116,7 +116,7 @@ jobs:
           }
           echo "✓ Frontend builds successfully"
       
-      - name: Verify admin builds
+      - name: Verify and build admin
         working-directory: ./app/admin
         run: |
           rm -rf node_modules package-lock.json
@@ -130,15 +130,13 @@ jobs:
       
       - name: Compress frontend build artifact
         run: |
-          cd app/frontend
-          tar -czf ../../.next-frontend.tar.gz .next
-          echo "Frontend artifact size: $(du -h ../../.next-frontend.tar.gz | cut -f1)"
+          tar -czf $PWD/.next-frontend.tar.gz -C app/frontend .next
+          echo "Frontend artifact size: $(du -h $PWD/.next-frontend.tar.gz | cut -f1)"
       
       - name: Compress admin build artifact
         run: |
-          cd app/admin
-          tar -czf ../../.next-admin.tar.gz .next
-          echo "Admin artifact size: $(du -h ../../.next-admin.tar.gz | cut -f1)"
+          tar -czf $PWD/.next-admin.tar.gz -C app/admin .next
+          echo "Admin artifact size: $(du -h $PWD/.next-admin.tar.gz | cut -f1)"
       
       - name: Upload frontend build artifact
         uses: actions/upload-artifact@v4
