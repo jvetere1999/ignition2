@@ -173,7 +173,7 @@ export default function HomePage() {
         <p className={styles.ctaDescription}>
           Start with focus, movement, or learning. Pick one thing. Build momentum.
         </p>
-        <Link href="/auth/signin" className={styles.ctaButton}>
+        <Link href="/auth/signup" className={styles.ctaButton}>
           Start Ignition
         </Link>
         <p className={styles.ageNotice}>
