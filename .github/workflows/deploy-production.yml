@@ -499,7 +499,7 @@ jobs:
 
       - name: Generate valid RGBA icons
         run: |
-          python3 -m pip install Pillow cairosvg -q
+          python3 -m pip install Pillow --break-system-packages -q
           python3 create_icons_valid.py
 
       - name: Build Tauri app
