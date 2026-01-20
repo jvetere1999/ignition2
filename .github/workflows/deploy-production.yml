@@ -228,7 +228,7 @@ jobs:
 
   build-and-deploy-backend:
     if: needs.wipe-and-rebuild-neon.result == 'success'
-    needs: [build-checks, wipe-and-rebuild-neon]
+    needs: wipe-and-rebuild-neon
     env:
       SKIP_MIGRATIONS: 'true'
     runs-on: ubuntu-latest
