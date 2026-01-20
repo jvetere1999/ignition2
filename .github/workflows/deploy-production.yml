@@ -123,6 +123,7 @@ jobs:
         run: |
           npm cache clean --force
           npm ci
+          npm rebuild
           npm run build:worker --no-telemetry || {
             echo "✗ Admin build failed"
             exit 1
