@@ -12,14 +12,14 @@ export function SignInButtons({ isSignUp = false }: SignInButtonsProps) {
 
   const handleGoogleSignIn = () => {
     setIsLoading(true);
-    // Redirect to OAuth flow
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online'}/api/auth/signin/google`;
+    // Redirect to OAuth flow - backend will redirect back to /auth/callback
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online'}/api/auth/signin/google?redirect_uri=${encodeURIComponent(`${window.location.origin}/auth/callback`)}`;
   };
 
   const handleAzureSignIn = () => {
     setIsLoading(true);
-    // Redirect to OAuth flow
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online'}/api/auth/signin/azure`;
+    // Redirect to OAuth flow - backend will redirect back to /auth/callback
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online'}/api/auth/signin/azure?redirect_uri=${encodeURIComponent(`${window.location.origin}/auth/callback`)}`;
   };
 
   return (

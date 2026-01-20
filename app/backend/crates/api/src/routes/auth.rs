@@ -29,15 +29,18 @@ use crate::state::AppState;
 /// Any other redirect URI will be rejected to prevent open redirect attacks.
 const ALLOWED_REDIRECT_URIS: &[&str] = &[
     // Production
+    "https://ignition.ecent.online/auth/callback",
     "https://ignition.ecent.online/today",
     "https://ignition.ecent.online/",
     "https://admin.ignition.ecent.online/dashboard",
     "https://admin.ignition.ecent.online/",
     // Development & Local
+    "http://localhost:3000/auth/callback",
     "http://localhost:3000/today",
     "http://localhost:3000/",
     "http://localhost:3001/dashboard",
     "http://localhost:3001/",
+    "http://127.0.0.1:3000/auth/callback",
     "http://127.0.0.1:3000/today",
     "http://127.0.0.1:3000/",
     "http://127.0.0.1:3001/dashboard",
