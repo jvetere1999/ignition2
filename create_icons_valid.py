@@ -1,36 +1,44 @@
 #!/usr/bin/env python3
 """
-Create minimal valid icon files for Tauri build.
-These are bare minimum PNG and ICO files that pass validation.
+Create valid RGBA icon files for Tauri build from SVG sources.
+Renders the app icon SVG to PNG files with RGBA color space.
 """
-import base64
 import os
-import struct
-
-# Minimal 1x1 transparent PNG
-# This is a valid, minimal PNG file 
-MINIMAL_PNG_BASE64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwADhgGAWjR9awAAAABJRU5ErkJggg=="
-
-# Decode to binary
-png_data = base64.b64decode(MINIMAL_PNG_BASE64)
+from PIL import Image
+import cairosvg
+from io import BytesIO
 
 icons_dir = "app/watcher/icons"
 os.makedirs(icons_dir, exist_ok=True)
 
-# Write all PNG files  
-for filename in ["32x32.png", "128x128.png", "128x128@2x.png", "tray_icon.png"]:
+# Use the app icon SVG as source
+svg_source = "app/frontend/src/app/icon.svg"
+
+# Define output sizes
+sizes_with_names = [
+    (32, "32x32.png"),
+    (128, "128x128.png"),
+    (256, "128x128@2x.png"),  # @2x is 2x the size
+    (128, "tray_icon.png"),
+]
+
+print(f"Rendering SVG icon from: {svg_source}")
+
+for size, filename in sizes_with_names:
+    # Render SVG to PNG via cairosvg
+    png_data = cairosvg.svg2png(
+        url=svg_source,
+        write_to=BytesIO(),
+        output_width=size,
+        output_height=size,
+    )
+    
+    # Convert to RGBA if needed
+    img = Image.open(BytesIO(png_data)).convert("RGBA")
+    
     filepath = os.path.join(icons_dir, filename)
-    with open(filepath, "wb") as f:
-        f.write(png_data)
-    print(f"✓ Created {filepath} ({len(png_data)} bytes)")
+    img.save(filepath, "PNG")
+    print(f"✓ Created {filepath} ({size}x{size} RGBA)")
 
-# Create minimal ICO file 
-# ICO format: 3-byte header + image data 
-ico_data = struct.pack("<HHH", 0, 1, 1)  # Reserved, type (icon), count
-ico_data += struct.pack("<BBBBIHHI", 1, 1, 0, 0, 1, 32, len(png_data), 22)  # Image entry
-ico_data += png_data
-
-ico_path = os.path.join(icons_dir, "icon.ico")
-with open(ico_path, "wb") as f:
-    f.write(ico_data)
-print(f"✓ Created {ico_path} ({len(ico_data)} bytes)")
+print("\n✓ All PNG icons created from SVG in RGBA format")
+print("✓ Note: icon.icns and icon.ico must be generated separately on their respective platforms")

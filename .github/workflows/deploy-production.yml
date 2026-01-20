@@ -166,27 +166,21 @@ jobs:
         with:
           node-version: '22'
       
-      - name: Download frontend build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-build
-          path: .
-      
-      - name: Download admin build artifact
-        uses: actions/download-artifact@v4
-        continue-on-error: true
-        with:
-          name: admin-build
-          path: .
-      
-      - name: Decompress for testing
+      - name: Build frontend for testing
+        working-directory: ./app/frontend
         run: |
-          tar -xzf .next-frontend.tar.gz -C app/frontend
-          if [ -f .next-admin.tar.gz ]; then
-            tar -xzf .next-admin.tar.gz -C app/admin
-          else
-            echo "Admin artifact not found, skipping admin decompression"
-          fi
+          rm -rf node_modules package-lock.json
+          npm cache clean --force
+          npm install
+          npm run build:worker --no-telemetry
+      
+      - name: Build admin for testing
+        working-directory: ./app/admin
+        run: |
+          rm -rf node_modules package-lock.json
+          npm cache clean --force
+          npm install
+          npm run build:worker --no-telemetry
       
       - name: Smoke test frontend build
         run: |
@@ -202,7 +196,8 @@ jobs:
           if [ -f "app/admin/.next/server/app/page.js" ]; then
             echo "✓ Admin build structure valid"
           else
-            echo "⚠️ Admin build not available, skipping validation"
+            echo "✗ Admin build missing expected files"
+            exit 1
           fi
 
   wipe-and-rebuild-neon:
@@ -503,9 +498,9 @@ jobs:
         run: pnpm install
 
       - name: Generate valid RGBA icons
-        working-directory: app/watcher
         run: |
-          python3 ../../create_icons_valid.py
+          python3 -m pip install Pillow cairosvg -q
+          python3 create_icons_valid.py
 
       - name: Build Tauri app
         working-directory: app/watcher
