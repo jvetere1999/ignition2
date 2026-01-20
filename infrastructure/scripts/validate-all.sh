@@ -301,8 +301,8 @@ cd "$PROJECT_ROOT"
 # Check key files exist
 key_files=(
   "README.md"
-  "schema.json"
-  "playwright.api.config.ts"
+  "app/database/config/schema.json"
+  "tests/playwright.api.config.ts"
   "app/backend/Cargo.toml"
   "app/frontend/package.json"
 )

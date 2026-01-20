@@ -37,7 +37,7 @@ jobs:
       
       - name: Validate schema.json
         run: |
-          python3 -c "import json; schema = json.load(open('schema.json')); print(f'✓ Schema v{schema[\"version\"]}: {len(schema[\"tables\"])} tables')"
+          python3 -c "import json; schema = json.load(open('app/database/config/schema.json')); print(f'✓ Schema v{schema[\"version\"]}: {len(schema[\"tables\"])} tables')"
       
       - name: Generate Rust, TypeScript, and SQL from schema.json
         run: |
