@@ -20,6 +20,8 @@ pub mod macros; // Boilerplate reduction macros for common patterns
 // PUBLIC MODULES - Domain-specific models and repositories
 pub mod admin_models;
 pub mod admin_repos;
+pub mod authenticator_models;
+pub mod authenticator_repos;
 pub mod books_models;
 pub mod books_repos;
 pub mod crypto_policy_models;

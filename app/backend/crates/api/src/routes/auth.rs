@@ -17,9 +17,11 @@ use axum::{
 use serde::{Deserialize, Serialize};
 
 use crate::db::oauth_repos::OAuthStateRepo;
+use crate::db::repos::{UserRepo, SessionRepo, generate_session_token};
+use crate::db::models::CreateSessionInput;
 use crate::error::{AppError, AppResult};
 use crate::middleware::auth::{create_logout_cookie, create_session_cookie, AuthContext};
-use crate::services::{AuthService, OAuthService};
+use crate::services::{AuthService, OAuthService, WebAuthnService};
 use crate::state::AppState;
 
 /// Allowed redirect URIs - must match frontend deployment URLs
@@ -102,6 +104,11 @@ pub fn router() -> Router<Arc<AppState>> {
         .route("/signin/azure", get(signin_azure))
         .route("/callback/google", get(callback_google))
         .route("/callback/azure", get(callback_azure))
+        // WebAuthn endpoints
+        .route("/webauthn/register-options", get(webauthn_register_options))
+        .route("/webauthn/register-verify", post(webauthn_register_verify))
+        .route("/webauthn/signin-options", get(webauthn_signin_options))
+        .route("/webauthn/signin-verify", post(webauthn_signin_verify))
         // Session endpoints
         .route("/session", get(get_session))
         .route("/signout", post(signout))
@@ -763,5 +770,194 @@ async fn accept_tos(
     Ok(Response::builder()
         .status(StatusCode::OK)
         .body(axum::body::Body::empty())
+        .map_err(|e| AppError::Internal(e.to_string()))?)
+}
+
+// ============================================================================
+// WEBAUTHN HANDLERS
+// ============================================================================
+
+#[derive(Deserialize)]
+pub struct WebAuthnRegisterOptionsRequest {
+    pub user_name: Option<String>,
+    pub user_display_name: Option<String>,
+}
+
+/// Get options for WebAuthn credential registration
+async fn webauthn_register_options(
+    State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthContext>,
+    Json(payload): Json<WebAuthnRegisterOptionsRequest>,
+) -> AppResult<Json<serde_json::Value>> {
+    tracing::debug!(
+        user_id = %auth.user_id,
+        operation = "webauthn_register_options",
+        "Starting WebAuthn registration flow"
+    );
+
+    let service = WebAuthnService::new(
+        "ignition.ecent.online",
+        &state.config.server.frontend_url,
+    );
+
+    let user_name = payload.user_name.unwrap_or_else(|| auth.email.clone());
+    let user_display_name = payload
+        .user_display_name
+        .unwrap_or_else(|| auth.name.clone());
+
+    let options = service.start_register(auth.user_id, &user_name, &user_display_name)?;
+
+    tracing::info!(
+        user_id = %auth.user_id,
+        operation = "webauthn_register_options",
+        "WebAuthn registration options generated"
+    );
+
+    Ok(Json(options))
+}
+
+#[derive(Deserialize)]
+pub struct WebAuthnRegisterVerifyRequest {
+    pub credential: serde_json::Value,
+}
+
+#[derive(Serialize)]
+pub struct WebAuthnRegisterVerifyResponse {
+    pub success: bool,
+    pub credential_id: String,
+}
+
+/// Verify and store WebAuthn credential
+async fn webauthn_register_verify(
+    State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthContext>,
+    Json(payload): Json<WebAuthnRegisterVerifyRequest>,
+) -> AppResult<Json<WebAuthnRegisterVerifyResponse>> {
+    tracing::debug!(
+        user_id = %auth.user_id,
+        operation = "webauthn_register_verify",
+        "Verifying WebAuthn credential"
+    );
+
+    let service = WebAuthnService::new(
+        "ignition.ecent.online",
+        &state.config.server.frontend_url,
+    );
+
+    let credential_id = service
+        .finish_register(&state.db, auth.user_id, payload.credential)
+        .await?;
+
+    tracing::info!(
+        user_id = %auth.user_id,
+        credential_id = %credential_id,
+        operation = "webauthn_register_verify",
+        "WebAuthn credential registered successfully"
+    );
+
+    Ok(Json(WebAuthnRegisterVerifyResponse {
+        success: true,
+        credential_id: credential_id.to_string(),
+    }))
+}
+
+/// Get options for WebAuthn assertion (signin)
+async fn webauthn_signin_options(
+    State(state): State<Arc<AppState>>,
+) -> AppResult<Json<serde_json::Value>> {
+    tracing::debug!(operation = "webauthn_signin_options", "Starting WebAuthn signin flow");
+
+    let service = WebAuthnService::new(
+        "ignition.ecent.online",
+        &state.config.server.frontend_url,
+    );
+
+    let options = service.start_signin()?;
+
+    tracing::info!(operation = "webauthn_signin_options", "WebAuthn signin options generated");
+
+    Ok(Json(options))
+}
+
+#[derive(Deserialize)]
+pub struct WebAuthnSigninVerifyRequest {
+    pub credential: serde_json::Value,
+}
+
+#[derive(Serialize)]
+pub struct WebAuthnSigninVerifyResponse {
+    pub user_id: String,
+    pub session_token: String,
+    pub user: serde_json::Value,
+}
+
+/// Verify WebAuthn assertion and create session
+async fn webauthn_signin_verify(
+    State(state): State<Arc<AppState>>,
+    Json(payload): Json<WebAuthnSigninVerifyRequest>,
+) -> AppResult<Response> {
+    tracing::debug!(operation = "webauthn_signin_verify", "Verifying WebAuthn assertion");
+
+    let service = WebAuthnService::new(
+        "ignition.ecent.online",
+        &state.config.server.frontend_url,
+    );
+
+    let (user_id, _counter) = service
+        .finish_signin(&state.db, payload.credential)
+        .await?;
+
+    tracing::debug!(
+        user_id = %user_id,
+        operation = "webauthn_signin_verify",
+        "WebAuthn assertion verified, creating session"
+    );
+
+    // Fetch user data
+    let user = UserRepo::find_by_id(&state.db, user_id)
+        .await?
+        .ok_or_else(|| AppError::NotFound("User not found".to_string()))?;
+
+    // Create session
+    let session = SessionRepo::create(
+        &state.db,
+        CreateSessionInput {
+            user_id,
+            user_agent: None,
+            ip_address: Some("0.0.0.0".to_string()), // In production, extract from request
+        },
+        (state.config.auth.session_ttl_seconds / 86400) as i64, // Convert to days
+    )
+    .await?;
+
+    // Create session cookie
+    let cookie = create_session_cookie(
+        &session.token,
+        &state.config.auth.cookie_domain,
+        state.config.auth.session_ttl_seconds,
+    );
+
+    tracing::info!(
+        user_id = %user_id,
+        operation = "webauthn_signin_verify",
+        "User signed in via WebAuthn successfully"
+    );
+
+    let response = serde_json::json!({
+        "user_id": user_id.to_string(),
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "name": user.name,
+            "avatar": user.image,
+        },
+        "success": true,
+    });
+
+    Ok(Response::builder()
+        .status(StatusCode::OK)
+        .header(header::SET_COOKIE, cookie)
+        .header(header::CONTENT_TYPE, "application/json")
+        .body(axum::body::Body::new(serde_json::to_string(&response).map_err(|e| AppError::Internal(e.to_string()))?))
         .map_err(|e| AppError::Internal(e.to_string()))?)
 }
