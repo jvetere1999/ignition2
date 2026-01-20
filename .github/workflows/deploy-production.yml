@@ -156,65 +156,6 @@ jobs:
           retention-days: 1
           compression-level: 0
 
-  build-watcher:
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: app/watcher/package-lock.json
-      
-      - name: Setup Rust with cargo cache
-        uses: dtolnay/rust-toolchain@stable
-      
-      - name: Cache cargo registry
-        uses: actions/cache@v4
-        with:
-          path: ~/.cargo/registry
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('app/watcher/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-registry-
-      
-      - name: Cache cargo build
-        uses: actions/cache@v4
-        with:
-          path: app/watcher/target
-          key: ${{ runner.os }}-cargo-build-watcher-${{ hashFiles('app/watcher/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-build-watcher-
-      
-      - name: Build watcher frontend
-        working-directory: ./app/watcher/src-frontend
-        run: |
-          npm ci
-          npm run build || {
-            echo "✗ Watcher frontend build failed"
-            exit 1
-          }
-          echo "✓ Watcher frontend builds successfully"
-      
-      - name: Build watcher Tauri app
-        working-directory: ./app/watcher
-        run: |
-          npm ci
-          npm run build || {
-            echo "✗ Watcher build failed"
-            exit 1
-          }
-          echo "✓ Watcher builds successfully"
-      
-      - name: Upload watcher build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: watcher-build
-          path: app/watcher/target/release/
-          retention-days: 1
-
   prebuild-tests:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     needs: build-checks
