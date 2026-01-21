@@ -12,6 +12,7 @@
 "use client";
 
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { getOnboardingState, skipOnboarding, startOnboarding, type OnboardingResponse } from "@/lib/api/onboarding";
 import { OnboardingModal } from "./OnboardingModal";
@@ -35,6 +36,8 @@ export function useOnboarding() {
 }
 
 export function OnboardingProvider({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const isOnboardingRoute = pathname === "/onboarding";
   const { user, isAuthenticated, isLoading } = useAuth();
   const [onboarding, setOnboarding] = useState<OnboardingResponse | null>(null);
   const [checked, setChecked] = useState(false);
@@ -52,6 +55,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   }, [user?.id, lastUserId]);
 
   useEffect(() => {
+    if (isOnboardingRoute) return;
     if (isLoading || !isAuthenticated || checked) return;
     if (!user || !user.approved) return;
 
@@ -80,7 +84,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     };
 
     checkOnboarding();
-  }, [isLoading, isAuthenticated, checked, user]);
+  }, [isLoading, isAuthenticated, checked, user, isOnboardingRoute]);
 
   const handleCompleteStep = useCallback(async () => {
     if (!onboarding?.flow) return;
@@ -104,6 +108,10 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
   // Don't render if not authenticated or still loading
   if (!isAuthenticated || !user) {
+    return children;
+  }
+
+  if (isOnboardingRoute) {
     return children;
   }
 

@@ -168,176 +168,75 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-      <AuthContext.Provider value={value}>
-        {isLoading ? (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '100vh',
-            width: '100%',
-            background: '#1e1e1e',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            position: 'relative',
-            overflow: 'hidden',
-          }}>
-            {/* Animated background elements */}
-            <div style={{
-              position: 'absolute',
-              width: '400px',
-              height: '400px',
-              background: 'rgba(255, 118, 77, 0.08)',
-              borderRadius: '50%',
-              top: '-50px',
-              left: '-50px',
-              animation: 'float 6s ease-in-out infinite',
-            }} />
-            <div style={{
-              position: 'absolute',
-              width: '300px',
-              height: '300px',
-              background: 'rgba(80, 184, 184, 0.05)',
-              borderRadius: '50%',
-              bottom: '-100px',
-              right: '-50px',
-              animation: 'float 8s ease-in-out infinite reverse',
-            }} />
-
-            <div style={{
-              textAlign: 'center',
-              animation: 'fadeIn 0.6s ease-out',
-              position: 'relative',
-              zIndex: 10,
-            }}>
-              {/* Animated logo/icon */}
-              <div style={{
-                marginBottom: '2.5rem',
-                animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-              }}>
-                <div style={{
-                  width: '70px',
-                  height: '70px',
-                  margin: '0 auto',
-                  background: '#2d2d2d',
-                  borderRadius: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '36px',
-                  fontWeight: 'bold',
-                  color: '#ff764d',
-                  boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)',
-                  border: '1px solid #3d3d3d',
-                }}>
-                  🎵
-                </div>
-              </div>
-
-              {/* Loading text */}
-              <h1 style={{
-                fontSize: '28px',
-                fontWeight: '700',
-                color: '#ffffff',
-                margin: '0 0 0.75rem 0',
-                letterSpacing: '0.5px',
-              }}>
-                Welcome to Passion
-              </h1>
-
-              {/* Subtext */}
-              <p style={{
-                fontSize: '15px',
-                color: 'rgba(255, 255, 255, 0.75)',
-                margin: '0 0 2.5rem 0',
-                fontWeight: '500',
-              }}>
-                Authenticating and loading your workspace...
-              </p>
-
-              {/* Loading spinner */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: '8px',
-                marginBottom: '2rem',
-              }}>
-                <div style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  background: '#ff764d',
-                  animation: 'bounce 1.4s infinite ease-in-out 0s',
-                }} />
-                <div style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  background: '#ff764d',
-                  animation: 'bounce 1.4s infinite ease-in-out 0.2s',
-                }} />
-                <div style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  background: '#ff764d',
-                  animation: 'bounce 1.4s infinite ease-in-out 0.4s',
-                }} />
-              </div>
-
-              {/* Status message */}
-              <p style={{
-                fontSize: '12px',
-                color: 'rgba(255, 255, 255, 0.6)',
-                margin: 0,
-              }}>
-                This usually takes a few seconds...
-              </p>
-
-              <style>{`
-                @keyframes fadeIn {
-                  from {
-                    opacity: 0;
-                    transform: translateY(-20px);
-                  }
-                  to {
-                    opacity: 1;
-                    transform: translateY(0);
-                  }
-                }
-
-                @keyframes pulse {
-                  0%, 100% {
-                    opacity: 1;
-                  }
-                  50% {
-                    opacity: 0.7;
-                  }
-                }
-
-                @keyframes float {
-                  0%, 100% {
-                    transform: translateY(0px);
-                  }
-                  50% {
-                    transform: translateY(20px);
-                  }
-                }
-
-                @keyframes bounce {
-                  0%, 80%, 100% {
-                    transform: translateY(0);
-                    opacity: 1;
-                  }
-                  40% {
-                    transform: translateY(-8px);
-                  }
-                }
-              `}</style>
+    <AuthContext.Provider value={value}>
+      {children}
+      {isLoading && (
+        <div
+          style={{
+            position: "fixed",
+            top: "16px",
+            right: "16px",
+            zIndex: 1000,
+            pointerEvents: "none",
+          }}
+        >
+          <div
+            style={{
+              pointerEvents: "auto",
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              padding: "12px 16px",
+              borderRadius: "16px",
+              background: "rgba(10, 12, 20, 0.85)",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              color: "#e5e7eb",
+              boxShadow: "0 14px 30px rgba(0, 0, 0, 0.4)",
+              backdropFilter: "blur(10px)",
+              minWidth: "220px",
+            }}
+          >
+            <div
+              style={{
+                width: "10px",
+                height: "10px",
+                borderRadius: "999px",
+                background: "#ff764d",
+                boxShadow: "0 0 12px rgba(255, 118, 77, 0.8)",
+                animation: "authToastPulse 1.4s ease-in-out infinite",
+              }}
+            />
+            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+              <span
+                style={{
+                  fontSize: "11px",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.14em",
+                  color: "rgba(255, 255, 255, 0.6)",
+                }}
+              >
+                Ignition
+              </span>
+              <span style={{ fontSize: "14px", fontWeight: 600 }}>
+                Loading your workspace...
+              </span>
             </div>
           </div>
-        ) : children}
-      </AuthContext.Provider>
+          <style>{`
+            @keyframes authToastPulse {
+              0%, 100% {
+                transform: scale(1);
+                opacity: 0.7;
+              }
+              50% {
+                transform: scale(1.35);
+                opacity: 1;
+              }
+            }
+          `}</style>
+        </div>
+      )}
+    </AuthContext.Provider>
   );
 }
 
