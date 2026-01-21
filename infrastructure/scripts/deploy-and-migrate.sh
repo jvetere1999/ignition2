@@ -17,7 +17,7 @@ echo -e "${BLUE}=== Ignition API Deployment & Migration Script ===${NC}\n"
 
 # Parse flags
 SKIP_DEPLOY=false
-SKIP_WIPE=false
+SKIP_MIGRATIONS=false
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -25,13 +25,13 @@ while [[ $# -gt 0 ]]; do
       SKIP_DEPLOY=true
       shift
       ;;
-    --skip-wipe)
-      SKIP_WIPE=true
+    --skip-migrations)
+      SKIP_MIGRATIONS=true
       shift
       ;;
     *)
       echo "Unknown option: $1"
-      echo "Usage: $0 [--skip-deploy] [--skip-wipe]"
+      echo "Usage: $0 [--skip-deploy] [--skip-migrations]"
       exit 1
       ;;
   esac
@@ -56,20 +56,26 @@ for machine in "${MACHINES[@]}"; do
 done
 echo -e "${GREEN}✓ Machines stopped${NC}\n"
 
-# Step 3: Wipe Neon
-if [ "$SKIP_WIPE" = false ]; then
-  echo -e "${RED}Step 3: Time to wipe Neon database${NC}"
-  echo -e "${RED}⚠️  This will DELETE ALL DATA in Neon${NC}"
-  echo ""
-  echo "Go to: https://console.neon.tech/"
-  echo "1. Select your project"
-  echo "2. Go to SQL Editor"
-  echo "3. Run: DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
-  echo ""
-  read -p "Press ENTER when Neon is wiped..."
-  echo -e "${GREEN}✓ Neon wiped${NC}\n"
+# Step 3: Apply pending migrations (non-destructive)
+if [ "$SKIP_MIGRATIONS" = false ]; then
+  echo -e "${YELLOW}Step 3: Applying pending migrations to Neon (no wipe)...${NC}"
+  SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+  NEON_SCRIPT="$SCRIPT_DIR/neon-migrate.sh"
+
+  if [ ! -f "$NEON_SCRIPT" ]; then
+    echo -e "${RED}✗ neon-migrate.sh not found at $NEON_SCRIPT${NC}"
+    exit 1
+  fi
+
+  if [ -z "$NEON_DATABASE_URL" ]; then
+    echo -e "${RED}✗ NEON_DATABASE_URL is not set. Export it before running.${NC}"
+    exit 1
+  fi
+
+  "$NEON_SCRIPT" apply
+  echo -e "${GREEN}✓ Migrations applied${NC}\n"
 else
-  echo -e "${YELLOW}Step 3: Skipping Neon wipe${NC}\n"
+  echo -e "${YELLOW}Step 3: Skipping migrations${NC}\n"
 fi
 
 # Step 4: Start machines
@@ -81,8 +87,8 @@ done
 echo -e "${GREEN}✓ Machines starting${NC}\n"
 
 # Step 5: Wait for startup
-echo -e "${YELLOW}Step 5: Waiting for migrations to run...${NC}"
-echo "Waiting 30 seconds for migrations..."
+echo -e "${YELLOW}Step 5: Waiting for service to boot...${NC}"
+echo "Waiting 30 seconds for startup..."
 sleep 30
 echo -e "${GREEN}✓ Wait complete${NC}\n"
 

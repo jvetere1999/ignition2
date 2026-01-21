@@ -103,7 +103,7 @@ impl AppState {
         );
 
         // Lightweight connectivity validation to fail fast if DB is unreachable
-        if let Err(e) = sqlx::query_scalar::<_, i64>("SELECT 1")
+        if let Err(e) = sqlx::query_scalar::<_, i32>("SELECT 1")
             .fetch_one(&db)
             .await
         {
