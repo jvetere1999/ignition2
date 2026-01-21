@@ -152,6 +152,19 @@ pub async fn require_auth(
         return Err(AppError::Forbidden);
     }
 
+    // Enforce passkey before accessing authenticated APIs
+    let has_passkey = crate::db::authenticator_repos::AuthenticatorRepo::get_by_user_id(
+        &state.db,
+        auth_context.user_id,
+    )
+    .await?
+    .first()
+    .is_some();
+
+    if !has_passkey {
+        return Err(AppError::Forbidden);
+    }
+
     if !user.tos_accepted {
         return Err(AppError::Forbidden);
     }

@@ -59,8 +59,11 @@ impl UserRepo {
     pub async fn create(pool: &PgPool, input: CreateUserInput) -> Result<User, AppError> {
         let id = Uuid::new_v4();
         let user = sqlx::query_as::<_, User>(
-            r#"INSERT INTO users (id, email, name, image, email_verified, role, approved, tos_accepted, is_admin, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, $5, 'user', false, false, false, NOW(), NOW())
+            r#"INSERT INTO users (
+                id, email, name, image, email_verified, role,
+                approved, tos_accepted, is_admin, created_at, updated_at
+            )
+            VALUES ($1, $2, $3, $4, $5, 'user', true, false, false, NOW(), NOW())
             RETURNING
                 id, name, email, email_verified, image, role,
                 approved, tos_accepted, tos_accepted_at,
