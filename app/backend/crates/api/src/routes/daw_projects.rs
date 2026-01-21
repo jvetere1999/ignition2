@@ -19,7 +19,10 @@ pub fn router() -> Router<Arc<AppState>> {
         .route("/", get(list_projects).post(initiate_upload))
         .route("/{project_id}", get(get_project))
         .route("/{project_id}/versions", get(list_versions))
-        .route("/{project_id}/versions/{version_id}/restore", post(restore_version))
+        .route(
+            "/{project_id}/versions/{version_id}/restore",
+            post(restore_version),
+        )
         .route("/upload/{session_id}/chunk", post(upload_chunk))
         .route("/upload/{session_id}/complete", post(complete_upload))
         .route("/download/{project_id}/{version_id}", get(download_project))
@@ -65,16 +68,12 @@ async fn initiate_upload(
     Json(req): Json<InitiateUploadRequest>,
 ) -> Result<Json<InitiateUploadResponse>, AppError> {
     if req.total_size <= 0 {
-        return Err(AppError::Validation(
-            "total_size must be > 0".to_string(),
-        ));
+        return Err(AppError::Validation("total_size must be > 0".to_string()));
     }
 
     if req.total_size > 5_000_000_000 {
         // 5GB max
-        return Err(AppError::Validation(
-            "File too large (max 5GB)".to_string(),
-        ));
+        return Err(AppError::Validation("File too large (max 5GB)".to_string()));
     }
 
     let chunk_size = 5_242_880; // 5MB

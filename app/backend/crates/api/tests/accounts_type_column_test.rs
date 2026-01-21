@@ -12,7 +12,9 @@ mod accounts_type_column_tests {
     // the AccountRepo can successfully query, insert, and update accounts
 
     #[sqlx::test]
-    async fn test_accounts_table_has_type_column(pool: PgPool) -> Result<(), Box<dyn std::error::Error>> {
+    async fn test_accounts_table_has_type_column(
+        pool: PgPool,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         // Verify the type column exists
         let result: (bool,) = sqlx::query_as(
             r#"
@@ -20,7 +22,7 @@ mod accounts_type_column_tests {
                 SELECT 1 FROM information_schema.columns
                 WHERE table_name = 'accounts' AND column_name = 'type'
             )
-            "#
+            "#,
         )
         .fetch_one(&pool)
         .await?;
@@ -34,14 +36,16 @@ mod accounts_type_column_tests {
     }
 
     #[sqlx::test]
-    async fn test_accounts_type_column_has_correct_type(pool: PgPool) -> Result<(), Box<dyn std::error::Error>> {
+    async fn test_accounts_type_column_has_correct_type(
+        pool: PgPool,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         // Verify the type column has correct definition
         let result: Option<(String, String, bool)> = sqlx::query_as(
             r#"
             SELECT column_name, data_type, is_nullable::text::boolean
             FROM information_schema.columns
             WHERE table_name = 'accounts' AND column_name = 'type'
-            "#
+            "#,
         )
         .fetch_optional(&pool)
         .await?;
@@ -49,7 +53,11 @@ mod accounts_type_column_tests {
         match result {
             Some((col_name, data_type, is_nullable)) => {
                 assert_eq!(col_name, "type", "Column name mismatch");
-                assert_eq!(data_type, "text", "Column type should be 'text', got '{}'", data_type);
+                assert_eq!(
+                    data_type, "text",
+                    "Column type should be 'text', got '{}'",
+                    data_type
+                );
                 assert!(!is_nullable, "Column should be NOT NULL");
             }
             None => panic!("Column 'type' does not exist in accounts table"),
@@ -59,14 +67,16 @@ mod accounts_type_column_tests {
     }
 
     #[sqlx::test]
-    async fn test_accounts_type_column_has_default(pool: PgPool) -> Result<(), Box<dyn std::error::Error>> {
+    async fn test_accounts_type_column_has_default(
+        pool: PgPool,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         // Verify the type column has correct default value
         let result: Option<(String,)> = sqlx::query_as(
             r#"
             SELECT column_default
             FROM information_schema.columns
             WHERE table_name = 'accounts' AND column_name = 'type'
-            "#
+            "#,
         )
         .fetch_optional(&pool)
         .await?;
@@ -87,7 +97,9 @@ mod accounts_type_column_tests {
 
     // Additional test: Verify the AccountRepo can deserialize rows with the type column
     #[sqlx::test]
-    async fn test_account_struct_can_deserialize_with_type_column(pool: PgPool) -> Result<(), Box<dyn std::error::Error>> {
+    async fn test_account_struct_can_deserialize_with_type_column(
+        pool: PgPool,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         // Create a test user first
         let user_id = Uuid::new_v4();
         sqlx::query("INSERT INTO users (id, email, name) VALUES ($1, $2, $3)")
@@ -105,7 +117,7 @@ mod accounts_type_column_tests {
                 id, user_id, provider, provider_account_id, type
             ) VALUES ($1, $2, $3, $4, $5)
             RETURNING id
-            "#
+            "#,
         )
         .bind(account_id)
         .bind(user_id)
@@ -125,7 +137,7 @@ mod accounts_type_column_tests {
         let query_result = sqlx::query_as::<_, (String, String)>(
             r#"
             SELECT id, type as account_type FROM accounts WHERE id = $1
-            "#
+            "#,
         )
         .bind(account_id)
         .fetch_optional(&pool)

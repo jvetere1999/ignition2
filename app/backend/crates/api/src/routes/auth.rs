@@ -16,10 +16,10 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 
+use crate::db::models::CreateSessionInput;
 use crate::db::oauth_repos::OAuthStateRepo;
 use crate::db::recovery_codes_repos::RecoveryCodesRepo;
-use crate::db::repos::{UserRepo, SessionRepo, generate_session_token};
-use crate::db::models::CreateSessionInput;
+use crate::db::repos::{generate_session_token, SessionRepo, UserRepo};
 use crate::error::{AppError, AppResult};
 use crate::middleware::auth::{create_logout_cookie, create_session_cookie, AuthContext};
 use crate::services::{AuthService, OAuthService, RecoveryValidator, WebAuthnService};
@@ -878,10 +878,7 @@ async fn webauthn_register_options(
         "Starting WebAuthn registration flow"
     );
 
-    let service = WebAuthnService::new(
-        "ignition.ecent.online",
-        &state.config.server.frontend_url,
-    );
+    let service = WebAuthnService::from_config(state.config.as_ref())?;
 
     let user_name = payload.user_name.unwrap_or_else(|| auth.email.clone());
     let user_display_name = payload
@@ -922,10 +919,7 @@ async fn webauthn_register_verify(
         "Verifying WebAuthn credential"
     );
 
-    let service = WebAuthnService::new(
-        "ignition.ecent.online",
-        &state.config.server.frontend_url,
-    );
+    let service = WebAuthnService::from_config(state.config.as_ref())?;
 
     let credential_id = service
         .finish_register(&state.db, auth.user_id, payload.credential)
@@ -948,16 +942,19 @@ async fn webauthn_register_verify(
 async fn webauthn_signin_options(
     State(state): State<Arc<AppState>>,
 ) -> AppResult<Json<serde_json::Value>> {
-    tracing::debug!(operation = "webauthn_signin_options", "Starting WebAuthn signin flow");
-
-    let service = WebAuthnService::new(
-        "ignition.ecent.online",
-        &state.config.server.frontend_url,
+    tracing::debug!(
+        operation = "webauthn_signin_options",
+        "Starting WebAuthn signin flow"
     );
+
+    let service = WebAuthnService::from_config(state.config.as_ref())?;
 
     let options = service.start_signin()?;
 
-    tracing::info!(operation = "webauthn_signin_options", "WebAuthn signin options generated");
+    tracing::info!(
+        operation = "webauthn_signin_options",
+        "WebAuthn signin options generated"
+    );
 
     Ok(Json(options))
 }
@@ -979,16 +976,14 @@ async fn webauthn_signin_verify(
     State(state): State<Arc<AppState>>,
     Json(payload): Json<WebAuthnSigninVerifyRequest>,
 ) -> AppResult<Response> {
-    tracing::debug!(operation = "webauthn_signin_verify", "Verifying WebAuthn assertion");
-
-    let service = WebAuthnService::new(
-        "ignition.ecent.online",
-        &state.config.server.frontend_url,
+    tracing::debug!(
+        operation = "webauthn_signin_verify",
+        "Verifying WebAuthn assertion"
     );
 
-    let (user_id, _counter) = service
-        .finish_signin(&state.db, payload.credential)
-        .await?;
+    let service = WebAuthnService::from_config(state.config.as_ref())?;
+
+    let (user_id, _counter) = service.finish_signin(&state.db, payload.credential).await?;
 
     tracing::debug!(
         user_id = %user_id,
@@ -1041,6 +1036,8 @@ async fn webauthn_signin_verify(
         .status(StatusCode::OK)
         .header(header::SET_COOKIE, cookie)
         .header(header::CONTENT_TYPE, "application/json")
-        .body(axum::body::Body::new(serde_json::to_string(&response).map_err(|e| AppError::Internal(e.to_string()))?))
+        .body(axum::body::Body::new(
+            serde_json::to_string(&response).map_err(|e| AppError::Internal(e.to_string()))?,
+        ))
         .map_err(|e| AppError::Internal(e.to_string()))?)
 }

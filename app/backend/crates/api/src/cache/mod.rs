@@ -5,11 +5,11 @@
 //! TODO: Activate in Phase 7 when profiling shows cache benefit
 #![allow(dead_code)]
 
+use serde_json::Value as JsonValue;
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 use tokio::sync::RwLock;
-use serde_json::Value as JsonValue;
 
 /// Cache entry with expiration time
 #[derive(Clone, Debug)]
@@ -26,7 +26,7 @@ impl CacheEntry {
 }
 
 /// Thread-safe query result cache
-/// 
+///
 /// Benefits (BACK-015):
 /// - 60-80% reduction for repeated queries
 /// - Configurable TTL per query type
@@ -49,7 +49,7 @@ impl QueryCache {
     /// Get a cached value, returning None if expired or not found
     pub async fn get(&self, key: &str) -> Option<JsonValue> {
         let cache = self.cache.read().await;
-        
+
         if let Some(entry) = cache.get(key) {
             if !entry.is_expired() {
                 tracing::debug!(
@@ -60,7 +60,7 @@ impl QueryCache {
                 return Some(entry.value.clone());
             }
         }
-        
+
         tracing::debug!(
             component = "cache",
             key = %key,
@@ -73,10 +73,10 @@ impl QueryCache {
     pub async fn set(&self, key: String, value: JsonValue, ttl: Duration) {
         let expires_at = SystemTime::now() + ttl;
         let entry = CacheEntry { value, expires_at };
-        
+
         let mut cache = self.cache.write().await;
         cache.insert(key.clone(), entry);
-        
+
         tracing::debug!(
             component = "cache",
             key = %key,
@@ -89,7 +89,7 @@ impl QueryCache {
     pub async fn invalidate(&self, key: &str) {
         let mut cache = self.cache.write().await;
         cache.remove(key);
-        
+
         tracing::debug!(
             component = "cache",
             key = %key,
@@ -105,11 +105,11 @@ impl QueryCache {
             .filter(|k| k.starts_with(prefix))
             .cloned()
             .collect();
-        
+
         for key in keys_to_remove {
             cache.remove(&key);
         }
-        
+
         tracing::debug!(
             component = "cache",
             prefix = %prefix,
@@ -121,24 +121,18 @@ impl QueryCache {
     pub async fn clear(&self) {
         let mut cache = self.cache.write().await;
         cache.clear();
-        
-        tracing::debug!(
-            component = "cache",
-            "Cache cleared"
-        );
+
+        tracing::debug!(component = "cache", "Cache cleared");
     }
 
     /// Get cache statistics
     pub async fn stats(&self) -> CacheStats {
         let cache = self.cache.read().await;
-        
+
         let total = cache.len();
-        let expired = cache
-            .values()
-            .filter(|e| e.is_expired())
-            .count();
+        let expired = cache.values().filter(|e| e.is_expired()).count();
         let valid = total - expired;
-        
+
         CacheStats {
             total_entries: total,
             valid_entries: valid,
@@ -164,9 +158,11 @@ mod tests {
         let cache = QueryCache::new();
         let key = "test:1".to_string();
         let value = JsonValue::String("hello".to_string());
-        
-        cache.set(key.clone(), value.clone(), Duration::from_secs(60)).await;
-        
+
+        cache
+            .set(key.clone(), value.clone(), Duration::from_secs(60))
+            .await;
+
         let result = cache.get(&key).await;
         assert_eq!(result, Some(value));
     }
@@ -183,12 +179,14 @@ mod tests {
         let cache = QueryCache::new();
         let key = "test:expiring".to_string();
         let value = JsonValue::String("goodbye".to_string());
-        
-        cache.set(key.clone(), value, Duration::from_millis(100)).await;
-        
+
+        cache
+            .set(key.clone(), value, Duration::from_millis(100))
+            .await;
+
         // Immediately: should hit
         assert!(cache.get(&key).await.is_some());
-        
+
         // After expiration: should miss
         tokio::time::sleep(Duration::from_millis(150)).await;
         assert!(cache.get(&key).await.is_none());
@@ -199,10 +197,10 @@ mod tests {
         let cache = QueryCache::new();
         let key = "test:invalidate".to_string();
         let value = JsonValue::String("test".to_string());
-        
+
         cache.set(key.clone(), value, Duration::from_secs(60)).await;
         assert!(cache.get(&key).await.is_some());
-        
+
         cache.invalidate(&key).await;
         assert!(cache.get(&key).await.is_none());
     }

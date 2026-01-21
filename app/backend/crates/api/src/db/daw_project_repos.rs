@@ -80,10 +80,11 @@ impl DawProjectsRepo {
         .fetch_all(pool)
         .await?;
 
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM daw_project_files WHERE user_id = $1")
-            .bind(user_id)
-            .fetch_one(pool)
-            .await?;
+        let count: (i64,) =
+            sqlx::query_as("SELECT COUNT(*) FROM daw_project_files WHERE user_id = $1")
+                .bind(user_id)
+                .fetch_one(pool)
+                .await?;
 
         Ok((projects, count.0))
     }
@@ -228,12 +229,10 @@ impl DawProjectsRepo {
         pool: &PgPool,
         session_id: Uuid,
     ) -> Result<(), sqlx::Error> {
-        sqlx::query(
-            "UPDATE upload_sessions SET status = 'complete' WHERE id = $1",
-        )
-        .bind(session_id)
-        .execute(pool)
-        .await?;
+        sqlx::query("UPDATE upload_sessions SET status = 'complete' WHERE id = $1")
+            .bind(session_id)
+            .execute(pool)
+            .await?;
 
         Ok(())
     }
@@ -300,13 +299,8 @@ impl DawProjectsRepo {
         .await?;
 
         // Update current version
-        Self::update_current_version(
-            pool,
-            project_id,
-            new_version.id,
-            project.version_count + 1,
-        )
-        .await?;
+        Self::update_current_version(pool, project_id, new_version.id, project.version_count + 1)
+            .await?;
 
         Ok(new_version)
     }
@@ -317,23 +311,18 @@ impl DawProjectsRepo {
         project_id: Uuid,
         user_id: Uuid,
     ) -> Result<(), sqlx::Error> {
-        sqlx::query(
-            "UPDATE daw_project_files SET updated_at = $1 WHERE id = $2 AND user_id = $3",
-        )
-        .bind(Utc::now())
-        .bind(project_id)
-        .bind(user_id)
-        .execute(pool)
-        .await?;
+        sqlx::query("UPDATE daw_project_files SET updated_at = $1 WHERE id = $2 AND user_id = $3")
+            .bind(Utc::now())
+            .bind(project_id)
+            .bind(user_id)
+            .execute(pool)
+            .await?;
 
         Ok(())
     }
 
     /// Get total storage used by user
-    pub async fn get_user_storage_usage(
-        pool: &PgPool,
-        user_id: Uuid,
-    ) -> Result<i64, sqlx::Error> {
+    pub async fn get_user_storage_usage(pool: &PgPool, user_id: Uuid) -> Result<i64, sqlx::Error> {
         let result: (Option<i64>,) = sqlx::query_as(
             "SELECT COALESCE(SUM(file_size), 0) FROM daw_project_files WHERE user_id = $1",
         )

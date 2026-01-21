@@ -8,9 +8,18 @@
 //! - If neither exists or matches, reject with 403
 //! - For GET/HEAD/OPTIONS: No CSRF check required
 
-use axum::{extract::Request, http::Method, middleware::Next, response::Response};
+use std::collections::HashSet;
+use std::sync::Arc;
+
+use axum::{
+    extract::{Request, State},
+    http::Method,
+    middleware::Next,
+    response::Response,
+};
 
 use crate::error::AppError;
+use crate::state::AppState;
 
 /// Production allowed origins
 const PRODUCTION_ORIGINS: &[&str] = &[
@@ -29,7 +38,11 @@ const DEV_ORIGINS: &[&str] = &[
 /// CSRF verification middleware
 ///
 /// Implements Origin/Referer verification per DEC-002=A.
-pub async fn csrf_check(req: Request, next: Next) -> Result<Response, AppError> {
+pub async fn csrf_check(
+    State(state): State<Arc<AppState>>,
+    req: Request,
+    next: Next,
+) -> Result<Response, AppError> {
     // Skip CSRF check for safe methods
     if is_safe_method(req.method()) {
         return Ok(next.run(req).await);
@@ -56,16 +69,22 @@ pub async fn csrf_check(req: Request, next: Next) -> Result<Response, AppError> 
         }
     }
 
-    // Determine environment from env var
-    let is_production = std::env::var("NODE_ENV")
-        .map(|v| v == "production")
-        .unwrap_or(false);
-
-    // Build allowed origins list
-    let mut all_allowed: Vec<&str> = PRODUCTION_ORIGINS.to_vec();
-    if !is_production {
-        all_allowed.extend(DEV_ORIGINS);
+    // Build allowed origins list based on configuration
+    let mut allowed: HashSet<String> = HashSet::new();
+    allowed.insert(state.config.server.frontend_url.clone());
+    allowed.insert(state.config.server.public_url.clone());
+    for origin in &state.config.cors.allowed_origins {
+        allowed.insert(origin.trim_end_matches('/').to_string());
     }
+
+    if state.config.is_production() {
+        allowed.extend(PRODUCTION_ORIGINS.iter().map(|o| o.to_string()));
+    } else {
+        allowed.extend(DEV_ORIGINS.iter().map(|o| o.to_string()));
+    }
+
+    let mut all_allowed: Vec<String> = allowed.into_iter().collect();
+    all_allowed.retain(|v| !v.is_empty());
 
     // Check Origin header first
     let origin = req.headers().get("Origin").and_then(|h| h.to_str().ok());
@@ -77,7 +96,7 @@ pub async fn csrf_check(req: Request, next: Next) -> Result<Response, AppError> 
         // Origin present, check against allowlist
         all_allowed
             .iter()
-            .any(|allowed| origin == *allowed || origin.starts_with(&format!("{}/", allowed)))
+            .any(|allowed| origin == allowed || origin.starts_with(&format!("{}/", allowed)))
     } else if let Some(referer) = referer {
         // Fall back to Referer
         all_allowed

@@ -49,7 +49,7 @@ impl InboxRepo {
             r#"SELECT 
                 COUNT(*) as total,
                 COUNT(*) FILTER (WHERE is_processed = false AND is_archived = false) as unread
-               FROM inbox_items WHERE user_id = $1"#
+               FROM inbox_items WHERE user_id = $1"#,
         )
         .bind(user_id)
         .fetch_one(db)

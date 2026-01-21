@@ -42,6 +42,10 @@ base64.workspace = true
 sha2.workspace = true
 hmac = "0.12"
 bcrypt.workspace = true
+p256 = { version = "0.13", features = ["ecdsa"] }
+rsa = { version = "0.9", features = ["sha2"] }
+serde_cbor = "0.11"
+ciborium = "0.2"
 
 # Serialization
 serde.workspace = true
@@ -66,4 +70,3 @@ config.workspace = true
 [dev-dependencies]
 axum-test = "18"
 sqlx = { version = "0.8", features = ["runtime-tokio", "tls-rustls", "postgres", "macros", "migrate"] }
-

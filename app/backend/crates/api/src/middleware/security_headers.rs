@@ -11,7 +11,11 @@
 //! - Cache-Control: Intelligent caching based on endpoint type (PERF-001)
 //! - X-Cache-Version: API version header for cache invalidation
 
-use axum::{body::Body, http::{Response, Method}, middleware::Next};
+use axum::{
+    body::Body,
+    http::{Method, Response},
+    middleware::Next,
+};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 /// Middleware to add security headers and cache headers to all responses
@@ -22,7 +26,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 pub async fn add_security_headers(request: axum::extract::Request, next: Next) -> Response<Body> {
     let path = request.uri().path().to_string();
     let method = request.method().clone();
-    
+
     let mut response = next.run(request).await;
     let headers = response.headers_mut();
 
@@ -94,9 +98,10 @@ pub async fn add_security_headers(request: axum::extract::Request, next: Next) -
         // STATIC/LONG-LIVED DATA - Cache for 1 hour
         // ====================================================================
         // Rarely changes: onboarding, frameworks, metadata
-        (Method::GET, p) if p.contains("/onboarding/")
-            || p.contains("/learn/metadata")
-            || p.contains("/learn/frameworks") =>
+        (Method::GET, p)
+            if p.contains("/onboarding/")
+                || p.contains("/learn/metadata")
+                || p.contains("/learn/frameworks") =>
         {
             "public, max-age=3600, s-maxage=3600" // 1 hour
         }
@@ -105,12 +110,13 @@ pub async fn add_security_headers(request: axum::extract::Request, next: Next) -
         // SEMI-STABLE DATA - Cache for 5 minutes
         // ====================================================================
         // Changes occasionally: habits, goals, exercises, reference content
-        (Method::GET, p) if p.contains("/habits/")
-            || p.contains("/goals/")
-            || p.contains("/exercise/")
-            || p.contains("/reference/")
-            || p.contains("/references/")
-            || p.contains("/quests/") =>
+        (Method::GET, p)
+            if p.contains("/habits/")
+                || p.contains("/goals/")
+                || p.contains("/exercise/")
+                || p.contains("/reference/")
+                || p.contains("/references/")
+                || p.contains("/quests/") =>
         {
             "private, max-age=300, s-maxage=300" // 5 minutes
         }
@@ -119,11 +125,12 @@ pub async fn add_security_headers(request: axum::extract::Request, next: Next) -
         // USER-SPECIFIC DATA - Cache for 1 minute
         // ====================================================================
         // Changes frequently but user-specific: user profile, progress, stats
-        (Method::GET, p) if p.contains("/user/")
-            || p.contains("/admin/stats")
-            || p.contains("/calendar/")
-            || p.contains("/daily-plan/")
-            || p.contains("/progress/") =>
+        (Method::GET, p)
+            if p.contains("/user/")
+                || p.contains("/admin/stats")
+                || p.contains("/calendar/")
+                || p.contains("/daily-plan/")
+                || p.contains("/progress/") =>
         {
             "private, max-age=60" // 1 minute
         }
@@ -132,9 +139,8 @@ pub async fn add_security_headers(request: axum::extract::Request, next: Next) -
         // REAL-TIME DATA - No caching
         // ====================================================================
         // Changes very frequently: focus sessions, inbox, streaming data
-        (Method::GET, p) if p.contains("/focus/")
-            || p.contains("/inbox/")
-            || p.contains("/notifications/") =>
+        (Method::GET, p)
+            if p.contains("/focus/") || p.contains("/inbox/") || p.contains("/notifications/") =>
         {
             "no-cache, no-store, must-revalidate" // No caching
         }
@@ -161,7 +167,7 @@ pub async fn add_security_headers(request: axum::extract::Request, next: Next) -
     // Reference: MEDIUM_TASKS_EXECUTION_PLAN.md#phase-3-add-cache-invalidation
     // Roadmap: Step 3 of 4 - Add version headers for client cache invalidation
     // Status: PENDING (depends on Phase 2: Service Worker setup)
-    
+
     // Version header for cache invalidation strategy
     // Increment this when API response format changes to force cache refresh
     // Client will check this version on startup and clear cache if mismatch
@@ -173,7 +179,10 @@ pub async fn add_security_headers(request: axum::extract::Request, next: Next) -
         let timestamp = duration.as_secs();
         headers.insert(
             "X-Response-Time",
-            timestamp.to_string().parse().unwrap_or_else(|_| "unknown".parse().unwrap()),
+            timestamp
+                .to_string()
+                .parse()
+                .unwrap_or_else(|_| "unknown".parse().unwrap()),
         );
     }
 

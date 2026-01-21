@@ -152,8 +152,8 @@ fn default_pool_size() -> u32 {
     // Production: Larger pool to handle more concurrent requests
     let env = std::env::var("APP_ENV").unwrap_or_else(|_| "development".to_string());
     match env.as_str() {
-        "production" => 20,  // Support 3x more concurrent users
-        _ => 5,              // Development/testing - conservative
+        "production" => 20, // Support 3x more concurrent users
+        _ => 5,             // Development/testing - conservative
     }
 }
 
@@ -162,17 +162,17 @@ fn default_min_pool_size() -> u32 {
     // Avoids latency spike when first requests arrive
     let env = std::env::var("APP_ENV").unwrap_or_else(|_| "development".to_string());
     match env.as_str() {
-        "production" => 5,   // Always have connections ready
-        _ => 1,              // Development - minimal overhead
+        "production" => 5, // Always have connections ready
+        _ => 1,            // Development - minimal overhead
     }
 }
 
 fn default_connection_max_lifetime() -> u64 {
-    30 * 60  // 30 minutes - connection lifecycle for state refresh
+    30 * 60 // 30 minutes - connection lifecycle for state refresh
 }
 
 fn default_connection_idle_timeout() -> u64 {
-    10 * 60  // 10 minutes - close idle connections to free resources
+    10 * 60 // 10 minutes - close idle connections to free resources
 }
 
 fn default_cookie_domain() -> String {

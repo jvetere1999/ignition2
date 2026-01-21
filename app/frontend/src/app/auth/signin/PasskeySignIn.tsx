@@ -3,6 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { safeFetch, API_BASE_URL } from "@/lib/api";
+import {
+  isWebAuthnSupported,
+  normalizeRequestOptions,
+  serializeAssertionResponse,
+} from "@/lib/auth/webauthn";
 import styles from "./page.module.css";
 
 /**
@@ -18,11 +23,7 @@ export function PasskeySignIn() {
 
   // Check WebAuthn support on mount
   useEffect(() => {
-    const supported =
-      typeof window !== "undefined" &&
-      (!!window.PublicKeyCredential ||
-        !!(navigator as any).credentials);
-    setIsSupported(supported);
+    setIsSupported(isWebAuthnSupported());
   }, []);
 
   const handlePasskeySignIn = async () => {
@@ -49,24 +50,23 @@ export function PasskeySignIn() {
       }
 
       const data = (await optionsResponse.json()) as any;
-      const options = data.options || data;
+      const options = normalizeRequestOptions(data.options || data);
 
-      // Get assertion (user verifies with biometric/PIN)
-      const assertion = await (navigator.credentials as any).get(options);
+      const assertion = (await navigator.credentials.get({
+        publicKey: options,
+      })) as PublicKeyCredential | null;
 
       if (!assertion) {
         throw new Error("Authentication cancelled");
       }
 
-      // Verify assertion on backend
-      const verifyResponse = await safeFetch(
-        `${API_BASE_URL}/auth/webauthn/signin-verify`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ assertion }),
-        }
-      );
+      const payload = serializeAssertionResponse(assertion);
+
+      const verifyResponse = await safeFetch(`${API_BASE_URL}/auth/webauthn/signin-verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: payload }),
+      });
 
       if (!verifyResponse.ok) {
         const errorData = (await verifyResponse

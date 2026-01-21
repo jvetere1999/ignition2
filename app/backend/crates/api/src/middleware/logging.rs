@@ -23,10 +23,7 @@ use tracing::{error, info, warn};
 ///
 /// Logs every request and response with timing information and status details.
 /// Useful for debugging, monitoring, and performance analysis.
-pub async fn request_logging_middleware(
-    req: Request<Body>,
-    next: Next,
-) -> Response {
+pub async fn request_logging_middleware(req: Request<Body>, next: Next) -> Response {
     let method = req.method().clone();
     let uri = req.uri().clone();
     let path = uri.path().to_string();

@@ -13,6 +13,11 @@ import {
   skipOnboarding as apiSkipOnboarding,
 } from "@/lib/api/onboarding";
 import { useRouter } from "next/navigation";
+import {
+  isWebAuthnSupported,
+  normalizeCreationOptions,
+  serializeAttestationResponse,
+} from "@/lib/auth/webauthn";
 import styles from "./OnboardingModal.module.css";
 
 interface OnboardingStep {
@@ -103,13 +108,13 @@ const FOCUS_DURATIONS = [
   { minutes: 45, label: "45 min", description: "Deep work" },
 ];
 
-export function OnboardingModal({ state, flow, currentStep, allSteps, needsOnboarding }: OnboardingModalProps) {
+export function OnboardingModal({ state, flow, currentStep: initialStep, allSteps, needsOnboarding }: OnboardingModalProps) {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [stepData, setStepData] = useState<Record<string, unknown>>({});
-  const [activeStep, setActiveStep] = useState<OnboardingStep | null>(currentStep);
+  const [activeStep, setActiveStep] = useState<OnboardingStep | null>(initialStep);
   const [stepCache, setStepCache] = useState<Record<string, OnboardingStep>>({});
 
   // Choice selections
@@ -120,7 +125,7 @@ export function OnboardingModal({ state, flow, currentStep, allSteps, needsOnboa
   const [gamificationVisible, setGamificationVisible] = useState<boolean>(true);
   const [webauthnStatus, setWebauthnStatus] = useState<WebAuthnStatus>({
     isRegistering: false,
-    isSupported: typeof window !== "undefined" && !!window.PublicKeyCredential,
+    isSupported: isWebAuthnSupported(),
     error: null,
     success: false,
   });
@@ -159,10 +164,10 @@ export function OnboardingModal({ state, flow, currentStep, allSteps, needsOnboa
       startOnboardingFlow();
     } else if (state.status !== "completed" && state.status !== "skipped") {
       setIsVisible(true);
-      if (currentStep) {
-        setActiveStep(currentStep);
-        setStepCache((prev) => ({ ...prev, [currentStep.id]: currentStep }));
-        const stepIndex = allSteps.findIndex((s) => s.id === currentStep.id);
+      if (initialStep) {
+        setActiveStep(initialStep);
+        setStepCache((prev) => ({ ...prev, [initialStep.id]: initialStep }));
+        const stepIndex = allSteps.findIndex((s) => s.id === initialStep.id);
         if (stepIndex >= 0) {
           setCurrentStepIndex(stepIndex);
         }
@@ -170,7 +175,7 @@ export function OnboardingModal({ state, flow, currentStep, allSteps, needsOnboa
         startOnboardingFlow();
       }
     }
-  }, [allSteps, currentStep, flow, needsOnboarding, startOnboardingFlow, state, totalSteps]);
+  }, [allSteps, initialStep, flow, needsOnboarding, startOnboardingFlow, state, totalSteps]);
 
   const currentStepData = activeStep;
   const currentStep = currentStepData;
@@ -252,20 +257,23 @@ export function OnboardingModal({ state, flow, currentStep, allSteps, needsOnboa
         throw new Error("Failed to get registration options");
       }
 
-      const { options } = (await optionsResponse.json()) as any;
+      const data = (await optionsResponse.json()) as any;
+      const options = normalizeCreationOptions(data.options || data);
 
-      // Create credential
-      const credential = await navigator.credentials.create(options);
+      const credential = (await navigator.credentials.create({
+        publicKey: options,
+      })) as PublicKeyCredential | null;
 
       if (!credential) {
         throw new Error("Passkey creation cancelled");
       }
 
-      // Send credential to backend for verification and storage
+      const payload = serializeAttestationResponse(credential);
+
       const verifyResponse = await safeFetch(`${API_BASE_URL}/auth/webauthn/register-verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ credential }),
+        body: JSON.stringify({ credential: payload }),
       });
 
       if (!verifyResponse.ok) {

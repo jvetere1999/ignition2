@@ -10,9 +10,8 @@ pub mod recovery_validator;
 pub mod webauthn;
 
 pub use auth::*;
-pub use chunked_upload::{ChunkedUploadConfig, ChunkValidator};
+pub use chunked_upload::{ChunkValidator, ChunkedUploadConfig};
 pub use oauth::*;
 pub use r2_storage::{R2Client, R2Config};
 pub use recovery_validator::RecoveryValidator;
 pub use webauthn::WebAuthnService;
-

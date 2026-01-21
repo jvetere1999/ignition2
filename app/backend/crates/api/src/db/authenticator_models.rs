@@ -14,11 +14,11 @@ pub struct AuthenticatorRow {
     pub user_id: Uuid,
     pub credential_id: String,
     pub provider_account_id: String,
-    pub credential_public_key: Vec<u8>,
+    pub credential_public_key: String,
     pub counter: i64,
     pub credential_device_type: String,
     pub credential_backed_up: bool,
-    pub transports: Option<String>, // JSON array
+    pub transports: Vec<String>,
     pub created_at: DateTime<Utc>,
 }
 
@@ -27,10 +27,11 @@ pub struct CreateAuthenticatorInput {
     pub user_id: Uuid,
     pub credential_id: String,
     pub provider_account_id: String,
-    pub credential_public_key: Vec<u8>,
+    pub credential_public_key: String,
+    pub counter: i64,
     pub credential_device_type: String,
     pub credential_backed_up: bool,
-    pub transports: Option<String>,
+    pub transports: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

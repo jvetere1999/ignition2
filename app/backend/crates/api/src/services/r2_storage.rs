@@ -7,8 +7,8 @@
 
 use crate::error::AppError;
 use chrono::{DateTime, Duration, Utc};
-use sha2::{Sha256, Digest};
 use hmac::{Hmac, Mac, Mac as _};
+use sha2::{Digest, Sha256};
 
 type HmacSha256 = Hmac<Sha256>;
 
@@ -74,7 +74,7 @@ mod signature_v4 {
     fn canonical_query_string(params: &[(String, String)]) -> String {
         let mut sorted_params = params.to_vec();
         sorted_params.sort_by(|a, b| a.0.cmp(&b.0));
-        
+
         sorted_params
             .into_iter()
             .map(|(k, v)| format!("{}={}", urlencode(&k), urlencode(&v)))
@@ -122,10 +122,7 @@ mod signature_v4 {
         hasher.update(canonical_request.as_bytes());
         let request_hash = format!("{:x}", hasher.finalize());
 
-        format!(
-            "{}\n{}\n{}",
-            algorithm, credential_scope, request_hash
-        )
+        format!("{}\n{}\n{}", algorithm, credential_scope, request_hash)
     }
 
     /// Calculate AWS Signature v4
@@ -138,34 +135,30 @@ mod signature_v4 {
     ) -> String {
         // Step 1: kDate = HMAC-SHA256("AWS4" + secret_key, date)
         let date_key = format!("AWS4{}", secret_key);
-        let mut mac = HmacSha256::new_from_slice(date_key.as_bytes())
-            .expect("HMAC key size invalid");
+        let mut mac =
+            HmacSha256::new_from_slice(date_key.as_bytes()).expect("HMAC key size invalid");
         mac.update(date.as_bytes());
         let date_key_result = mac.finalize().into_bytes();
 
         // Step 2: kRegion = HMAC-SHA256(kDate, region)
-        let mut mac = HmacSha256::new_from_slice(&date_key_result)
-            .expect("HMAC key size invalid");
+        let mut mac = HmacSha256::new_from_slice(&date_key_result).expect("HMAC key size invalid");
         mac.update(region.as_bytes());
         let region_key = mac.finalize().into_bytes();
 
         // Step 3: kService = HMAC-SHA256(kRegion, service)
-        let mut mac = HmacSha256::new_from_slice(&region_key)
-            .expect("HMAC key size invalid");
+        let mut mac = HmacSha256::new_from_slice(&region_key).expect("HMAC key size invalid");
         mac.update(service.as_bytes());
         let service_key = mac.finalize().into_bytes();
 
         // Step 4: kSigning = HMAC-SHA256(kService, "aws4_request")
-        let mut mac = HmacSha256::new_from_slice(&service_key)
-            .expect("HMAC key size invalid");
+        let mut mac = HmacSha256::new_from_slice(&service_key).expect("HMAC key size invalid");
         mac.update(b"aws4_request");
         let signing_key = mac.finalize().into_bytes();
 
         // Step 5: Signature = Hex(HMAC-SHA256(kSigning, stringToSign))
-        let mut mac = HmacSha256::new_from_slice(&signing_key)
-            .expect("HMAC key size invalid");
+        let mut mac = HmacSha256::new_from_slice(&signing_key).expect("HMAC key size invalid");
         mac.update(string_to_sign.as_bytes());
-        
+
         format!("{:x}", mac.finalize().into_bytes())
     }
 
@@ -191,7 +184,10 @@ mod signature_v4 {
         let canonical_uri = format!("/{}", key);
 
         let query_params = vec![
-            ("X-Amz-Algorithm".to_string(), "AWS4-HMAC-SHA256".to_string()),
+            (
+                "X-Amz-Algorithm".to_string(),
+                "AWS4-HMAC-SHA256".to_string(),
+            ),
             ("X-Amz-Credential".to_string(), credential_scope.to_string()),
             ("X-Amz-Date".to_string(), timestamp.to_string()),
             ("X-Amz-Expires".to_string(), expires_in.to_string()),
@@ -200,19 +196,13 @@ mod signature_v4 {
 
         let canonical_query_string = canonical_query_string(&query_params);
 
-        let headers = vec![
-            ("host".to_string(), host.to_string()),
-        ];
+        let headers = vec![("host".to_string(), host.to_string())];
 
         let (canonical_headers, signed_headers) = canonical_headers(&headers);
 
         format!(
             "{}\n{}\n{}\n{}\n\n{}\n",
-            method,
-            canonical_uri,
-            canonical_query_string,
-            canonical_headers,
-            signed_headers
+            method, canonical_uri, canonical_query_string, canonical_headers, signed_headers
         )
     }
 
@@ -247,11 +237,7 @@ mod signature_v4 {
 
         format!(
             "{}\n{}\n\n{}\n\n{}\n{}",
-            method,
-            canonical_uri,
-            canonical_headers,
-            signed_headers,
-            payload_hash
+            method, canonical_uri, canonical_headers, signed_headers, payload_hash
         )
     }
 }
@@ -281,10 +267,7 @@ impl R2Client {
         let date = now.format("%Y%m%d").to_string();
 
         // Credential scope
-        let credential_scope = format!(
-            "{}/{}/s3/aws4_request",
-            date, self.config.region
-        );
+        let credential_scope = format!("{}/{}/s3/aws4_request", date, self.config.region);
 
         // Create canonical request
         let canonical_request = signature_v4::create_canonical_request_get(
@@ -347,10 +330,7 @@ impl R2Client {
         let date = now.format("%Y%m%d").to_string();
 
         // Credential scope for PUT request
-        let credential_scope = format!(
-            "{}/{}/s3/aws4_request",
-            date, self.config.region
-        );
+        let credential_scope = format!("{}/{}/s3/aws4_request", date, self.config.region);
 
         // Create canonical request for PUT
         let canonical_request = signature_v4::create_canonical_request_put(
@@ -380,19 +360,21 @@ impl R2Client {
         let mut headers = std::collections::HashMap::new();
         headers.insert("Content-Type".to_string(), content_type.to_string());
         headers.insert("X-Amz-Date".to_string(), timestamp);
-        headers.insert("X-Amz-Algorithm".to_string(), "AWS4-HMAC-SHA256".to_string());
+        headers.insert(
+            "X-Amz-Algorithm".to_string(),
+            "AWS4-HMAC-SHA256".to_string(),
+        );
         headers.insert(
             "X-Amz-Credential".to_string(),
             format!("{}/{}", self.config.access_key_id, credential_scope),
         );
-        headers.insert("X-Amz-SignedHeaders".to_string(), "host;content-type;x-amz-date".to_string());
+        headers.insert(
+            "X-Amz-SignedHeaders".to_string(),
+            "host;content-type;x-amz-date".to_string(),
+        );
         headers.insert("X-Amz-Signature".to_string(), signature);
 
-        let upload_url = format!(
-            "{}/{}",
-            self.config.endpoint_url,
-            storage_key
-        );
+        let upload_url = format!("{}/{}", self.config.endpoint_url, storage_key);
 
         Ok(PresignedUploadUrl {
             url: upload_url,

@@ -134,7 +134,7 @@ async fn list_recovery_codes(
 ///
 /// # Trust Boundary
 /// e2ee_boundary() - This crosses the E2EE boundary by accepting plaintext new passphrase.
-/// Security-critical: 
+/// Security-critical:
 /// - Validates recovery code (single-use, not expired)
 /// - Never logs plaintext passphrase
 /// - Uses bcrypt cost 12 for new hash

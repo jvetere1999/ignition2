@@ -1,6 +1,6 @@
 use super::privacy_modes_models::*;
-use sqlx::PgPool;
 use chrono::Utc;
+use sqlx::PgPool;
 use sqlx::Row;
 use uuid::Uuid;
 
@@ -8,7 +8,10 @@ pub struct PrivacyModesRepo;
 
 impl PrivacyModesRepo {
     /// Get privacy preferences for user
-    pub async fn get_preferences(pool: &PgPool, user_id: Uuid) -> Result<PrivacyPreferences, sqlx::Error> {
+    pub async fn get_preferences(
+        pool: &PgPool,
+        user_id: Uuid,
+    ) -> Result<PrivacyPreferences, sqlx::Error> {
         sqlx::query_as::<_, PrivacyPreferences>(
             r#"
             SELECT id, user_id, default_mode, show_privacy_toggle, exclude_private_from_search,
@@ -23,7 +26,10 @@ impl PrivacyModesRepo {
     }
 
     /// Create default privacy preferences for new user
-    pub async fn create_default(pool: &PgPool, user_id: Uuid) -> Result<PrivacyPreferences, sqlx::Error> {
+    pub async fn create_default(
+        pool: &PgPool,
+        user_id: Uuid,
+    ) -> Result<PrivacyPreferences, sqlx::Error> {
         let id = Uuid::new_v4();
         let now = Utc::now();
 
@@ -55,7 +61,8 @@ impl PrivacyModesRepo {
         let mut query_str = r#"
             UPDATE privacy_preferences
             SET updated_at = NOW()
-        "#.to_string();
+        "#
+        .to_string();
 
         let mut param_count = 1;
 
@@ -75,7 +82,10 @@ impl PrivacyModesRepo {
         }
 
         if let Some(days) = req.private_content_retention_days {
-            query_str.push_str(&format!(", private_content_retention_days = ${}", param_count));
+            query_str.push_str(&format!(
+                ", private_content_retention_days = ${}",
+                param_count
+            ));
             param_count += 1;
         }
 
@@ -105,7 +115,11 @@ impl PrivacyModesRepo {
     }
 
     /// Check if content is private
-    pub async fn is_private(pool: &PgPool, content_id: Uuid, table_name: &str) -> Result<bool, sqlx::Error> {
+    pub async fn is_private(
+        pool: &PgPool,
+        content_id: Uuid,
+        table_name: &str,
+    ) -> Result<bool, sqlx::Error> {
         let query_str = format!(
             r#"
             SELECT EXISTS(
@@ -115,7 +129,10 @@ impl PrivacyModesRepo {
             table_name
         );
 
-        let row = sqlx::query(&query_str).bind(content_id).fetch_one(pool).await?;
+        let row = sqlx::query(&query_str)
+            .bind(content_id)
+            .fetch_one(pool)
+            .await?;
         let is_private: bool = row.get("is_private");
         Ok(is_private)
     }
@@ -143,7 +160,10 @@ impl PrivacyModesRepo {
             )
         };
 
-        let rows = sqlx::query(&query_str).bind(user_id).fetch_all(pool).await?;
+        let rows = sqlx::query(&query_str)
+            .bind(user_id)
+            .fetch_all(pool)
+            .await?;
         let ids: Vec<Uuid> = rows.into_iter().map(|r| r.get("id")).collect();
         Ok(ids)
     }

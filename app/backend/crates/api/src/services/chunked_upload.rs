@@ -51,29 +51,26 @@ impl ChunkValidator {
     ) -> Result<(), AppError> {
         // Validate chunk number
         if chunk_number >= total_chunks {
-            return Err(AppError::BadRequest(
-                format!("Invalid chunk number: {}", chunk_number)
-            ));
+            return Err(AppError::BadRequest(format!(
+                "Invalid chunk number: {}",
+                chunk_number
+            )));
         }
 
         // Validate chunk size (last chunk can be smaller)
         if chunk_number < total_chunks - 1 && chunk_size != self.config.chunk_size {
-            return Err(AppError::BadRequest(
-                format!(
-                    "Invalid chunk size: {}, expected: {}",
-                    chunk_size, self.config.chunk_size
-                )
-            ));
+            return Err(AppError::BadRequest(format!(
+                "Invalid chunk size: {}, expected: {}",
+                chunk_size, self.config.chunk_size
+            )));
         }
 
         // Validate total file size
         if total_size > self.config.max_file_size {
-            return Err(AppError::BadRequest(
-                format!(
-                    "File size {} exceeds maximum {}",
-                    total_size, self.config.max_file_size
-                )
-            ));
+            return Err(AppError::BadRequest(format!(
+                "File size {} exceeds maximum {}",
+                total_size, self.config.max_file_size
+            )));
         }
 
         Ok(())
@@ -94,7 +91,7 @@ pub fn verify_chunk_hash(data: &[u8], expected_hash: &str) -> Result<(), AppErro
         Ok(())
     } else {
         Err(AppError::BadRequest(
-            "Chunk hash mismatch - possible corruption".to_string()
+            "Chunk hash mismatch - possible corruption".to_string(),
         ))
     }
 }
@@ -136,10 +133,7 @@ pub async fn reconstruct_file_from_chunks(
 }
 
 /// Cleans up failed or expired upload sessions
-pub async fn cleanup_upload_session(
-    repo: &sqlx::PgPool,
-    session_id: &str,
-) -> Result<(), AppError> {
+pub async fn cleanup_upload_session(repo: &sqlx::PgPool, session_id: &str) -> Result<(), AppError> {
     // TODO: Delete all chunks associated with session from R2
     // List all chunks: upload-{session_id}/chunk-*
     // Delete each chunk
@@ -163,7 +157,7 @@ pub fn validate_multipart_form(
 
     if total_chunks == 0 {
         return Err(AppError::BadRequest(
-            "total_chunks must be greater than 0".to_string()
+            "total_chunks must be greater than 0".to_string(),
         ));
     }
 

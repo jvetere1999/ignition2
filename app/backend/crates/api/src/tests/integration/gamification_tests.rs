@@ -21,10 +21,17 @@ mod tests {
     async fn test_award_xp_creates_progress(pool: PgPool) {
         let user_id = create_test_user(&pool).await;
 
-        let result =
-            UserProgressRepo::award_xp(&pool, user_id, 50, EventType::Custom, None, Some("Test award"), None)
-                .await
-                .expect("Failed to award XP");
+        let result = UserProgressRepo::award_xp(
+            &pool,
+            user_id,
+            50,
+            EventType::Custom,
+            None,
+            Some("Test award"),
+            None,
+        )
+        .await
+        .expect("Failed to award XP");
 
         assert!(result.already_awarded == false);
         assert_eq!(result.new_balance, 50);
@@ -42,9 +49,10 @@ mod tests {
             .expect("Failed to award XP");
 
         // Second award
-        let result = UserProgressRepo::award_xp(&pool, user_id, 40, EventType::Custom, None, None, None)
-            .await
-            .expect("Failed to award XP");
+        let result =
+            UserProgressRepo::award_xp(&pool, user_id, 40, EventType::Custom, None, None, None)
+                .await
+                .expect("Failed to award XP");
 
         assert_eq!(result.new_balance, 70);
     }

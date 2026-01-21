@@ -24,10 +24,7 @@ pub fn assert_app_error(result: &Result<impl std::fmt::Debug, AppError>, error_t
             );
         }
         Ok(ok) => {
-            panic!(
-                "Expected error but got success: {:?}",
-                ok
-            );
+            panic!("Expected error but got success: {:?}", ok);
         }
     }
 }

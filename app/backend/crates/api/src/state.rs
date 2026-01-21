@@ -69,8 +69,12 @@ impl AppState {
         let db = PgPoolOptions::new()
             .max_connections(config.database.pool_size)
             .min_connections(config.database.min_pool_size)
-            .max_lifetime(std::time::Duration::from_secs(config.database.connection_max_lifetime))
-            .idle_timeout(std::time::Duration::from_secs(config.database.connection_idle_timeout))
+            .max_lifetime(std::time::Duration::from_secs(
+                config.database.connection_max_lifetime,
+            ))
+            .idle_timeout(std::time::Duration::from_secs(
+                config.database.connection_idle_timeout,
+            ))
             .acquire_timeout(Duration::from_secs(30))
             .connect(&config.database.url)
             .await
@@ -97,6 +101,22 @@ impl AppState {
             db.idle_timeout_secs = config.database.connection_idle_timeout,
             "Database connection pool created (BACK-014: optimized for scalability)"
         );
+
+        // Lightweight connectivity validation to fail fast if DB is unreachable
+        if let Err(e) = sqlx::query_scalar::<_, i64>("SELECT 1")
+            .fetch_one(&db)
+            .await
+        {
+            tracing::error!(
+                error.type = "connection",
+                error.message = %e,
+                operation = "database_health_check",
+                "Database connectivity validation failed"
+            );
+            return Err(anyhow::anyhow!(
+                "Database connectivity validation failed: {e}"
+            ));
+        }
 
         // ✓ Migrations are now handled by the deployment pipeline (wipe-and-rebuild-neon job)
         // ✓ Backend no longer runs migrations on startup to avoid conflicts

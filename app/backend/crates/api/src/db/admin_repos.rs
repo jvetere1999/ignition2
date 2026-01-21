@@ -441,7 +441,7 @@ impl AdminStatsRepo {
                 COUNT(*) FILTER (WHERE role = 'admin') as admins,
                 COUNT(*) FILTER (WHERE last_activity_at > NOW() - INTERVAL '7 days') as active_7d,
                 COUNT(*) FILTER (WHERE last_activity_at > NOW() - INTERVAL '30 days') as active_30d
-               FROM users"#
+               FROM users"#,
         )
         .fetch_one(pool)
         .await?;
@@ -473,7 +473,7 @@ impl AdminStatsRepo {
                 (SELECT COUNT(*) FROM exercises) as exercises,
                 (SELECT COUNT(*) FROM universal_quests) as universal_quests,
                 (SELECT COUNT(*) FROM quests) as user_quests,
-                (SELECT COUNT(*) FROM market_items) as market_items"#
+                (SELECT COUNT(*) FROM market_items) as market_items"#,
         )
         .fetch_one(pool)
         .await?;
@@ -511,7 +511,7 @@ impl AdminStatsRepo {
                 (SELECT COUNT(*) FROM habit_completions) as habits,
                 (SELECT COUNT(*) FROM goals) as goals,
                 (SELECT COUNT(*) FROM ideas) as ideas,
-                (SELECT COUNT(*) FROM books) as books"#
+                (SELECT COUNT(*) FROM books) as books"#,
         )
         .fetch_one(pool)
         .await?;

@@ -5,7 +5,9 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::db::authenticator_models::{AuthenticatorRow, CreateAuthenticatorInput, AuthenticatorInfo};
+use crate::db::authenticator_models::{
+    AuthenticatorInfo, AuthenticatorRow, CreateAuthenticatorInput,
+};
 use crate::error::{AppError, AppResult};
 
 pub struct AuthenticatorRepo;
@@ -27,14 +29,14 @@ impl AuthenticatorRepo {
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
             RETURNING *
-            "#
+            "#,
         )
         .bind(id)
         .bind(input.user_id)
         .bind(&input.credential_id)
         .bind(&input.provider_account_id)
         .bind(&input.credential_public_key)
-        .bind(0i64) // counter starts at 0
+        .bind(input.counter)
         .bind(&input.credential_device_type)
         .bind(input.credential_backed_up)
         .bind(&input.transports)
@@ -50,7 +52,7 @@ impl AuthenticatorRepo {
         credential_id: &str,
     ) -> AppResult<Option<AuthenticatorRow>> {
         let row = sqlx::query_as::<_, AuthenticatorRow>(
-            "SELECT * FROM authenticators WHERE credential_id = $1"
+            "SELECT * FROM authenticators WHERE credential_id = $1",
         )
         .bind(credential_id)
         .fetch_optional(pool)
@@ -60,12 +62,9 @@ impl AuthenticatorRepo {
     }
 
     /// Get all authenticators for a user
-    pub async fn get_by_user_id(
-        pool: &PgPool,
-        user_id: Uuid,
-    ) -> AppResult<Vec<AuthenticatorRow>> {
+    pub async fn get_by_user_id(pool: &PgPool, user_id: Uuid) -> AppResult<Vec<AuthenticatorRow>> {
         let rows = sqlx::query_as::<_, AuthenticatorRow>(
-            "SELECT * FROM authenticators WHERE user_id = $1 ORDER BY created_at DESC"
+            "SELECT * FROM authenticators WHERE user_id = $1 ORDER BY created_at DESC",
         )
         .bind(user_id)
         .fetch_all(pool)
@@ -80,13 +79,11 @@ impl AuthenticatorRepo {
         credential_id: &str,
         new_counter: i64,
     ) -> AppResult<()> {
-        let result = sqlx::query(
-            "UPDATE authenticators SET counter = $1 WHERE credential_id = $2"
-        )
-        .bind(new_counter)
-        .bind(credential_id)
-        .execute(pool)
-        .await?;
+        let result = sqlx::query("UPDATE authenticators SET counter = $1 WHERE credential_id = $2")
+            .bind(new_counter)
+            .bind(credential_id)
+            .execute(pool)
+            .await?;
 
         if result.rows_affected() == 0 {
             return Err(AppError::NotFound("Authenticator not found".to_string()));
@@ -96,18 +93,12 @@ impl AuthenticatorRepo {
     }
 
     /// Delete an authenticator
-    pub async fn delete(
-        pool: &PgPool,
-        id: Uuid,
-        user_id: Uuid,
-    ) -> AppResult<()> {
-        let result = sqlx::query(
-            "DELETE FROM authenticators WHERE id = $1 AND user_id = $2"
-        )
-        .bind(id)
-        .bind(user_id)
-        .execute(pool)
-        .await?;
+    pub async fn delete(pool: &PgPool, id: Uuid, user_id: Uuid) -> AppResult<()> {
+        let result = sqlx::query("DELETE FROM authenticators WHERE id = $1 AND user_id = $2")
+            .bind(id)
+            .bind(user_id)
+            .execute(pool)
+            .await?;
 
         if result.rows_affected() == 0 {
             return Err(AppError::NotFound("Authenticator not found".to_string()));
@@ -122,7 +113,7 @@ impl AuthenticatorRepo {
         credential_id: &str,
     ) -> AppResult<Uuid> {
         let row = sqlx::query_scalar::<_, Uuid>(
-            "SELECT user_id FROM authenticators WHERE credential_id = $1"
+            "SELECT user_id FROM authenticators WHERE credential_id = $1",
         )
         .bind(credential_id)
         .fetch_optional(pool)

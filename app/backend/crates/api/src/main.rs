@@ -11,8 +11,8 @@ use tower_http::request_id::{MakeRequestUuid, PropagateRequestIdLayer, SetReques
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-mod config;
 mod cache;
+mod config;
 mod db;
 mod error;
 mod middleware;
@@ -118,7 +118,10 @@ fn build_router(state: Arc<AppState>) -> Router {
                     state.clone(),
                     middleware::auth::require_auth,
                 ))
-                .layer(axum::middleware::from_fn(middleware::csrf::csrf_check))
+                .layer(axum::middleware::from_fn_with_state(
+                    state.clone(),
+                    middleware::csrf::csrf_check,
+                ))
                 .layer(axum::middleware::from_fn_with_state(
                     state.clone(),
                     middleware::auth::extract_session,
@@ -132,7 +135,10 @@ fn build_router(state: Arc<AppState>) -> Router {
                     state.clone(),
                     middleware::auth::require_auth,
                 ))
-                .layer(axum::middleware::from_fn(middleware::csrf::csrf_check))
+                .layer(axum::middleware::from_fn_with_state(
+                    state.clone(),
+                    middleware::csrf::csrf_check,
+                ))
                 .layer(axum::middleware::from_fn_with_state(
                     state.clone(),
                     middleware::auth::extract_session,
@@ -159,7 +165,10 @@ fn build_router(state: Arc<AppState>) -> Router {
                     state.clone(),
                     middleware::auth::require_auth,
                 ))
-                .layer(axum::middleware::from_fn(middleware::csrf::csrf_check))
+                .layer(axum::middleware::from_fn_with_state(
+                    state.clone(),
+                    middleware::csrf::csrf_check,
+                ))
                 .layer(axum::middleware::from_fn_with_state(
                     state.clone(),
                     middleware::auth::extract_session,
@@ -183,7 +192,10 @@ fn build_router(state: Arc<AppState>) -> Router {
             "/admin",
             routes::admin::router()
                 .layer(axum::middleware::from_fn(middleware::auth::require_admin))
-                .layer(axum::middleware::from_fn(middleware::csrf::csrf_check))
+                .layer(axum::middleware::from_fn_with_state(
+                    state.clone(),
+                    middleware::csrf::csrf_check,
+                ))
                 .layer(axum::middleware::from_fn_with_state(
                     state.clone(),
                     middleware::auth::extract_session,

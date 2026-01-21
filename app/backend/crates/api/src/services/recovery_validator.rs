@@ -40,7 +40,10 @@ impl RecoveryValidator {
                 ));
             }
 
-            if !part.chars().all(|c| c.is_ascii_alphanumeric() && c.is_ascii_uppercase()) {
+            if !part
+                .chars()
+                .all(|c| c.is_ascii_alphanumeric() && c.is_ascii_uppercase())
+            {
                 return Err(AppError::BadRequest(
                     "Code must contain only uppercase letters and numbers: XXXX-XXXX-XXXX"
                         .to_string(),
@@ -61,7 +64,9 @@ impl RecoveryValidator {
     /// Returns `AppError::BadRequest` if passphrase is too weak
     pub fn validate_passphrase_strength(passphrase: &str) -> Result<(), AppError> {
         if passphrase.is_empty() {
-            return Err(AppError::BadRequest("Passphrase cannot be empty".to_string()));
+            return Err(AppError::BadRequest(
+                "Passphrase cannot be empty".to_string(),
+            ));
         }
 
         if passphrase.len() < 8 {
@@ -79,7 +84,8 @@ impl RecoveryValidator {
 
         if !entropy_good {
             return Err(AppError::BadRequest(
-                "Passphrase should use mixed case OR include numbers/symbols for better security".to_string(),
+                "Passphrase should use mixed case OR include numbers/symbols for better security"
+                    .to_string(),
             ));
         }
 
@@ -90,10 +96,7 @@ impl RecoveryValidator {
     ///
     /// # Errors
     /// Returns `AppError::BadRequest` if passphrases are identical
-    pub fn validate_different_passphrases(
-        old: &str,
-        new: &str,
-    ) -> Result<(), AppError> {
+    pub fn validate_different_passphrases(old: &str, new: &str) -> Result<(), AppError> {
         if old == new {
             return Err(AppError::BadRequest(
                 "New passphrase must be different from current passphrase".to_string(),

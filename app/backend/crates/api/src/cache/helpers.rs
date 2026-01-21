@@ -1,6 +1,6 @@
 //! Cache management utilities: key building, invalidation strategies, metadata
 //! Companion infrastructure for cache/mod.rs
-//! 
+//!
 //! TODO: Activate in Phase 7 for performance optimization
 #![allow(dead_code)]
 
@@ -142,7 +142,13 @@ impl CacheInvalidationStrategy {
 
     /// Create entity-scoped cache key
     pub fn entity_key(entity_type: &str, entity_id: &str, key: &str) -> String {
-        format!("{}:{}:{}:{}", entity_type, entity_id, key, get_current_time_ms() / 1000)
+        format!(
+            "{}:{}:{}:{}",
+            entity_type,
+            entity_id,
+            key,
+            get_current_time_ms() / 1000
+        )
     }
 
     /// Create user-scoped cache key
@@ -317,7 +323,9 @@ impl CacheWarmer {
     /// Warm the cache by loading all entries
     pub async fn warm(&self, cache: &QueryCache) {
         for (key, value) in &self.keys {
-            cache.set(key.clone(), value.clone(), Duration::from_secs(3600)).await;
+            cache
+                .set(key.clone(), value.clone(), Duration::from_secs(3600))
+                .await;
         }
     }
 
@@ -347,7 +355,10 @@ pub struct MultiLevelCacheStrategy {
 impl MultiLevelCacheStrategy {
     /// Create new multi-level strategy
     pub fn new(l1_ttl_ms: u64, l2_ttl_ms: u64) -> Self {
-        Self { l1_ttl_ms, l2_ttl_ms }
+        Self {
+            l1_ttl_ms,
+            l2_ttl_ms,
+        }
     }
 
     /// Get L1 cache TTL

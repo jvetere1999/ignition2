@@ -10,9 +10,9 @@ pub struct DawProjectFile {
     pub project_name: String,
     pub file_path: String,
     pub file_size: i64,
-    pub file_hash: String, // SHA256 of encrypted content
+    pub file_hash: String,    // SHA256 of encrypted content
     pub content_type: String, // .als, .flp, .logicx, .serum, etc
-    pub storage_key: String, // R2 key path
+    pub storage_key: String,  // R2 key path
     pub encrypted: bool,
     pub current_version_id: Uuid,
     pub version_count: i32,
@@ -56,8 +56,8 @@ pub struct UploadSession {
 pub struct InitiateUploadRequest {
     pub project_name: String,
     pub content_type: String, // .als, .flp, .logicx, .serum, .wavetable
-    pub total_size: i64, // Total file size in bytes
-    pub file_hash: String, // SHA256 hash for resumability verification
+    pub total_size: i64,      // Total file size in bytes
+    pub file_hash: String,    // SHA256 hash for resumability verification
 }
 
 /// Response after initiating upload
