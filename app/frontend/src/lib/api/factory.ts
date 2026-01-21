@@ -5,6 +5,8 @@
  * error handling, retry logic, and environment-aware configuration.
  */
 
+import { getApiBaseUrl } from "@/lib/config/environment";
+
 interface ApiClientConfig {
   baseURL: string;
   timeout: number;
@@ -280,16 +282,7 @@ export class ApiError extends Error {
  * Get default API base URL based on environment
  */
 function getDefaultBaseURL(): string {
-  if (typeof window === 'undefined') {
-    // Server-side
-    return process.env.API_BASE_URL || 'http://localhost:3000/api';
-  }
-
-  // Client-side
-  return (
-    process.env.NEXT_PUBLIC_API_URL ||
-    `${window.location.origin}/api`
-  );
+  return getApiBaseUrl();
 }
 
 /**

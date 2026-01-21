@@ -76,13 +76,13 @@
 }
 
 .signInBtn.google {
-  background-color: white;
-  color: #1f1f1f;
+  background-color: var(--m-bg-primary);
+  color: var(--m-text-primary);
 }
 
 .signInBtn.microsoft {
-  background-color: #2f2f2f;
-  color: white;
+  background-color: var(--m-bg-secondary);
+  color: var(--m-text-primary);
 }
 
 /* Terms */
@@ -94,4 +94,3 @@
   margin: 0;
   max-width: 280px;
 }
-

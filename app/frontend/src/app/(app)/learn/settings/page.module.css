@@ -239,15 +239,15 @@
   padding: var(--space-2) var(--space-4);
   font-size: var(--font-size-sm);
   background-color: transparent;
-  border: 1px solid #ef4444;
+  border: 1px solid var(--color-error);
   border-radius: var(--radius-md);
-  color: #ef4444;
+  color: var(--color-error);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .dataBtnDanger:hover {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: color-mix(in srgb, var(--color-error) 10%, transparent);
 }
 
 /* Footer */
@@ -266,7 +266,7 @@
   background-color: var(--color-accent-primary);
   border: none;
   border-radius: var(--radius-md);
-  color: white;
+  color: var(--color-text-inverse);
   cursor: pointer;
   transition: opacity var(--transition-fast);
 }
@@ -274,4 +274,3 @@
 .saveBtn:hover {
   opacity: 0.9;
 }
-

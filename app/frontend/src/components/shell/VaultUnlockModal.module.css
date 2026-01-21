@@ -1,7 +1,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--color-bg-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -10,12 +10,12 @@
 }
 
 .modal {
-  background: white;
+  background: var(--color-bg-primary);
   border-radius: 12px;
   padding: 32px;
   max-width: 400px;
   width: 90%;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-xl);
   animation: slideUp 0.3s ease-out;
 }
 
@@ -45,13 +45,13 @@
   margin: 0;
   font-size: 20px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--color-text-primary);
 }
 
 .message {
   margin: 0 0 20px 0;
   font-size: 14px;
-  color: #6b7280;
+  color: var(--color-text-muted);
   line-height: 1.5;
 }
 
@@ -70,7 +70,7 @@
 .input {
   flex: 1;
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-border-secondary);
   border-radius: 8px;
   font-size: 14px;
   font-family: inherit;
@@ -79,28 +79,28 @@
 
 .input:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-border-focus) 20%, transparent);
 }
 
 .input:disabled {
-  background: #f3f4f6;
-  color: #9ca3af;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
 }
 
 .toggleButton {
   padding: 8px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-border-secondary);
   border-radius: 8px;
-  background: white;
+  background: var(--color-bg-primary);
   cursor: pointer;
   transition: all 0.2s;
   font-size: 16px;
 }
 
 .toggleButton:hover:not(:disabled) {
-  background: #f9fafb;
-  border-color: #9ca3af;
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border-primary);
 }
 
 .toggleButton:disabled {
@@ -111,18 +111,22 @@
 .error {
   margin: 0;
   padding: 8px 12px;
-  background: #fee2e2;
-  border: 1px solid #fecaca;
+  background: var(--color-error-bg);
+  border: 1px solid color-mix(in srgb, var(--color-error) 30%, var(--color-border-primary));
   border-radius: 6px;
-  color: #991b1b;
+  color: var(--color-error);
   font-size: 13px;
   line-height: 1.4;
 }
 
 .submitButton {
   padding: 10px 16px;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-primary) 0%,
+    var(--color-accent-primary-active) 100%
+  );
+  color: var(--color-text-inverse);
   border: none;
   border-radius: 8px;
   font-size: 14px;
@@ -133,7 +137,7 @@
 
 .submitButton:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+  box-shadow: var(--shadow-lg);
 }
 
 .submitButton:disabled {
@@ -144,13 +148,13 @@
 .details {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--color-border-primary);
 }
 
 .summary {
   cursor: pointer;
   font-size: 13px;
-  color: #3b82f6;
+  color: var(--color-accent-primary);
   font-weight: 500;
   user-select: none;
   list-style: none;
@@ -174,7 +178,7 @@ details[open] .summary::before {
 .recoveryText {
   margin: 8px 0 0 20px;
   font-size: 12px;
-  color: #6b7280;
+  color: var(--color-text-muted);
   line-height: 1.5;
 }
 

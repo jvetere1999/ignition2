@@ -3,8 +3,8 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: var(--bg-secondary, #1a1a1c);
-  border-top: 1px solid var(--border-color, #333);
+  background: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border-primary);
   z-index: 1000;
   padding: 8px 16px 12px;
 }
@@ -33,25 +33,25 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: var(--text-primary, #fff);
+  color: var(--color-text-primary);
 }
 
 .minimizedTime {
   font-size: 12px;
   font-variant-numeric: tabular-nums;
-  color: var(--text-secondary, #888);
+  color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
 .playButtonMini {
   width: 32px;
   height: 32px;
-  background: var(--accent-primary, #ff764d);
-  color: #fff;
+  background: var(--color-accent-primary);
+  color: var(--color-text-inverse);
 }
 
 .playButtonMini:hover {
-  background: var(--accent-hover, #e5693f);
+  background: var(--color-accent-primary-hover);
 }
 
 .expandButton {
@@ -62,15 +62,15 @@
   height: 32px;
   border: none;
   background: transparent;
-  color: var(--text-secondary, #888);
+  color: var(--color-text-secondary);
   border-radius: 4px;
   cursor: pointer;
   transition: color 0.15s ease, background 0.15s ease;
 }
 
 .expandButton:hover {
-  background: var(--bg-tertiary, #333);
-  color: var(--text-primary, #fff);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
 }
 
 .minimizeButton {
@@ -81,15 +81,15 @@
   height: 32px;
   border: none;
   background: transparent;
-  color: var(--text-secondary, #888);
+  color: var(--color-text-secondary);
   border-radius: 4px;
   cursor: pointer;
   transition: color 0.15s ease, background 0.15s ease;
 }
 
 .minimizeButton:hover {
-  background: var(--bg-tertiary, #333);
-  color: var(--text-primary, #fff);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
 }
 
 .waveformWrapper {
@@ -114,12 +114,12 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: var(--text-primary, #fff);
+  color: var(--color-text-primary);
 }
 
 .trackArtist {
   font-size: 12px;
-  color: var(--text-secondary, #888);
+  color: var(--color-text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -139,29 +139,29 @@
   height: 36px;
   border: none;
   background: transparent;
-  color: var(--text-primary, #fff);
+  color: var(--color-text-primary);
   border-radius: 50%;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
 }
 
 .controlButton:hover {
-  background: var(--bg-tertiary, #333);
+  background: var(--color-bg-tertiary);
 }
 
 .controlButton.active {
-  color: var(--accent-primary, #ff764d);
+  color: var(--color-accent-primary);
 }
 
 .playButton {
   width: 44px;
   height: 44px;
-  background: var(--accent-primary, #ff764d);
-  color: #fff;
+  background: var(--color-accent-primary);
+  color: var(--color-text-inverse);
 }
 
 .playButton:hover {
-  background: var(--accent-hover, #e5693f);
+  background: var(--color-accent-primary-hover);
 }
 
 .timeDisplay {
@@ -170,7 +170,7 @@
   gap: 4px;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
-  color: var(--text-secondary, #aaa);
+  color: var(--color-text-secondary);
   min-width: 80px;
 }
 
@@ -188,7 +188,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--text-secondary, #aaa);
+  color: var(--color-text-secondary);
 }
 
 .volumeSlider {
@@ -196,7 +196,7 @@
   height: 4px;
   -webkit-appearance: none;
   appearance: none;
-  background: var(--bg-tertiary, #333);
+  background: var(--color-bg-tertiary);
   border-radius: 2px;
   cursor: pointer;
 }
@@ -205,7 +205,7 @@
   -webkit-appearance: none;
   width: 12px;
   height: 12px;
-  background: var(--text-primary, #fff);
+  background: var(--color-text-primary);
   border-radius: 50%;
   cursor: pointer;
 }
@@ -213,7 +213,7 @@
 .volumeSlider::-moz-range-thumb {
   width: 12px;
   height: 12px;
-  background: var(--text-primary, #fff);
+  background: var(--color-text-primary);
   border-radius: 50%;
   border: none;
   cursor: pointer;
@@ -227,15 +227,15 @@
   height: 32px;
   border: none;
   background: transparent;
-  color: var(--text-secondary, #888);
+  color: var(--color-text-secondary);
   border-radius: 4px;
   cursor: pointer;
   transition: color 0.15s ease, background 0.15s ease;
 }
 
 .closeButton:hover {
-  background: var(--bg-tertiary, #333);
-  color: var(--text-primary, #fff);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
 }
 
 .analyzeButton {
@@ -246,20 +246,20 @@
   height: 32px;
   border: none;
   background: transparent;
-  color: var(--text-secondary, #888);
+  color: var(--color-text-secondary);
   border-radius: 4px;
   cursor: pointer;
   transition: color 0.15s ease, background 0.15s ease;
 }
 
 .analyzeButton:hover {
-  background: var(--bg-tertiary, #333);
-  color: var(--text-primary, #fff);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
 }
 
 .analyzeButton.active {
-  color: var(--accent-primary, #ff764d);
-  background: var(--accent-primary, #ff764d)20;
+  color: var(--color-accent-primary);
+  background: color-mix(in srgb, var(--color-accent-primary) 12%, transparent);
 }
 
 /* Responsive */

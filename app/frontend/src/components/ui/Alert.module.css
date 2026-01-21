@@ -7,27 +7,27 @@
 }
 
 .alert.default {
-  background-color: #f0f9ff;
-  border-color: #bfdbfe;
-  color: #0c4a6e;
+  background-color: color-mix(in srgb, var(--color-accent-primary) 10%, transparent);
+  border-color: color-mix(in srgb, var(--color-accent-primary) 35%, transparent);
+  color: var(--color-accent-primary);
 }
 
 .alert.destructive {
-  background-color: #fee2e2;
-  border-color: #fca5a5;
-  color: #7f1d1d;
+  background-color: color-mix(in srgb, var(--color-error) 10%, transparent);
+  border-color: color-mix(in srgb, var(--color-error) 35%, transparent);
+  color: var(--color-error);
 }
 
 .alert.warning {
-  background-color: #fef3c7;
-  border-color: #fde68a;
-  color: #78350f;
+  background-color: color-mix(in srgb, var(--color-warning) 10%, transparent);
+  border-color: color-mix(in srgb, var(--color-warning) 35%, transparent);
+  color: var(--color-warning);
 }
 
 .alert.success {
-  background-color: #ecfdf5;
-  border-color: #a7f3d0;
-  color: #065f46;
+  background-color: color-mix(in srgb, var(--color-success) 10%, transparent);
+  border-color: color-mix(in srgb, var(--color-success) 35%, transparent);
+  color: var(--color-success);
 }
 
 .alertTitle {

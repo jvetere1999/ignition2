@@ -12,6 +12,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { lockVault, unlockVault, getVaultLockState, VaultLockState } from '@/lib/api/vault';
+import { getApiBaseUrl } from '@/lib/config/environment';
 
 interface VaultContextType {
   isLocked: boolean;
@@ -20,6 +21,8 @@ interface VaultContextType {
   unlockVault: (passphrase: string) => Promise<void>;
   setManualLock: (locked: boolean) => void;
 }
+
+const API_BASE_URL = getApiBaseUrl();
 
 const VaultContext = createContext<VaultContextType | undefined>(undefined);
 
@@ -47,7 +50,7 @@ export const VaultProvider: React.FC<VaultProviderProps> = ({ children }) => {
     const initVaultState = async () => {
       try {
         // Check if user is authenticated before fetching vault state
-        const sessionResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online'}/auth/session`, {
+        const sessionResponse = await fetch(`${API_BASE_URL}/auth/session`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -88,7 +91,7 @@ export const VaultProvider: React.FC<VaultProviderProps> = ({ children }) => {
       inactivityTimerRef.current = setTimeout(async () => {
         try {
           // Check if user is authenticated before locking vault
-          const sessionResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online'}/auth/session`, {
+          const sessionResponse = await fetch(`${API_BASE_URL}/auth/session`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -151,7 +154,7 @@ export const VaultProvider: React.FC<VaultProviderProps> = ({ children }) => {
         // App backgrounded - check auth before locking
         try {
           // Check if user is authenticated before locking vault
-          const sessionResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online'}/auth/session`, {
+          const sessionResponse = await fetch(`${API_BASE_URL}/auth/session`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',

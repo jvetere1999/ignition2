@@ -231,7 +231,7 @@ export function OnboardingModal({ initialState, flow, userId }: OnboardingModalP
 
     try {
       // Get registration options from backend
-      const optionsResponse = await safeFetch(`${API_BASE_URL}/api/auth/webauthn/register-options`, {
+      const optionsResponse = await safeFetch(`${API_BASE_URL}/auth/webauthn/register-options`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
@@ -250,7 +250,7 @@ export function OnboardingModal({ initialState, flow, userId }: OnboardingModalP
       }
 
       // Send credential to backend for verification and storage
-      const verifyResponse = await safeFetch(`${API_BASE_URL}/api/auth/webauthn/register-verify`, {
+      const verifyResponse = await safeFetch(`${API_BASE_URL}/auth/webauthn/register-verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ credential }),

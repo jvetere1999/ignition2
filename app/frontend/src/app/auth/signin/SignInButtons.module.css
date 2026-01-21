@@ -7,68 +7,54 @@
 .button {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   border-radius: var(--radius-md);
-  border: none;
+  border: 1px solid var(--color-border-secondary);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-sm);
   transition: all var(--transition-fast);
-  text-decoration: none;
+  cursor: pointer;
 }
 
 .button:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
-/* Google Button - White with colored icon */
-.googleButton {
-  background-color: #ffffff;
-  color: #3c4043;
-  border: 1px solid #dadce0;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+.button svg {
+  flex-shrink: 0;
 }
 
-.googleButton:hover:not(:disabled) {
-  background-color: #f8f9fa;
-  border-color: #c6c6c6;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.googleButton:active:not(:disabled) {
-  background-color: #f1f3f4;
-}
-
-/* Microsoft Button - White with colored icon */
+.googleButton,
 .microsoftButton {
-  background-color: #ffffff;
-  color: #3c4043;
-  border: 1px solid #dadce0;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  width: 100%;
 }
 
+.googleButton:hover:not(:disabled),
 .microsoftButton:hover:not(:disabled) {
-  background-color: #f8f9fa;
-  border-color: #c6c6c6;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.microsoftButton:active:not(:disabled) {
-  background-color: #f1f3f4;
-}
-
-/* Dark theme support */
-:global([data-theme="dark"]) .googleButton,
-:global([data-theme="dark"]) .microsoftButton {
   background-color: var(--color-bg-secondary);
-  color: var(--color-text);
-  border-color: var(--color-border);
+  border-color: var(--color-border-focus);
+  box-shadow: var(--shadow-md);
 }
 
-:global([data-theme="dark"]) .googleButton:hover:not(:disabled),
-:global([data-theme="dark"]) .microsoftButton:hover:not(:disabled) {
+.googleButton:active:not(:disabled),
+.microsoftButton:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: var(--shadow-sm);
+}
+
+:global([data-theme="dark"]) .button {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-primary);
+}
+
+:global([data-theme="dark"]) .button:hover:not(:disabled) {
   background-color: var(--color-bg-tertiary);
   border-color: var(--color-border-focus);
 }
-

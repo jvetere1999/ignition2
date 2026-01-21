@@ -99,7 +99,7 @@
   min-height: 300px;
   background-color: var(--color-bg-secondary);
   border-radius: var(--radius-xl);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-lg);
   padding: var(--space-6);
   display: flex;
   flex-direction: column;
@@ -163,7 +163,7 @@
   gap: var(--space-3);
   padding: var(--space-3) var(--space-6);
   background-color: var(--color-accent-primary);
-  color: white;
+  color: var(--color-text-inverse);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   border: none;
@@ -180,7 +180,7 @@
 .shortcut {
   padding: 2px 6px;
   font-size: var(--font-size-xs);
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: color-mix(in srgb, var(--color-text-primary) 12%, transparent);
   border-radius: var(--radius-sm);
 }
 
@@ -212,35 +212,35 @@
 }
 
 .gradeBtn.again {
-  border-color: #ef4444;
+  border-color: var(--color-error);
 }
 
 .gradeBtn.again:hover {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: color-mix(in srgb, var(--color-error) 10%, transparent);
 }
 
 .gradeBtn.hard {
-  border-color: #f97316;
+  border-color: var(--color-warning);
 }
 
 .gradeBtn.hard:hover {
-  background-color: rgba(249, 115, 22, 0.1);
+  background-color: color-mix(in srgb, var(--color-warning) 10%, transparent);
 }
 
 .gradeBtn.good {
-  border-color: #22c55e;
+  border-color: var(--color-success);
 }
 
 .gradeBtn.good:hover {
-  background-color: rgba(34, 197, 94, 0.1);
+  background-color: color-mix(in srgb, var(--color-success) 10%, transparent);
 }
 
 .gradeBtn.easy {
-  border-color: #3b82f6;
+  border-color: var(--color-accent-primary);
 }
 
 .gradeBtn.easy:hover {
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: color-mix(in srgb, var(--color-accent-primary) 10%, transparent);
 }
 
 .gradeLabel {
@@ -312,7 +312,7 @@
   margin-top: var(--space-4);
   padding: var(--space-3) var(--space-6);
   background-color: var(--color-accent-primary);
-  color: white;
+  color: var(--color-text-inverse);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   border-radius: var(--radius-md);
@@ -350,23 +350,22 @@
 }
 
 .statValue.again {
-  color: #ef4444;
+  color: var(--color-error);
 }
 
 .statValue.hard {
-  color: #f97316;
+  color: var(--color-warning);
 }
 
 .statValue.good {
-  color: #22c55e;
+  color: var(--color-success);
 }
 
 .statValue.easy {
-  color: #3b82f6;
+  color: var(--color-accent-primary);
 }
 
 .statLabel {
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
 }
-

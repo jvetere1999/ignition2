@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import styles from "./page.module.css";
+import { getApiBaseUrl } from "@/lib/config/environment";
 
 interface SignInButtonsProps {
   isSignUp?: boolean;
@@ -18,8 +19,8 @@ export function SignInButtons({ isSignUp = false }: SignInButtonsProps) {
       
       // Build absolute redirect URI
       const redirectUri = `${window.location.origin}/auth/callback`;
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.ecent.online";
-      const endpoint = `${apiUrl}/api/auth/signin/${provider}`;
+      const apiUrl = getApiBaseUrl();
+      const endpoint = `${apiUrl}/auth/signin/${provider}`;
       const url = `${endpoint}?redirect_uri=${encodeURIComponent(redirectUri)}`;
       
       console.log(`[SignIn] Redirecting to ${provider}: ${url}`);

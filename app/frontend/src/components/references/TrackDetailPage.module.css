@@ -21,17 +21,17 @@
 .backButton {
   padding: 8px 16px;
   font-size: 14px;
-  color: #9ca3af;
+  color: var(--color-text-secondary);
   background: transparent;
-  border: 1px solid #374151;
+  border: 1px solid var(--color-border-primary);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .backButton:hover {
-  color: #f3f4f6;
-  border-color: #4b5563;
+  color: var(--color-text-primary);
+  border-color: var(--color-border-secondary);
 }
 
 .trackInfo {
@@ -41,13 +41,13 @@
 .trackName {
   font-size: 24px;
   font-weight: 700;
-  color: #f3f4f6;
+  color: var(--color-text-primary);
   margin: 0;
 }
 
 .trackArtist {
   font-size: 14px;
-  color: #9ca3af;
+  color: var(--color-text-secondary);
   margin: 4px 0 0;
 }
 
@@ -59,9 +59,9 @@
   text-transform: uppercase;
 }
 
-.status_uploading { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
-.status_processing { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
-.status_error { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+.status_uploading { background: color-mix(in srgb, var(--color-info) 20%, transparent); color: var(--color-info); }
+.status_processing { background: color-mix(in srgb, var(--color-warning) 20%, transparent); color: var(--color-warning); }
+.status_error { background: color-mix(in srgb, var(--color-error) 20%, transparent); color: var(--color-error); }
 
 /* Loading/Error states */
 .loading,
@@ -72,14 +72,14 @@
   justify-content: center;
   min-height: 300px;
   gap: 16px;
-  color: #9ca3af;
+  color: var(--color-text-secondary);
 }
 
 .spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid #374151;
-  border-top-color: #3b82f6;
+  border: 3px solid var(--color-border-primary);
+  border-top-color: var(--color-accent-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -90,8 +90,8 @@
 
 .error button {
   padding: 8px 16px;
-  background: #3b82f6;
-  color: white;
+  background: var(--color-accent-primary);
+  color: var(--color-text-inverse);
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -99,7 +99,7 @@
 
 /* Visualizer */
 .visualizerSection {
-  background: #111827;
+  background: var(--color-bg-primary);
   border-radius: 12px;
   padding: 24px;
   padding-bottom: 48px; /* Space for annotations */
@@ -111,7 +111,7 @@
   align-items: center;
   gap: 16px;
   padding: 16px;
-  background: #1f2937;
+  background: var(--color-bg-secondary);
   border-radius: 8px;
 }
 
@@ -119,8 +119,8 @@
   width: 48px;
   height: 48px;
   font-size: 20px;
-  background: #3b82f6;
-  color: white;
+  background: var(--color-accent-primary);
+  color: var(--color-text-inverse);
   border: none;
   border-radius: 50%;
   cursor: pointer;
@@ -131,7 +131,7 @@
 }
 
 .playButton:hover {
-  background: #2563eb;
+  background: var(--color-accent-primary-active);
 }
 
 .playButton:active {
@@ -139,14 +139,14 @@
 }
 
 .playButton:disabled {
-  background: #374151;
+  background: var(--color-border-primary);
   cursor: not-allowed;
 }
 
 .time {
   font-size: 13px;
   font-family: monospace;
-  color: #9ca3af;
+  color: var(--color-text-secondary);
   min-width: 100px;
 }
 
@@ -155,7 +155,7 @@
   height: 6px;
   -webkit-appearance: none;
   appearance: none;
-  background: #374151;
+  background: var(--color-border-primary);
   border-radius: 3px;
   cursor: pointer;
 }
@@ -164,7 +164,7 @@
   -webkit-appearance: none;
   width: 14px;
   height: 14px;
-  background: #3b82f6;
+  background: var(--color-accent-primary);
   border-radius: 50%;
   cursor: pointer;
 }
@@ -173,7 +173,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #9ca3af;
+  color: var(--color-text-secondary);
 }
 
 .volumeControl input {
@@ -181,7 +181,7 @@
   height: 4px;
   -webkit-appearance: none;
   appearance: none;
-  background: #374151;
+  background: var(--color-border-primary);
   border-radius: 2px;
   cursor: pointer;
 }
@@ -190,7 +190,7 @@
   -webkit-appearance: none;
   width: 12px;
   height: 12px;
-  background: #9ca3af;
+  background: var(--color-text-secondary);
   border-radius: 50%;
   cursor: pointer;
 }
@@ -211,14 +211,14 @@
 /* Metadata */
 .metadata {
   padding: 16px;
-  background: #1f2937;
+  background: var(--color-bg-secondary);
   border-radius: 8px;
 }
 
 .metadata h3 {
   font-size: 14px;
   font-weight: 600;
-  color: #f3f4f6;
+  color: var(--color-text-primary);
   margin: 0 0 12px;
 }
 
@@ -231,12 +231,11 @@
 
 .metadata dt {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--color-text-muted);
 }
 
 .metadata dd {
   font-size: 12px;
-  color: #d1d5db;
+  color: var(--color-text-secondary);
   margin: 0;
 }
-

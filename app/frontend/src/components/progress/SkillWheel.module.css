@@ -10,7 +10,10 @@
 }
 
 .wheel {
-  filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(
+    0 4px 20px
+    color-mix(in srgb, var(--color-bg-overlay) 60%, transparent)
+  );
 }
 
 .wheel.animating .skillPolygon {
@@ -108,12 +111,12 @@
 .skillDetails {
   width: 100%;
   max-width: 320px;
-  background: var(--bg-secondary);
-  border: 2px solid var(--skill-color, var(--accent-primary));
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--skill-color, var(--color-accent-primary));
   border-radius: 12px;
   padding: 1.25rem;
   animation: slideUp 0.3s ease-out;
-  box-shadow: 0 0 20px var(--skill-color, var(--accent-primary))40;
+  box-shadow: 0 0 20px color-mix(in srgb, var(--skill-color, var(--color-accent-primary)) 25%, transparent);
 }
 
 @keyframes slideUp {
@@ -137,7 +140,7 @@
 .skillName {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--skill-color, var(--accent-primary));
+  color: var(--skill-color, var(--color-accent-primary));
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -146,11 +149,11 @@
 .skillRank {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   padding: 0.25rem 0.5rem;
-  background: var(--skill-color, var(--accent-primary))20;
+  background: color-mix(in srgb, var(--skill-color, var(--color-accent-primary)) 12%, transparent);
   border-radius: 4px;
 }
 
@@ -162,22 +165,26 @@
 
 .levelProgress {
   height: 8px;
-  background: var(--bg-tertiary);
+  background: var(--color-bg-tertiary);
   border-radius: 4px;
   overflow: hidden;
 }
 
 .levelFill {
   height: 100%;
-  background: linear-gradient(90deg, var(--skill-color, var(--accent-primary)), var(--skill-color, var(--accent-primary))cc);
+  background: linear-gradient(
+    90deg,
+    var(--skill-color, var(--color-accent-primary)),
+    color-mix(in srgb, var(--skill-color, var(--color-accent-primary)) 80%, transparent)
+  );
   border-radius: 4px;
   transition: width 0.5s ease;
-  box-shadow: 0 0 10px var(--skill-color, var(--accent-primary))80;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--skill-color, var(--color-accent-primary)) 50%, transparent);
 }
 
 .levelText {
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--color-text-muted);
   text-align: right;
 }
 
@@ -190,13 +197,13 @@
 }
 
 .star {
-  color: var(--border-color);
+  color: var(--color-border-primary);
   transition: all 0.2s ease;
 }
 
 .star.filled {
-  color: var(--skill-color, var(--accent-primary));
-  text-shadow: 0 0 8px var(--skill-color, var(--accent-primary));
+  color: var(--skill-color, var(--color-accent-primary));
+  text-shadow: 0 0 8px var(--skill-color, var(--color-accent-primary));
 }
 
 /* Responsive */
@@ -221,4 +228,3 @@
     font-size: 1rem;
   }
 }
-

@@ -36,7 +36,7 @@ export function PasskeySignIn() {
     try {
       // Get assertion options from backend
       const optionsResponse = await safeFetch(
-        `${API_BASE_URL}/api/auth/webauthn/signin-options`,
+        `${API_BASE_URL}/auth/webauthn/signin-options`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },
@@ -59,7 +59,7 @@ export function PasskeySignIn() {
 
       // Verify assertion on backend
       const verifyResponse = await safeFetch(
-        `${API_BASE_URL}/api/auth/webauthn/signin-verify`,
+        `${API_BASE_URL}/auth/webauthn/signin-verify`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

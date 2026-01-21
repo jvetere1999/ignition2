@@ -2,9 +2,11 @@ import React, { createContext, useContext, useEffect, useState, useCallback, use
 import { getSearchManager, type SearchableContent } from '@/lib/search/SearchIndexManager';
 import { getIdeas, type Idea } from '@/lib/api/ideas';
 import { getEntries, type InfobaseEntry } from '@/lib/api/infobase';
+import { getApiBaseUrl } from '@/lib/config/environment';
 
 const IDLE_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
 const POLL_INTERVAL_MS = 30 * 1000; // 30 seconds
+const API_BASE_URL = getApiBaseUrl();
 
 export interface VaultLockState {
   locked_at: string | null;
@@ -71,7 +73,7 @@ export const VaultLockProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         // Only lock vault if user is authenticated (has session)
         try {
           // First check if user has an active session
-          const sessionResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online'}/auth/session`, {
+          const sessionResponse = await fetch(`${API_BASE_URL}/auth/session`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -90,7 +92,7 @@ export const VaultLockProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           }
 
           // User is authenticated, proceed with lock
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online'}/api/vault/lock`, {
+          const response = await fetch(`${API_BASE_URL}/api/vault/lock`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -185,7 +187,7 @@ export const VaultLockProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Lock vault
   const lockVault = useCallback(async (reason: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online'}/api/vault/lock`, {
+      const response = await fetch(`${API_BASE_URL}/api/vault/lock`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -213,7 +215,7 @@ export const VaultLockProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setUnlockError(null);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online'}/api/vault/unlock`, {
+      const response = await fetch(`${API_BASE_URL}/api/vault/unlock`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -245,7 +247,7 @@ export const VaultLockProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const pollLockState = useCallback(async () => {
     try {
       // Check if user is authenticated before polling
-      const sessionResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online'}/auth/session`, {
+      const sessionResponse = await fetch(`${API_BASE_URL}/auth/session`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -262,7 +264,7 @@ export const VaultLockProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       }
 
       // User is authenticated, poll vault lock state
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online'}/api/sync/poll`, {
+      const response = await fetch(`${API_BASE_URL}/api/sync/poll`, {
         credentials: 'include',
       });
 

@@ -13,7 +13,9 @@
  * - POST /auth/accept-tos    - Accept Terms of Service
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online';
+import { getApiBaseUrl } from "@/lib/config/environment";
+
+const API_BASE_URL = getApiBaseUrl();
 
 /**
  * User session from backend

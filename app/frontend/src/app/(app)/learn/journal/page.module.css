@@ -157,7 +157,7 @@
 .filterBtn.active {
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Entries Grid */
@@ -191,13 +191,13 @@
 }
 
 .synthBadge.serum {
-  background-color: rgba(236, 72, 153, 0.15);
-  color: #ec4899;
+  background-color: color-mix(in srgb, var(--color-accent-secondary) 15%, transparent);
+  color: var(--color-accent-secondary);
 }
 
 .synthBadge.vital {
-  background-color: rgba(34, 211, 238, 0.15);
-  color: #22d3ee;
+  background-color: color-mix(in srgb, var(--color-info) 15%, transparent);
+  color: var(--color-info);
 }
 
 .synthBadge.other {
@@ -421,7 +421,7 @@
   background-color: var(--color-accent-primary);
   border: none;
   border-radius: var(--radius-md);
-  color: white;
+  color: var(--color-text-inverse);
   cursor: pointer;
   transition: opacity var(--transition-fast);
 }

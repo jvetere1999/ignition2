@@ -7,7 +7,9 @@
  * - Change passphrase (authenticated)
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online';
+import { getApiBaseUrl } from "@/lib/config/environment";
+
+const API_BASE_URL = getApiBaseUrl();
 
 // Request types
 export interface GenerateRecoveryCodesRequest {

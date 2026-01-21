@@ -47,7 +47,7 @@ export interface EnvironmentConfig {
 /**
  * Get API base URL with fallback
  */
-function getApiBaseUrl(): string {
+export function getApiBaseUrl(): string {
   if (typeof window === 'undefined') {
     // Server-side
     return process.env.API_URL || 'https://api.ecent.online';

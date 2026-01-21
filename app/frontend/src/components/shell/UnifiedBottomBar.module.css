@@ -234,8 +234,7 @@
 
 .controlBtn.active {
   color: var(--color-accent-primary);
-  background: var(--color-accent-primary);
-  background: rgba(255, 183, 3, 0.15);
+  background: color-mix(in srgb, var(--color-warning) 15%, transparent);
 }
 
 .playBtn {
@@ -339,7 +338,7 @@
 .popupOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--color-bg-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -427,13 +426,13 @@
 
 /* Visualizer Popup */
 .visualizerPopup {
-  background: #000;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--color-bg-primary);
+  border: 1px solid color-mix(in srgb, var(--color-border-primary) 40%, transparent);
   border-radius: var(--radius-xl);
   width: 800px;
   max-width: 95vw;
   overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+  box-shadow: var(--shadow-xl);
 }
 
 .visualizerHeader {
@@ -441,8 +440,8 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--space-3) var(--space-4);
-  background: rgba(20, 20, 20, 0.9);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: color-mix(in srgb, var(--color-bg-primary) 90%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border-primary) 40%, transparent);
 }
 
 .visualizerTitle {
@@ -455,7 +454,7 @@
   width: 100%;
   height: 500px;
   display: block;
-  background: #000;
+  background: var(--color-bg-primary);
 }
 
 /* Analysis Popup */

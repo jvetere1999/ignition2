@@ -21,9 +21,9 @@ import ProjectUpload from "@/components/daw/ProjectUpload";
 import ProjectList from "@/components/daw/ProjectList";
 import StorageUsage from "@/components/daw/StorageUsage";
 import { AlertCircle, Music, Upload } from "lucide-react";
+import { getApiBaseUrl } from "@/lib/config/environment";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://api.ecent.online";
+const API_BASE_URL = getApiBaseUrl();
 
 interface DawProject {
   id: string;

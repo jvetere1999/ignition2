@@ -184,7 +184,7 @@
 .descriptorBtn.active {
   border-color: var(--color-accent-primary);
   background-color: var(--color-accent-primary);
-  color: white;
+  color: var(--color-text-inverse);
 }
 
 .options {
@@ -232,7 +232,7 @@
 .cpuBtn.active {
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .slider {
@@ -255,7 +255,7 @@
   border-radius: var(--radius-md);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
-  color: white;
+  color: var(--color-text-inverse);
   cursor: pointer;
   transition: opacity var(--transition-fast);
 }
@@ -272,8 +272,8 @@
 .spinner {
   width: 18px;
   height: 18px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
+  border: 2px solid color-mix(in srgb, var(--color-text-inverse) 30%, transparent);
+  border-top-color: var(--color-text-inverse);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -681,4 +681,3 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
 }
-

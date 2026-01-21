@@ -7,8 +7,8 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: var(--bg-secondary, #1a1a1c);
-  border-top: 1px solid var(--border-color, #333);
+  background: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border-primary);
   z-index: 998;
   transition: transform 0.2s ease, bottom 0.2s ease;
 }
@@ -18,13 +18,13 @@
   right: 16px;
   width: auto;
   border-radius: 8px 8px 0 0;
-  border: 1px solid var(--border-color, #333);
+  border: 1px solid var(--color-border-primary);
   border-bottom: none;
   cursor: pointer;
 }
 
 .indicator.minimized:hover {
-  background: var(--bg-tertiary, #222);
+  background: var(--color-bg-tertiary);
 }
 
 .minimizedContent {
@@ -40,13 +40,13 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: var(--bg-tertiary, #333);
+  background: var(--color-bg-tertiary);
   overflow: hidden;
 }
 
 .progressFill {
   height: 100%;
-  background: var(--mode-color, var(--accent-primary, #ff764d));
+  background: var(--mode-color, var(--color-accent-primary));
   transition: width 0.3s linear;
 }
 
@@ -69,9 +69,9 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--mode-color, var(--accent-primary));
+  color: var(--mode-color, var(--color-accent-primary));
   padding: 4px 8px;
-  background: var(--mode-color, var(--accent-primary))15;
+  background: color-mix(in srgb, var(--mode-color, var(--color-accent-primary)) 12%, transparent);
   border-radius: 4px;
 }
 
@@ -79,7 +79,7 @@
   font-size: 1.25rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: var(--text-primary, #fff);
+  color: var(--color-text-primary);
 }
 
 .right {
@@ -95,15 +95,15 @@
   padding: 6px 12px;
   font-size: 0.8125rem;
   font-weight: 500;
-  color: var(--text-primary, #fff);
-  background: var(--bg-tertiary, #333);
+  color: var(--color-text-primary);
+  background: var(--color-bg-tertiary);
   border-radius: 6px;
   text-decoration: none;
   transition: background 0.15s ease;
 }
 
 .viewButton:hover {
-  background: var(--surface-hover, #444);
+  background: var(--color-bg-secondary);
 }
 
 .abandonButton {
@@ -114,15 +114,15 @@
   height: 32px;
   border: none;
   background: transparent;
-  color: var(--text-muted, #666);
+  color: var(--color-text-muted);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .abandonButton:hover {
-  background: var(--accent-error, #ff5252)20;
-  color: var(--accent-error, #ff5252);
+  background: color-mix(in srgb, var(--color-error) 12%, transparent);
+  color: var(--color-error);
 }
 
 .minimizeButton {
@@ -133,15 +133,15 @@
   height: 32px;
   border: none;
   background: transparent;
-  color: var(--text-muted, #666);
+  color: var(--color-text-muted);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .minimizeButton:hover {
-  background: var(--bg-tertiary, #333);
-  color: var(--text-primary, #fff);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
 }
 
 .pausedBadge {
@@ -149,9 +149,9 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--accent-warning, #ffc107);
+  color: var(--color-warning);
   padding: 2px 6px;
-  background: var(--accent-warning, #ffc107)20;
+  background: color-mix(in srgb, var(--color-warning) 12%, transparent);
   border-radius: 4px;
 }
 
@@ -169,4 +169,3 @@
     font-size: 0.625rem;
   }
 }
-

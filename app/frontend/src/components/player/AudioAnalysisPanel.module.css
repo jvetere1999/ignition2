@@ -1,6 +1,6 @@
 .panel {
-  background: var(--bg-secondary, #1e1e20);
-  border: 1px solid var(--border-color, #333);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
   border-radius: 8px;
   padding: 1rem;
   max-height: 500px;
@@ -12,7 +12,7 @@
   align-items: center;
   gap: 1rem;
   margin-bottom: 1rem;
-  border-bottom: 1px solid var(--border-color, #333);
+  border-bottom: 1px solid var(--color-border-primary);
   padding-bottom: 0.75rem;
 }
 
@@ -20,12 +20,12 @@
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--text-primary, #fff);
+  color: var(--color-text-primary);
 }
 
 .trackName {
   font-size: 0.875rem;
-  color: var(--text-secondary, #888);
+  color: var(--color-text-secondary);
   margin-left: auto;
 }
 
@@ -45,7 +45,7 @@
   margin: 0;
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--text-primary, #fff);
+  color: var(--color-text-primary);
 }
 
 .bandsGrid {
@@ -55,8 +55,8 @@
 }
 
 .bandCard {
-  background: var(--bg-primary, #141416);
-  border: 1px solid var(--border-color, #333);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-primary);
   border-radius: 6px;
   padding: 1rem;
 }
@@ -74,7 +74,7 @@
 }
 
 .bandFreq {
-  color: var(--text-secondary, #888);
+  color: var(--color-text-secondary);
   font-size: 0.8rem;
 }
 
@@ -87,14 +87,14 @@
 
 .energyLabel {
   font-size: 0.75rem;
-  color: var(--text-secondary, #888);
+  color: var(--color-text-secondary);
   width: 50px;
 }
 
 .energyBar {
   flex: 1;
   height: 8px;
-  background: var(--bg-tertiary, #333);
+  background: var(--color-bg-tertiary);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -110,7 +110,7 @@
   font-weight: 500;
   min-width: 45px;
   text-align: right;
-  color: var(--text-primary, #fff);
+  color: var(--color-text-primary);
 }
 
 .bandMetrics {
@@ -126,14 +126,14 @@
 
 .metricLabel {
   font-size: 0.7rem;
-  color: var(--text-secondary, #888);
+  color: var(--color-text-secondary);
   text-transform: uppercase;
 }
 
 .metricValue {
   font-size: 0.85rem;
   font-weight: 500;
-  color: var(--text-primary, #fff);
+  color: var(--color-text-primary);
 }
 
 .statsGrid {
@@ -147,27 +147,27 @@
   flex-direction: column;
   gap: 4px;
   padding: 0.75rem;
-  background: var(--bg-primary, #141416);
+  background: var(--color-bg-primary);
   border-radius: 6px;
 }
 
 .statLabel {
   font-size: 0.75rem;
-  color: var(--text-secondary, #888);
+  color: var(--color-text-secondary);
 }
 
 .statValue {
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--text-primary, #fff);
+  color: var(--color-text-primary);
 }
 
 .infoText {
   font-size: 0.8rem;
-  color: var(--text-secondary, #888);
+  color: var(--color-text-secondary);
   line-height: 1.5;
   padding: 0.75rem;
-  background: var(--bg-primary, #141416);
+  background: var(--color-bg-primary);
   border-radius: 6px;
 }
 
@@ -176,31 +176,31 @@
   align-items: baseline;
   gap: 8px;
   padding: 1rem;
-  background: var(--bg-primary, #141416);
+  background: var(--color-bg-primary);
   border-radius: 6px;
 }
 
 .bpmValue {
   font-size: 2rem;
   font-weight: 700;
-  color: var(--accent-primary, #ff764d);
+  color: var(--color-accent-primary);
 }
 
 .bpmLabel {
   font-size: 0.875rem;
-  color: var(--text-secondary, #888);
+  color: var(--color-text-secondary);
 }
 
 .analysisInfo {
   font-size: 0.75rem;
-  color: var(--text-muted, #666);
+  color: var(--color-text-muted);
   text-align: right;
 }
 
 .noAnalysis {
   text-align: center;
   padding: 2rem;
-  color: var(--text-secondary, #888);
+  color: var(--color-text-secondary);
 }
 
 .noAnalysis p {
@@ -209,5 +209,5 @@
 
 .note {
   font-size: 0.85rem;
-  color: var(--text-muted, #666);
+  color: var(--color-text-muted);
 }

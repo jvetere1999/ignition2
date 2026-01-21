@@ -23,7 +23,7 @@
 .closeButton {
   background: transparent;
   border: none;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-muted);
   cursor: pointer;
   padding: var(--space-1);
   display: flex;
@@ -55,7 +55,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.5);
+  background: color-mix(in srgb, var(--color-bg-overlay) 80%, transparent);
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
 }
@@ -102,7 +102,7 @@
 
 .modeButton:hover,
 .colorButton:hover {
-  background: var(--color-bg-hover);
+  background: var(--color-bg-tertiary);
   color: var(--color-text-primary);
 }
 
@@ -114,16 +114,24 @@
 }
 
 .colorButton.accent {
-  border-left: 3px solid rgb(99, 102, 241);
+  border-left: 3px solid var(--color-accent-secondary);
 }
 
 .colorButton.rainbow {
   border-left: 3px solid;
-  border-image: linear-gradient(180deg, red, orange, yellow, green, blue, violet) 1;
+  border-image: linear-gradient(
+    180deg,
+    var(--color-error),
+    var(--color-warning),
+    var(--color-success),
+    var(--color-info),
+    var(--color-accent-primary),
+    var(--color-accent-secondary)
+  ) 1;
 }
 
 .colorButton.monochrome {
-  border-left: 3px solid rgb(180, 180, 180);
+  border-left: 3px solid var(--color-border-primary);
 }
 
 .slider {
@@ -152,4 +160,3 @@
   border: none;
   cursor: pointer;
 }
-

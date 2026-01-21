@@ -20,9 +20,9 @@ import {
   Textarea,
   Progress,
 } from "@/components/ui";
+import { getApiBaseUrl } from "@/lib/config/environment";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://api.ecent.online";
+const API_BASE_URL = getApiBaseUrl();
 
 const SUPPORTED_FORMATS = [".als", ".flp", ".logicx", ".serum"];
 const MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024; // 5GB

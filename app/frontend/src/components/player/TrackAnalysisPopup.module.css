@@ -5,7 +5,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--color-bg-overlay);
   backdrop-filter: blur(4px);
   z-index: 1100;
   display: flex;
@@ -22,15 +22,15 @@
 }
 
 .popup {
-  background: var(--bg-elevated, #2a2a2c);
-  border: 1px solid var(--border-default, #444);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-primary);
   border-radius: 12px;
   width: 100%;
   max-width: 600px;
   max-height: 80vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-xl);
   animation: slideUp 0.2s ease-out;
   overflow: hidden;
 }
@@ -52,8 +52,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid var(--border-subtle, #333);
-  background: var(--bg-secondary, #1a1a1c);
+  border-bottom: 1px solid var(--color-border-secondary);
+  background: var(--color-bg-secondary);
 }
 
 .trackInfo {
@@ -67,7 +67,7 @@
 .title {
   font-size: 1.125rem;
   font-weight: 600;
-  color: var(--text-primary, #fff);
+  color: var(--color-text-primary);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -76,7 +76,7 @@
 
 .artist {
   font-size: 0.875rem;
-  color: var(--text-secondary, #888);
+  color: var(--color-text-secondary);
 }
 
 .closeBtn {
@@ -87,7 +87,7 @@
   height: 36px;
   border: none;
   background: transparent;
-  color: var(--text-secondary, #888);
+  color: var(--color-text-secondary);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -95,8 +95,8 @@
 }
 
 .closeBtn:hover {
-  background: var(--surface-hover, #333);
-  color: var(--text-primary, #fff);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
 }
 
 /* Content */
@@ -113,14 +113,14 @@
   justify-content: center;
   gap: 1rem;
   padding: 3rem;
-  color: var(--text-muted, #666);
+  color: var(--color-text-muted);
 }
 
 .spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid var(--border-subtle, #333);
-  border-top-color: var(--accent-primary, #ff764d);
+  border: 3px solid var(--color-border-secondary);
+  border-top-color: var(--color-accent-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -132,7 +132,7 @@
 .error {
   padding: 2rem;
   text-align: center;
-  color: var(--accent-error, #ff5252);
+  color: var(--color-error);
 }
 
 /* Stats Grid */
@@ -149,7 +149,7 @@
   align-items: center;
   gap: 0.25rem;
   padding: 0.75rem;
-  background: var(--surface-default, #222);
+  background: var(--color-bg-secondary);
   border-radius: 8px;
   text-align: center;
 }
@@ -159,13 +159,13 @@
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--text-muted, #666);
+  color: var(--color-text-muted);
 }
 
 .statValue {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--text-primary, #fff);
+  color: var(--color-text-primary);
 }
 
 /* Waveform Section */
@@ -178,7 +178,7 @@
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--text-muted, #666);
+  color: var(--color-text-muted);
   margin: 0 0 0.75rem 0;
 }
 
@@ -187,7 +187,7 @@
   align-items: flex-end;
   gap: 1px;
   height: 60px;
-  background: var(--bg-primary, #1a1a1c);
+  background: var(--color-bg-primary);
   border-radius: 6px;
   padding: 0.5rem;
   overflow: hidden;
@@ -216,15 +216,15 @@
   align-items: flex-start;
   gap: 0.5rem;
   padding: 0.75rem;
-  background: var(--surface-default, #222);
+  background: var(--color-bg-secondary);
   border-radius: 6px;
   font-size: 0.875rem;
-  color: var(--text-secondary, #aaa);
+  color: var(--color-text-secondary);
   line-height: 1.4;
 }
 
 .noteIcon {
-  color: var(--accent-primary, #ff764d);
+  color: var(--color-accent-primary);
   font-weight: bold;
   flex-shrink: 0;
 }
@@ -232,13 +232,13 @@
 /* Footer */
 .footer {
   padding: 0.75rem 1.25rem;
-  border-top: 1px solid var(--border-subtle, #333);
-  background: var(--bg-secondary, #1a1a1c);
+  border-top: 1px solid var(--color-border-secondary);
+  background: var(--color-bg-secondary);
 }
 
 .hint {
   font-size: 0.75rem;
-  color: var(--text-muted, #666);
+  color: var(--color-text-muted);
 }
 
 /* Responsive */
@@ -251,4 +251,3 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
-

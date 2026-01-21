@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useErrorStore } from '@/lib/hooks/useErrorNotification';
+import { getApiBaseUrl } from '@/lib/config/environment';
 
 // Recovery code API responses
 export interface RecoveryCodeResponse {
@@ -38,7 +39,7 @@ interface VaultRecoveryContextType {
   clearCodes: () => void;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online';
+const API_BASE_URL = getApiBaseUrl();
 
 // Create context
 const VaultRecoveryContext = createContext<VaultRecoveryContextType | undefined>(undefined);

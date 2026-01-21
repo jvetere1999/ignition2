@@ -7,9 +7,9 @@
   flex-direction: column;
   gap: 12px;
   padding: 16px;
-  background: #1f2937;
+  background: var(--color-bg-secondary);
   border-radius: 8px;
-  border: 1px solid #374151;
+  border: 1px solid var(--color-border-primary);
 }
 
 .header {
@@ -21,7 +21,7 @@
 .title {
   font-size: 14px;
   font-weight: 600;
-  color: #f3f4f6;
+  color: var(--color-text-primary);
   margin: 0;
 }
 
@@ -29,8 +29,8 @@
   padding: 6px 12px;
   font-size: 12px;
   font-weight: 500;
-  color: white;
-  background: #8b5cf6;
+  color: var(--color-text-inverse);
+  background: var(--color-accent-secondary);
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -38,7 +38,7 @@
 }
 
 .addButton:hover {
-  background: #7c3aed;
+  background: color-mix(in srgb, var(--color-accent-secondary) 85%, var(--color-accent-primary));
 }
 
 .addButton:disabled {
@@ -57,7 +57,7 @@
 
 .empty {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--color-text-muted);
   text-align: center;
   padding: 16px;
 }
@@ -67,24 +67,24 @@
   align-items: center;
   gap: 8px;
   padding: 8px;
-  background: #111827;
+  background: var(--color-bg-primary);
   border-radius: 4px;
   cursor: pointer;
   transition: background 0.15s ease;
 }
 
 .item:hover {
-  background: #1f2937;
+  background: var(--color-bg-tertiary);
 }
 
 .itemSelected {
-  background: #374151;
-  outline: 2px solid #8b5cf6;
+  background: var(--color-bg-tertiary);
+  outline: 2px solid var(--color-accent-secondary);
   outline-offset: -2px;
 }
 
 .itemActive {
-  background: rgba(139, 92, 246, 0.15);
+  background: color-mix(in srgb, var(--color-accent-secondary) 15%, transparent);
 }
 
 .itemColor {
@@ -103,7 +103,7 @@
   display: block;
   font-size: 13px;
   font-weight: 500;
-  color: #f3f4f6;
+  color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -112,13 +112,13 @@
 .itemTime {
   display: block;
   font-size: 11px;
-  color: #9ca3af;
+  color: var(--color-text-secondary);
   font-family: monospace;
 }
 
 .itemDuration {
   margin-left: 6px;
-  color: #6b7280;
+  color: var(--color-text-muted);
 }
 
 .itemType {
@@ -126,19 +126,19 @@
   font-weight: 500;
   padding: 2px 6px;
   border-radius: 3px;
-  background: #374151;
-  color: #9ca3af;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
 }
 
-.type_intro { background: rgba(74, 222, 128, 0.2); color: #4ade80; }
-.type_verse { background: rgba(96, 165, 250, 0.2); color: #60a5fa; }
-.type_chorus { background: rgba(244, 114, 182, 0.2); color: #f472b6; }
-.type_bridge { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
-.type_breakdown { background: rgba(167, 139, 250, 0.2); color: #a78bfa; }
-.type_buildup { background: rgba(251, 146, 60, 0.2); color: #fb923c; }
-.type_drop { background: rgba(239, 68, 68, 0.2); color: #f87171; }
-.type_outro { background: rgba(107, 114, 128, 0.2); color: #9ca3af; }
-.type_custom { background: rgba(148, 163, 184, 0.2); color: #94a3b8; }
+.type_intro { background: color-mix(in srgb, var(--color-success) 20%, transparent); color: var(--color-success); }
+.type_verse { background: color-mix(in srgb, var(--color-info) 20%, transparent); color: var(--color-info); }
+.type_chorus { background: color-mix(in srgb, var(--color-accent-secondary) 20%, transparent); color: var(--color-accent-secondary); }
+.type_bridge { background: color-mix(in srgb, var(--color-warning) 20%, transparent); color: var(--color-warning); }
+.type_breakdown { background: color-mix(in srgb, var(--color-accent-primary) 20%, transparent); color: var(--color-accent-primary); }
+.type_buildup { background: color-mix(in srgb, var(--color-warning) 20%, transparent); color: var(--color-warning); }
+.type_drop { background: color-mix(in srgb, var(--color-error) 20%, transparent); color: var(--color-error); }
+.type_outro { background: color-mix(in srgb, var(--color-text-muted) 20%, transparent); color: var(--color-text-muted); }
+.type_custom { background: color-mix(in srgb, var(--color-text-secondary) 20%, transparent); color: var(--color-text-secondary); }
 
 .loopBadge {
   font-size: 12px;
@@ -150,7 +150,7 @@
   flex-direction: column;
   gap: 12px;
   padding-top: 12px;
-  border-top: 1px solid #374151;
+  border-top: 1px solid var(--color-border-primary);
 }
 
 .formRow {
@@ -165,7 +165,7 @@
   gap: 4px;
   font-size: 12px;
   font-weight: 500;
-  color: #9ca3af;
+  color: var(--color-text-secondary);
 }
 
 .checkboxLabel {
@@ -184,9 +184,9 @@
 .formRow textarea {
   padding: 8px;
   font-size: 13px;
-  color: #f3f4f6;
-  background: #111827;
-  border: 1px solid #374151;
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-primary);
   border-radius: 4px;
   outline: none;
   transition: border-color 0.15s ease;
@@ -195,7 +195,7 @@
 .formRow input:focus,
 .formRow select:focus,
 .formRow textarea:focus {
-  border-color: #8b5cf6;
+  border-color: var(--color-border-focus);
 }
 
 .formRow textarea {
@@ -217,44 +217,43 @@
   padding: 8px 16px;
   font-size: 12px;
   font-weight: 500;
-  border: 1px solid #374151;
+  border: 1px solid var(--color-border-primary);
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.15s ease;
-  background: #111827;
-  color: #9ca3af;
+  background: var(--color-bg-primary);
+  color: var(--color-text-secondary);
 }
 
 .formActions button:hover,
 .selectedActions button:hover {
-  background: #1f2937;
-  color: #f3f4f6;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
 }
 
 .saveButton {
-  background: #8b5cf6 !important;
-  border-color: #8b5cf6 !important;
-  color: white !important;
+  background: var(--color-accent-secondary) !important;
+  border-color: var(--color-accent-secondary) !important;
+  color: var(--color-text-inverse) !important;
 }
 
 .saveButton:hover {
-  background: #7c3aed !important;
+  background: color-mix(in srgb, var(--color-accent-secondary) 85%, var(--color-accent-primary)) !important;
 }
 
 .deleteButton {
-  background: #7f1d1d !important;
-  border-color: #991b1b !important;
-  color: #fca5a5 !important;
+  background: var(--color-error) !important;
+  border-color: var(--color-error) !important;
+  color: var(--color-text-inverse) !important;
 }
 
 .deleteButton:hover {
-  background: #991b1b !important;
-  color: white !important;
+  background: color-mix(in srgb, var(--color-error) 85%, var(--color-text-primary)) !important;
+  color: var(--color-text-inverse) !important;
 }
 
 .loopActiveButton {
-  background: rgba(139, 92, 246, 0.3) !important;
-  border-color: #8b5cf6 !important;
-  color: #a78bfa !important;
+  background: color-mix(in srgb, var(--color-accent-secondary) 30%, transparent) !important;
+  border-color: var(--color-accent-secondary) !important;
+  color: var(--color-accent-secondary) !important;
 }
-

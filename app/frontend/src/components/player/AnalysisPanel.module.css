@@ -6,7 +6,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--color-bg-overlay);
   backdrop-filter: blur(4px);
   z-index: 1000;
   display: flex;
@@ -26,15 +26,15 @@
 }
 
 .panel {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-default);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-primary);
   border-radius: 12px;
   width: 100%;
   max-width: 800px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-xl);
   animation: slideUp 0.2s ease-out;
   overflow: hidden;
 }
@@ -56,8 +56,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid var(--border-subtle);
-  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--color-border-secondary);
+  background: var(--color-bg-secondary);
 }
 
 .trackInfo {
@@ -70,7 +70,7 @@
 .trackName {
   font-size: 1.125rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--color-text-primary);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -79,7 +79,7 @@
 
 .trackArtist {
   font-size: 0.875rem;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .closeBtn {
@@ -90,7 +90,7 @@
   height: 36px;
   border: none;
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -98,8 +98,8 @@
 }
 
 .closeBtn:hover {
-  background: var(--surface-hover);
-  color: var(--text-primary);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
 }
 
 /* Stats Bar */
@@ -108,8 +108,8 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   padding: 0.75rem 1.25rem;
-  background: var(--bg-primary);
-  border-bottom: 1px solid var(--border-subtle);
+  background: var(--color-bg-primary);
+  border-bottom: 1px solid var(--color-border-secondary);
 }
 
 .stat {
@@ -118,7 +118,7 @@
   align-items: center;
   gap: 0.25rem;
   padding: 0.5rem 0.75rem;
-  background: var(--surface-default);
+  background: var(--color-bg-secondary);
   border-radius: 8px;
   min-width: 70px;
 }
@@ -128,13 +128,13 @@
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--text-muted);
+  color: var(--color-text-muted);
 }
 
 .statValue {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--accent-primary);
+  color: var(--color-accent-primary);
   background: none;
   border: none;
   cursor: pointer;
@@ -149,16 +149,16 @@
 .statValueFixed {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--color-text-primary);
 }
 
 .statInput {
   width: 50px;
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--text-primary);
-  background: var(--bg-primary);
-  border: 1px solid var(--accent-primary);
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-accent-primary);
   border-radius: 4px;
   padding: 0.125rem 0.25rem;
   text-align: center;
@@ -167,9 +167,9 @@
 .statSelect {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--text-primary);
-  background: var(--bg-primary);
-  border: 1px solid var(--accent-primary);
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-accent-primary);
   border-radius: 4px;
   padding: 0.125rem;
 }
@@ -179,15 +179,15 @@
   display: flex;
   gap: 0;
   padding: 0 1.25rem;
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-subtle);
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border-secondary);
 }
 
 .tab {
   padding: 0.75rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
@@ -197,7 +197,7 @@
 }
 
 .tab:hover {
-  color: var(--text-primary);
+  color: var(--color-text-primary);
 }
 
 .tabActive {
@@ -633,4 +633,3 @@
     grid-template-columns: 1fr;
   }
 }
-

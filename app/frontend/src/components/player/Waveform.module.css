@@ -1,7 +1,7 @@
 .container {
   position: relative;
   width: 100%;
-  background: var(--bg-tertiary, #1a1a1c);
+  background: var(--color-bg-tertiary);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -18,7 +18,7 @@
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 12px;
-  color: var(--text-muted, #888);
+  color: var(--color-text-muted);
 }
 
 .timeDisplay {
@@ -26,7 +26,6 @@
   justify-content: space-between;
   padding: 4px 8px;
   font-size: 11px;
-  color: var(--text-secondary, #aaa);
+  color: var(--color-text-secondary);
   font-variant-numeric: tabular-nums;
 }
-

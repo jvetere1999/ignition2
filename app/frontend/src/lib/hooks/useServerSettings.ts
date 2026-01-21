@@ -12,8 +12,9 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/lib/auth';
+import { getApiBaseUrl } from '@/lib/config/environment';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online';
+const API_BASE_URL = getApiBaseUrl();
 
 export interface ServerSettings {
   theme: 'light' | 'dark' | 'system';

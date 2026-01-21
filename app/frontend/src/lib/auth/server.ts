@@ -6,8 +6,9 @@
  */
 
 import { cookies } from "next/headers";
+import { getApiBaseUrl } from "@/lib/config/environment";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online';
+const API_BASE_URL = getApiBaseUrl();
 
 export interface AuthUser {
   id: string;

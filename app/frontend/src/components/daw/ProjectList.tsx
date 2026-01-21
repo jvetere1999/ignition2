@@ -14,9 +14,9 @@ import {
   AlertDescription,
 } from "@/components/ui";
 import { MoreVertical, Download, History, Trash2, Music, AlertCircle } from "lucide-react";
+import { getApiBaseUrl } from "@/lib/config/environment";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://api.ecent.online";
+const API_BASE_URL = getApiBaseUrl();
 
 interface Project {
   id: string;

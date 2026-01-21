@@ -14,7 +14,7 @@
 
 .label {
   font-weight: var(--font-weight-medium);
-  color: var(--text-primary);
+  color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   display: flex;
   align-items: center;
@@ -22,7 +22,7 @@
 }
 
 .required {
-  color: var(--accent-error);
+  color: var(--color-error);
   font-weight: bold;
 }
 
@@ -30,10 +30,10 @@
 .textarea,
 .select {
   padding: var(--input-padding);
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--color-border-primary);
   border-radius: var(--input-border-radius);
-  background-color: var(--surface-default);
-  color: var(--text-primary);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
   font-size: 16px; /* Prevent iOS auto-zoom */
   font-family: inherit;
   
@@ -43,22 +43,22 @@
 
 .input::placeholder,
 .textarea::placeholder {
-  color: var(--text-muted);
+  color: var(--color-text-muted);
 }
 
 .input:focus,
 .textarea:focus,
 .select:focus {
   outline: none;
-  border-color: var(--focus-ring);
-  box-shadow: 0 0 0 3px var(--selection-bg);
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-border-focus) 20%, transparent);
 }
 
 .input:disabled,
 .textarea:disabled,
 .select:disabled {
-  background-color: var(--surface-active);
-  color: var(--text-muted);
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
   cursor: not-allowed;
   opacity: 0.6;
 }
@@ -69,15 +69,15 @@
 }
 
 .inputError {
-  border-color: var(--accent-error);
+  border-color: var(--color-error);
 }
 
 .inputError:focus {
-  box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-error) 20%, transparent);
 }
 
 .error {
-  color: var(--accent-error);
+  color: var(--color-error);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   display: flex;
@@ -86,16 +86,16 @@
 }
 
 .helpText {
-  color: var(--text-muted);
+  color: var(--color-text-muted);
   font-size: var(--font-size-xs);
 }
 
 .errorMessage {
   padding: var(--spacing-md);
-  background-color: rgba(244, 67, 54, 0.1);
-  border: 1px solid var(--accent-error);
+  background-color: var(--color-error-bg);
+  border: 1px solid var(--color-error);
   border-radius: var(--card-border-radius);
-  color: var(--accent-error);
+  color: var(--color-error);
   font-size: var(--font-size-sm);
   display: flex;
   align-items: center;
@@ -110,10 +110,10 @@
 
 .successMessage {
   padding: var(--spacing-md);
-  background-color: rgba(76, 175, 80, 0.1);
-  border: 1px solid var(--accent-success);
+  background-color: var(--color-success-bg);
+  border: 1px solid var(--color-success);
   border-radius: var(--card-border-radius);
-  color: var(--accent-success);
+  color: var(--color-success);
   font-size: var(--font-size-sm);
   display: flex;
   align-items: center;
@@ -133,7 +133,7 @@
   gap: var(--spacing-sm);
   cursor: pointer;
   font-size: var(--font-size-sm);
-  color: var(--text-primary);
+  color: var(--color-text-primary);
   user-select: none;
 }
 
@@ -142,7 +142,7 @@
   width: 20px;
   height: 20px;
   cursor: pointer;
-  accent-color: var(--accent-primary);
+  accent-color: var(--color-accent-primary);
   flex-shrink: 0;
   
   /* Ensure minimum touch target */
@@ -154,14 +154,14 @@
 
 .checkbox:focus,
 .radio:focus {
-  outline: 2px solid var(--focus-ring);
+  outline: 2px solid var(--color-border-focus);
   outline-offset: 2px;
 }
 
 .submitButton {
   padding: var(--button-padding);
-  background-color: var(--accent-primary);
-  color: var(--text-inverse);
+  background-color: var(--color-accent-primary);
+  color: var(--color-text-inverse);
   border: none;
   border-radius: var(--button-border-radius);
   font-weight: var(--font-weight-medium);
@@ -179,7 +179,7 @@
 }
 
 .submitButton:hover:not(:disabled) {
-  background-color: var(--accent-secondary);
+  background-color: var(--color-accent-secondary);
   transform: translateY(-2px);
 }
 

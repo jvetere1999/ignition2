@@ -11,7 +11,9 @@
 // Configuration
 // ============================================
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online';
+import { getApiBaseUrl } from "@/lib/config/environment";
+
+const API_BASE_URL = getApiBaseUrl();
 const OFFLINE_QUEUE_BLOCKLIST = [
   '/api/infobase',
   '/api/ideas',

@@ -9,6 +9,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { getApiBaseUrl } from "@/lib/config/environment";
+
+const API_BASE_URL = getApiBaseUrl();
 
 export default function CallbackPage() {
   const router = useRouter();
@@ -26,8 +29,7 @@ export default function CallbackPage() {
         let sessionResponse;
         
         while (retries > 0) {
-          sessionResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL || 'https://api.ecent.online'}/auth/session`,
+          sessionResponse = await fetch(`${API_BASE_URL}/auth/session`,
             {
               method: "GET",
               credentials: "include",

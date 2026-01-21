@@ -38,7 +38,7 @@
 }
 
 .cutoffLine {
-  stroke: var(--color-accent-secondary, #8b5cf6);
+  stroke: var(--color-accent-secondary);
   stroke-width: 1;
   stroke-dasharray: 4 2;
 }
@@ -140,7 +140,7 @@
 }
 
 .positionIndicator {
-  stroke: var(--color-accent-secondary, #22d3ee);
+  stroke: var(--color-accent-secondary);
   stroke-width: 2;
 }
 
@@ -164,4 +164,3 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
 }
-
