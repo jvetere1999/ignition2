@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { safeFetch, API_BASE_URL } from "@/lib/api";
 import styles from "./page.module.css";
 
@@ -13,6 +13,7 @@ function formatRecoveryCode(value: string): string {
 
 export function RecoveryCodeSignIn() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [code, setCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +39,8 @@ export function RecoveryCodeSignIn() {
         throw new Error(data.message || "Recovery code sign in failed.");
       }
 
-      router.push("/today");
+      const callbackUrl = getSafeCallbackUrl(searchParams.get("callbackUrl"));
+      router.push(callbackUrl ?? "/today");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Recovery code sign in failed.";
       setError(message);
@@ -80,4 +82,12 @@ export function RecoveryCodeSignIn() {
       </p>
     </div>
   );
+}
+
+function getSafeCallbackUrl(value: string | null): string | null {
+  if (!value) return null;
+  if (value.startsWith("/") && !value.startsWith("//")) {
+    return value;
+  }
+  return null;
 }

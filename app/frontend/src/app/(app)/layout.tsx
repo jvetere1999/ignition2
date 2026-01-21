@@ -19,11 +19,12 @@ import { AppShell } from "@/components/shell";
 import { OnboardingProvider } from "@/components/onboarding";
 import { AdminButton } from "@/components/admin/AdminButton";
 import { SyncStateProvider } from "@/lib/sync/SyncStateContext";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const { user, isAuthenticated, isLoading, signIn } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   // Track if we're actively redirecting to avoid infinite redirects
   const [isRedirecting, setIsRedirecting] = useState(false);
@@ -33,9 +34,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     if (!isLoading && !isAuthenticated && !isRedirecting) {
       console.log('[AppLayout] User not authenticated, initiating redirect to sign in');
       setIsRedirecting(true);
-      signIn();
+      const search = typeof window !== "undefined" ? window.location.search : "";
+      const callbackUrl = `${pathname}${search}`;
+      router.replace(`/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`);
     }
-  }, [isLoading, isAuthenticated, signIn, isRedirecting]);
+  }, [isLoading, isAuthenticated, isRedirecting, pathname, router]);
 
   useEffect(() => {
     if (isLoading || !isAuthenticated || !user) return;
