@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { safeFetch, API_BASE_URL } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { getOnboardingState, type OnboardingResponse } from "@/lib/api/onboarding";
 import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
@@ -10,13 +12,19 @@ import styles from "./page.module.css";
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: isAuthLoading, refresh } = useAuth();
   const [onboarding, setOnboarding] = useState<OnboardingResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasRead, setHasRead] = useState(false);
+  const [isOldEnough, setIsOldEnough] = useState(false);
+  const [isAccepting, setIsAccepting] = useState(false);
+  const [tosError, setTosError] = useState<string | null>(null);
+
+  const needsTos = !!user && !user.tosAccepted;
 
   useEffect(() => {
-    if (isAuthLoading || !isAuthenticated) return;
+    if (isAuthLoading || !isAuthenticated || !user || !user.tosAccepted) return;
     let isActive = true;
 
     const loadOnboarding = async () => {
@@ -50,14 +58,117 @@ export default function OnboardingPage() {
     return () => {
       isActive = false;
     };
-  }, [isAuthLoading, isAuthenticated, router]);
+  }, [isAuthLoading, isAuthenticated, router, user]);
+
+  const acceptTos = async () => {
+    if (!hasRead || !isOldEnough) {
+      setTosError("Please confirm both checkboxes to continue.");
+      return;
+    }
+    setIsAccepting(true);
+    setTosError(null);
+    try {
+      const response = await safeFetch(`${API_BASE_URL}/auth/accept-tos`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          accepted: true,
+          version: "1.0",
+        }),
+      });
+      if (!response.ok) {
+        const data = (await response.json().catch(() => ({}))) as { message?: string };
+        throw new Error(data.message || "Failed to accept Terms of Service.");
+      }
+      await refresh();
+    } catch (acceptError) {
+      const message = acceptError instanceof Error ? acceptError.message : "Failed to accept Terms of Service.";
+      setTosError(message);
+    } finally {
+      setIsAccepting(false);
+    }
+  };
 
   const hasFlowSteps = !!onboarding?.flow && onboarding.flow.total_steps > 0;
-  const showStatus = isAuthLoading || isLoading || !!error || !hasFlowSteps;
-  const statusTitle = error ? "Onboarding unavailable" : "Preparing onboarding";
+  const awaitingStep = !isLoading && !error && hasFlowSteps && !onboarding?.current_step;
+  const showStatus = isAuthLoading || isLoading || !!error || !hasFlowSteps || awaitingStep;
+  const statusTitle = error
+    ? "Onboarding unavailable"
+    : awaitingStep
+    ? "Fetching your first step"
+    : "Preparing onboarding";
   const statusBody = error
     ? "Please refresh to try again."
+    : awaitingStep
+    ? "If this takes too long, refresh."
     : "Setting up your passkey and personalization steps.";
+
+  if (needsTos) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.brand}>Ignition Onboarding</div>
+        <div className={styles.tosCard}>
+          <div className={styles.tosHeader}>
+            <span className={styles.tosEyebrow}>Required</span>
+            <h1 className={styles.tosTitle}>Before we start</h1>
+            <p className={styles.tosSubtitle}>
+              Review the Terms of Service and confirm your age. This is required to unlock onboarding.
+            </p>
+          </div>
+
+          <div className={styles.tosBody}>
+            <p>
+              Ignition is a focus workspace with secure passkey authentication. We keep your data private and
+              never access your encryption keys.
+            </p>
+            <div className={styles.tosLinks}>
+              <Link href="/terms">Read Terms of Service</Link>
+              <Link href="/privacy">Read Privacy Policy</Link>
+            </div>
+          </div>
+
+          <div className={styles.tosChecks}>
+            <label className={styles.tosCheck}>
+              <input
+                type="checkbox"
+                checked={isOldEnough}
+                onChange={(event) => {
+                  setIsOldEnough(event.target.checked);
+                  if (tosError) setTosError(null);
+                }}
+              />
+              <span>I confirm that I am at least 16 years old.</span>
+            </label>
+            <label className={styles.tosCheck}>
+              <input
+                type="checkbox"
+                checked={hasRead}
+                onChange={(event) => {
+                  setHasRead(event.target.checked);
+                  if (tosError) setTosError(null);
+                }}
+              />
+              <span>I have read and agree to the Terms of Service and Privacy Policy.</span>
+            </label>
+          </div>
+
+          <div className={styles.tosActionRow}>
+            {tosError && <p className={styles.tosError}>{tosError}</p>}
+            <button
+              className={styles.tosAction}
+              type="button"
+              onClick={acceptTos}
+              disabled={isAccepting || !hasRead || !isOldEnough}
+            >
+              {isAccepting ? "Continuing..." : "Continue"}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>

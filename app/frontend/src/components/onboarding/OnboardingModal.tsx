@@ -679,16 +679,7 @@ export function OnboardingModal({ state, flow, currentStep: initialStep, allStep
   }
 
   if (!currentStep) {
-    return (
-      <div className={styles.overlay}>
-        <div className={styles.modal}>
-          <div className={styles.content}>
-            <h2 className={styles.stepTitle}>Preparing your onboarding…</h2>
-            <p className={styles.stepDescription}>Fetching your first step. If this takes too long, refresh.</p>
-          </div>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   const canGoBack = currentStepIndex > 0;

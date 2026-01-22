@@ -17,7 +17,6 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 import { MobileNav } from "./MobileNav";
-import { TOSModal } from "./TOSModal";
 import { FocusStateProvider } from "@/lib/focus";
 import styles from "./AppShell.module.css";
 
@@ -43,32 +42,12 @@ interface AppShellProps {
 }
 
 export function AppShell({ children }: AppShellProps) {
-  const { user, isAuthenticated, refresh } = useAuth();
+  const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [omnibarOpen, setOmnibarOpen] = useState(false);
-  const [showTOS, setShowTOS] = useState(false);
-  const [tosChecked, setTosChecked] = useState(false);
-
   // Note: Authentication is enforced by middleware.
   // Client-side redirect is disabled to prevent race conditions.
   // The middleware already redirects unauthenticated users before this component renders.
-
-  // Check TOS acceptance
-  useEffect(() => {
-    if (!isAuthenticated || tosChecked) return;
-
-    // User from backend includes tosAccepted field
-    if (user && !user.tosAccepted) {
-      setShowTOS(true);
-    }
-    setTosChecked(true);
-  }, [isAuthenticated, tosChecked, user]);
-
-  const handleTOSAccept = useCallback(() => {
-    setShowTOS(false);
-    // Refresh session to get updated TOS status
-    refresh();
-  }, [refresh]);
 
   const toggleSidebar = useCallback(() => {
     setSidebarOpen((prev) => !prev);
@@ -125,7 +104,6 @@ export function AppShell({ children }: AppShellProps) {
           isOpen={omnibarOpen}
           onClose={() => setOmnibarOpen(false)}
         />
-        {showTOS && <TOSModal onAccept={handleTOSAccept} />}
       </div>
     </FocusStateProvider>
   );
