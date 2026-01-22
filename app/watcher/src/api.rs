@@ -1,6 +1,9 @@
 /// Backend API client for DAW Watcher
 /// Handles authentication, file uploads, and project management
+use crate::chunking::{build_chunk_descriptors, ChunkDescriptor, ChunkSettings};
+use crate::compression::compress_zstd;
 use crate::models::WatcherSettings;
+use crate::packager::build_tar_archive;
 use reqwest::Client;
 use std::path::Path;
 use tracing::info;
@@ -29,31 +32,55 @@ impl ApiClient {
         content_type: &str,
         file_path: &Path,
     ) -> Result<String, String> {
-        let file_size = std::fs::metadata(file_path)
-            .map_err(|e| format!("Failed to get file metadata: {}", e))?
-            .len();
+        let effective_content_type = if file_path.is_dir() {
+            "application/vnd.ignition.daw-project+tar"
+        } else {
+            content_type
+        };
 
-        // Calculate file hash
-        let file_data = std::fs::read(file_path)
-            .map_err(|e| format!("Failed to read file: {}", e))?;
+        let file_data = if file_path.is_dir() {
+            build_tar_archive(file_path)?
+        } else {
+            std::fs::read(file_path).map_err(|e| format!("Failed to read file: {}", e))?
+        };
+
+        let file_size = file_data.len() as u64;
         let file_hash = self.calculate_hash(&file_data);
 
-        // Initiate upload session
+        let chunk_settings = ChunkSettings::default();
+        let chunk_descriptors = build_chunk_descriptors(&file_data, &chunk_settings);
+
+        let manifest = build_manifest(
+            &file_hash,
+            file_size,
+            &chunk_settings,
+            &chunk_descriptors,
+        );
+
         let session_id = self
-            .initiate_upload(project_name, content_type, file_size, &file_hash)
+            .initiate_upload(
+                project_name,
+                effective_content_type,
+                file_size,
+                &file_hash,
+                chunk_descriptors.len() as i32,
+            )
             .await?;
 
         info!(
             "Initiated upload session {} for {} ({})",
-            session_id, project_name, content_type
+            session_id, project_name, effective_content_type
         );
 
-        // Upload file chunks
-        self.upload_chunks(&session_id, &file_data, content_type)
+        let missing = self
+            .check_missing_chunks(&session_id, &manifest)
+            .await?;
+
+        self.upload_chunks(&session_id, &file_data, &chunk_descriptors, &missing)
             .await?;
 
         // Complete upload
-        self.complete_upload(&session_id, project_name, &file_hash)
+        self.complete_upload(&session_id, &manifest, &file_hash)
             .await?;
 
         info!("Upload completed: {} ({})", project_name, session_id);
@@ -114,6 +141,7 @@ impl ApiClient {
         content_type: &str,
         total_size: u64,
         file_hash: &str,
+        total_chunks: i32,
     ) -> Result<String, String> {
         let url = format!("{}/api/daw/", self.base_url);
 
@@ -122,6 +150,9 @@ impl ApiClient {
             "content_type": content_type,
             "total_size": total_size,
             "file_hash": file_hash,
+            "total_chunks": total_chunks,
+            "compression": "zstd",
+            "chunking": "gear",
         });
 
         let response = self
@@ -153,16 +184,21 @@ impl ApiClient {
         &self,
         session_id: &str,
         file_data: &[u8],
-        _content_type: &str,
+        chunks: &[ChunkDescriptor],
+        missing: &[String],
     ) -> Result<(), String> {
-        const CHUNK_SIZE: usize = 5 * 1024 * 1024; // 5MB
-        let total_chunks = (file_data.len() + CHUNK_SIZE - 1) / CHUNK_SIZE;
+        let total_chunks = chunks.len();
+        let missing_set: std::collections::HashSet<&String> = missing.iter().collect();
 
-        for chunk_num in 0..total_chunks {
-            let start = chunk_num * CHUNK_SIZE;
-            let end = std::cmp::min(start + CHUNK_SIZE, file_data.len());
-            let chunk = &file_data[start..end];
+        for chunk in chunks {
+            if !missing_set.contains(&chunk.hash) {
+                continue;
+            }
 
+            let start = chunk.offset;
+            let end = chunk.offset + chunk.length;
+            let slice = &file_data[start..end];
+            let compressed = compress_zstd(slice)?;
             let url = format!(
                 "{}/api/daw/upload/{}/chunk",
                 self.base_url, session_id
@@ -171,10 +207,11 @@ impl ApiClient {
             let mut form = reqwest::multipart::Form::new();
             form = form.part(
                 "chunk",
-                reqwest::multipart::Part::bytes(chunk.to_vec()),
+                reqwest::multipart::Part::bytes(compressed),
             );
-            form = form.text("chunk_number", chunk_num.to_string());
-            form = form.text("total_chunks", total_chunks.to_string());
+            form = form.text("chunk_hash", chunk.hash.clone());
+            form = form.text("compression", "zstd");
+            form = form.text("encryption", "none");
 
             let response: reqwest::Response = self
                 .client
@@ -193,7 +230,7 @@ impl ApiClient {
                 ));
             }
 
-            info!("Uploaded chunk {}/{}", chunk_num + 1, total_chunks);
+            info!("Uploaded chunk {}/{}", chunk.index + 1, total_chunks);
         }
 
         Ok(())
@@ -203,7 +240,7 @@ impl ApiClient {
     async fn complete_upload(
         &self,
         session_id: &str,
-        _project_name: &str,
+        manifest: &ChunkManifest,
         file_hash: &str,
     ) -> Result<(), String> {
         let url = format!(
@@ -214,6 +251,7 @@ impl ApiClient {
         let body = serde_json::json!({
             "file_hash": file_hash,
             "change_description": "Uploaded by DAW Watcher",
+            "manifest": manifest,
         });
 
         let response = self
@@ -240,6 +278,43 @@ impl ApiClient {
         let mut hasher = Sha256::new();
         hasher.update(data);
         format!("{:x}", hasher.finalize())
+    }
+
+    async fn check_missing_chunks(
+        &self,
+        session_id: &str,
+        manifest: &ChunkManifest,
+    ) -> Result<Vec<String>, String> {
+        let url = format!(
+            "{}/api/daw/upload/{}/chunks/check",
+            self.base_url, session_id
+        );
+
+        let body = serde_json::json!({
+            "chunk_hashes": manifest.chunks.iter().map(|c| c.hash.clone()).collect::<Vec<_>>(),
+            "compression": manifest.compression.algo.as_str(),
+            "encryption": "none",
+        });
+
+        let response = self
+            .client
+            .post(&url)
+            .bearer_auth(self.auth_token.as_ref().unwrap_or(&String::new()))
+            .json(&body)
+            .send()
+            .await
+            .map_err(|e| format!("Failed to check chunks: {}", e))?;
+
+        if !response.status().is_success() {
+            return Err(format!("Failed to check chunks: {}", response.status()));
+        }
+
+        let data = response
+            .json::<ChunkCheckResponse>()
+            .await
+            .map_err(|e| format!("Failed to parse response: {}", e))?;
+
+        Ok(data.missing)
     }
 }
 
@@ -269,4 +344,75 @@ pub struct SyncStatusResponse {
     pub syncing: bool,
     pub last_sync_time: Option<String>,
     pub total_synced_files: u64,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+struct ChunkManifest {
+    version: i32,
+    total_size: i64,
+    file_hash: String,
+    compression: CompressionConfig,
+    chunking: ChunkingConfig,
+    chunks: Vec<ChunkManifestEntry>,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+struct CompressionConfig {
+    algo: String,
+    level: i32,
+    rsyncable: bool,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+struct ChunkingConfig {
+    algo: String,
+    min_size: i64,
+    avg_size: i64,
+    max_size: i64,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+struct ChunkManifestEntry {
+    index: i32,
+    hash: String,
+    size: i64,
+    compressed_size: Option<i64>,
+}
+
+#[derive(Debug, serde::Deserialize)]
+struct ChunkCheckResponse {
+    missing: Vec<String>,
+}
+
+fn build_manifest(
+    file_hash: &str,
+    total_size: u64,
+    settings: &ChunkSettings,
+    chunks: &[ChunkDescriptor],
+) -> ChunkManifest {
+    ChunkManifest {
+        version: 1,
+        total_size: total_size as i64,
+        file_hash: file_hash.to_string(),
+        compression: CompressionConfig {
+            algo: "zstd".to_string(),
+            level: crate::compression::ZSTD_LEVEL,
+            rsyncable: true,
+        },
+        chunking: ChunkingConfig {
+            algo: "gear".to_string(),
+            min_size: settings.min_size as i64,
+            avg_size: settings.avg_size as i64,
+            max_size: settings.max_size as i64,
+        },
+        chunks: chunks
+            .iter()
+            .map(|chunk| ChunkManifestEntry {
+                index: chunk.index as i32,
+                hash: chunk.hash.clone(),
+                size: chunk.size as i64,
+                compressed_size: None,
+            })
+            .collect(),
+    }
 }

@@ -57,7 +57,10 @@ export default function WatcherApp() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800">
+    <div
+      className="min-h-screen"
+      style={{ background: "var(--gradient-onboarding-bg)" }}
+    >
       <div className="container mx-auto px-4 py-6">
         {/* Header */}
         <div className="mb-6">

@@ -746,6 +746,56 @@
       "rust_type": "DawProjectVersions",
       "ts_type": "DawProjectVersions"
     },
+    "daw_project_chunks": {
+      "fields": {
+        "hash": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": true,
+          "unique": false,
+          "foreign_key": false
+        },
+        "compression": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "encryption": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "'none'"
+        },
+        "size_bytes": {
+          "type": "BIGINT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "storage_key": {
+          "type": "TEXT",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false
+        },
+        "created_at": {
+          "type": "TIMESTAMPTZ",
+          "nullable": false,
+          "primary": false,
+          "unique": false,
+          "foreign_key": false,
+          "default": "NOW()"
+        }
+      },
+      "rust_type": "DawProjectChunks",
+      "ts_type": "DawProjectChunks"
+    },
     "upload_sessions": {
       "fields": {
         "id": {
@@ -8324,6 +8374,1613 @@
           "sort_order": 22
         }
       ]
+    },
+    "goals": {
+      "unique_key": "id",
+      "records": [
+        {
+          "id": "a0000000-0000-0000-0000-000000000001",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "title": "Social Confidence Through Reps (No Shrinking)",
+          "description": "Build social confidence by repeating approach behaviors while anxious and dropping \"make myself small\" safety behaviors. Success = I stayed present and took normal space, not \"I felt confident.\"",
+          "category": "Social / Confidence",
+          "priority": 5,
+          "status": "active",
+          "progress": 0,
+          "sort_order": 1
+        },
+        {
+          "id": "a0000000-0000-0000-0000-000000000002",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "title": "Sober Rave Freedom (Disinhibition Without Substances)",
+          "description": "Retrain my nervous system to move freely at raves while sober by interrupting stiffening, redirecting attention outward, and doing controlled \"embarrassment exposures.\"",
+          "category": "Movement / Social / Embodiment",
+          "priority": 5,
+          "status": "active",
+          "progress": 0,
+          "sort_order": 2
+        },
+        {
+          "id": "a0000000-0000-0000-0000-000000000003",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "title": "Dating Presence (Connection Over Performance)",
+          "description": "Improve dating confidence by staying present, showing preferences, escalating gently, and tolerating awkwardness without self-correction or checking for approval.",
+          "category": "Dating / Confidence",
+          "priority": 4,
+          "status": "active",
+          "progress": 0,
+          "sort_order": 3
+        }
+      ]
+    },
+    "user_quests": {
+      "unique_key": "id",
+      "records": [
+        {
+          "id": "b0000000-0000-0000-0000-000000000001",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "title": "Anti-Shrinking Week (Body Takes Normal Space)",
+          "description": "For 7-14 days, identify 2 \"shrinking\" safety behaviors and drop them on purpose (examples: quiet voice, hunching, apologizing, over-smiling, compressing arms). Track reps; success is compliance, not comfort.\n\n**Linked Goal:** Social Confidence Through Reps (No Shrinking)\n**Duration:** 1-2 weeks\n**Success Criteria:** Complete minimum 10 reps of anti-shrinking behaviors",
+          "category": "Social / CBT",
+          "difficulty": "medium",
+          "xp_reward": 250,
+          "coin_reward": 50,
+          "status": "not_started",
+          "progress": 0,
+          "target": 10,
+          "is_active": true,
+          "is_repeatable": false
+        },
+        {
+          "id": "b0000000-0000-0000-0000-000000000002",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "title": "12 Social Openers (Tiny Starts)",
+          "description": "Complete 12 micro-interactions (friends, strangers, staff, coworkers): one opener + one follow-up question. Leave the interaction without evaluating performance.\n\n**Linked Goal:** Social Confidence Through Reps (No Shrinking)\n**Duration:** 1-2 weeks\n**Success Criteria:** 12 completed micro-interactions",
+          "category": "Social / Exposure",
+          "difficulty": "medium",
+          "xp_reward": 250,
+          "coin_reward": 50,
+          "status": "not_started",
+          "progress": 0,
+          "target": 12,
+          "is_active": true,
+          "is_repeatable": false
+        },
+        {
+          "id": "b0000000-0000-0000-0000-000000000003",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "title": "Embarrassment Tolerance Training (No Fixing)",
+          "description": "Do 8 deliberate \"mild awkward\" reps (ask a simple question, admit slight nerves, let silence happen, make a slightly bold compliment). Do not repair, explain, or backpedal. Stay present through the discomfort.\n\n**Linked Goal:** Social Confidence Through Reps (No Shrinking)\n**Duration:** 2-4 weeks\n**Success Criteria:** 8 embarrassment tolerance reps completed",
+          "category": "CBT / Exposure",
+          "difficulty": "hard",
+          "xp_reward": 500,
+          "coin_reward": 100,
+          "status": "not_started",
+          "progress": 0,
+          "target": 8,
+          "is_active": true,
+          "is_repeatable": false
+        },
+        {
+          "id": "b0000000-0000-0000-0000-000000000004",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "title": "Sober Movement Conditioning (7 Songs)",
+          "description": "Move continuously for 7 full songs across the quest (alone or in public). No mirror. No judging. The goal is \"continuous movement,\" not dance quality.\n\n**Linked Goal:** Sober Rave Freedom (Disinhibition Without Substances)\n**Duration:** 1-4 weeks\n**Success Criteria:** 7 full songs with continuous movement",
+          "category": "Movement / Conditioning",
+          "difficulty": "easy",
+          "xp_reward": 100,
+          "coin_reward": 25,
+          "status": "not_started",
+          "progress": 0,
+          "target": 7,
+          "is_active": true,
+          "is_repeatable": false
+        },
+        {
+          "id": "b0000000-0000-0000-0000-000000000005",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "title": "Rave Reset Mastery (Stiffness -> Release Sequence)",
+          "description": "Practice and deploy a 20-second reset when stiffness appears: jaw drop + exhale; shoulder roll x2; hip sway 4 counts; resume movement. Do this 10 times across practice or real events.\n\n**Linked Goal:** Sober Rave Freedom (Disinhibition Without Substances)\n**Duration:** 1-4 weeks\n**Success Criteria:** 10 completed reset sequences",
+          "category": "Movement / Somatic",
+          "difficulty": "medium",
+          "xp_reward": 250,
+          "coin_reward": 50,
+          "status": "not_started",
+          "progress": 0,
+          "target": 10,
+          "is_active": true,
+          "is_repeatable": false
+        },
+        {
+          "id": "b0000000-0000-0000-0000-000000000006",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "title": "Dating Reps (3 Invites + 2 Dates)",
+          "description": "Send 3 low-pressure invites and complete 2 in-person dates/hangouts. Focus on presence + showing preferences, not being impressive.\n\n**Linked Goal:** Dating Presence (Connection Over Performance)\n**Duration:** 2-4 weeks\n**Success Criteria:** 3 invites sent + 2 dates completed",
+          "category": "Dating / Exposure",
+          "difficulty": "epic",
+          "xp_reward": 1000,
+          "coin_reward": 200,
+          "status": "not_started",
+          "progress": 0,
+          "target": 5,
+          "is_active": true,
+          "is_repeatable": false
+        }
+      ]
+    },
+    "habits": {
+      "unique_key": "id",
+      "records": [
+        {
+          "id": "c0000000-0000-0000-0000-000000000001",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "name": "Social Rep (Approach While Anxious)",
+          "description": "Do one approach behavior despite discomfort (start convo, join group, send invite, ask someone about themselves). Log a single sentence: \"What I did.\"\n\n**Linked Goal:** Social Confidence Through Reps (No Shrinking)\n**Target:** 3x per week",
+          "frequency": "weekly",
+          "target_count": 3,
+          "icon": "\ud83d\udcac",
+          "color": "#4F46E5",
+          "sort_order": 1,
+          "is_active": true
+        },
+        {
+          "id": "c0000000-0000-0000-0000-000000000002",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "name": "Drop One Safety Behavior (Anti-Shrink)",
+          "description": "Choose 1 safety behavior today and do the opposite (speak 10% slower, shoulders open, no apologizing, don't hide hands, don't look down).\n\n**Linked Goal:** Social Confidence Through Reps (No Shrinking)\n**Target:** 4x per week",
+          "frequency": "weekly",
+          "target_count": 4,
+          "icon": "\ud83d\udee1\ufe0f",
+          "color": "#DC2626",
+          "sort_order": 2,
+          "is_active": true
+        },
+        {
+          "id": "c0000000-0000-0000-0000-000000000003",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "name": "Embarrassment Rep (No Repair)",
+          "description": "Do something mildly awkward on purpose and do not \"fix\" it (no explaining, no over-talking, no apology). Stay in the interaction 20-60 seconds.\n\n**Linked Goal:** Social Confidence Through Reps (No Shrinking)\n**Target:** 2x per week",
+          "frequency": "weekly",
+          "target_count": 2,
+          "icon": "\ud83d\ude33",
+          "color": "#F59E0B",
+          "sort_order": 3,
+          "is_active": true
+        },
+        {
+          "id": "c0000000-0000-0000-0000-000000000004",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "name": "One Preference Spoken (Micro-Assertiveness)",
+          "description": "State one preference out loud (food, music, plan, opinion). Short. No justification.\n\n**Linked Goal:** Social Confidence Through Reps (No Shrinking)\n**Target:** 3x per week",
+          "frequency": "weekly",
+          "target_count": 3,
+          "icon": "\ud83c\udfaf",
+          "color": "#10B981",
+          "sort_order": 4,
+          "is_active": true
+        },
+        {
+          "id": "c0000000-0000-0000-0000-000000000005",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "name": "Continuous Movement Song (No Mirror)",
+          "description": "Put on one song and move continuously until it ends. The only rule: keep moving.\n\n**Linked Goal:** Sober Rave Freedom (Disinhibition Without Substances)\n**Target:** 4x per week",
+          "frequency": "weekly",
+          "target_count": 4,
+          "icon": "\ud83c\udfb5",
+          "color": "#8B5CF6",
+          "sort_order": 5,
+          "is_active": true
+        },
+        {
+          "id": "c0000000-0000-0000-0000-000000000006",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "name": "Stiffness Reset Drill (20 seconds)",
+          "description": "Practice: jaw drop + exhale; shoulder roll x2; hip sway 4 counts; resume. Count it as done when you complete the sequence.\n\n**Linked Goal:** Sober Rave Freedom (Disinhibition Without Substances)\n**Target:** 5x per week",
+          "frequency": "weekly",
+          "target_count": 5,
+          "icon": "\ud83d\udd04",
+          "color": "#EC4899",
+          "sort_order": 6,
+          "is_active": true
+        },
+        {
+          "id": "c0000000-0000-0000-0000-000000000007",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "name": "Outward Attention Loop (Sound/Light/Body)",
+          "description": "For 60 seconds, rotate attention: bass -> lights -> feet/weight. If you catch self-monitoring, restart the loop.\n\n**Linked Goal:** Sober Rave Freedom (Disinhibition Without Substances)\n**Target:** 5x per week",
+          "frequency": "weekly",
+          "target_count": 5,
+          "icon": "\ud83d\udc41\ufe0f",
+          "color": "#06B6D4",
+          "sort_order": 7,
+          "is_active": true
+        },
+        {
+          "id": "c0000000-0000-0000-0000-000000000008",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "name": "Controlled \"Too Much\" Move (Disinhibition Rep)",
+          "description": "For 10 seconds, intentionally move bigger than comfortable (arms, shoulders, head). Stay present after.\n\n**Linked Goal:** Sober Rave Freedom (Disinhibition Without Substances)\n**Target:** 2x per week",
+          "frequency": "weekly",
+          "target_count": 2,
+          "icon": "\ud83d\udd25",
+          "color": "#F97316",
+          "sort_order": 8,
+          "is_active": true
+        },
+        {
+          "id": "c0000000-0000-0000-0000-000000000009",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "name": "Send One Invite",
+          "description": "Invite someone to something simple (coffee, walk, show, event). Low pressure.\n\n**Linked Goal:** Dating Presence (Connection Over Performance)\n**Target:** 1x per week",
+          "frequency": "weekly",
+          "target_count": 1,
+          "icon": "\ud83d\udce8",
+          "color": "#EF4444",
+          "sort_order": 9,
+          "is_active": true
+        },
+        {
+          "id": "c0000000-0000-0000-0000-000000000010",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "name": "2-Step Conversation (Ask + Follow-up)",
+          "description": "Ask one open question, then one follow-up about a detail. Do not pivot to performance.\n\n**Linked Goal:** Dating Presence (Connection Over Performance)\n**Target:** 4x per week",
+          "frequency": "weekly",
+          "target_count": 4,
+          "icon": "\ud83d\udde3\ufe0f",
+          "color": "#3B82F6",
+          "sort_order": 10,
+          "is_active": true
+        },
+        {
+          "id": "c0000000-0000-0000-0000-000000000011",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "name": "Warmth Signal (Compliment or Appreciation)",
+          "description": "Give one sincere compliment/appreciation to a friend/date. One sentence.\n\n**Linked Goal:** Dating Presence (Connection Over Performance)\n**Target:** 2x per week",
+          "frequency": "weekly",
+          "target_count": 2,
+          "icon": "\ud83d\udc9d",
+          "color": "#EC4899",
+          "sort_order": 11,
+          "is_active": true
+        },
+        {
+          "id": "c0000000-0000-0000-0000-000000000012",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "name": "Tiny Vulnerability (One Honest Sentence)",
+          "description": "Share one small honest thing (\"I'm a bit tired today,\" \"I get nervous sometimes,\" \"I'm excited about this\"). No over-explaining.\n\n**Linked Goal:** Dating Presence (Connection Over Performance)\n**Target:** 2x per week",
+          "frequency": "weekly",
+          "target_count": 2,
+          "icon": "\ud83d\udcad",
+          "color": "#A855F7",
+          "sort_order": 12,
+          "is_active": true
+        }
+      ]
+    },
+    "exercises": {
+      "unique_key": "name",
+      "records": [
+        {
+          "name": "Cat–cow on hands and knees",
+          "description": "General warm-up for spine.\n\nKey cues: Start neutral; gently round then extend; move with slow breathing.\nGuide: https://www.youtube.com/watch?v=RKN24fpS-as",
+          "category": "mobility_posture",
+          "muscle_groups": ["spine", "thoracic"],
+          "equipment": [],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Half-kneeling hip-flexor stretch",
+          "description": "Primary hip-flexor stretch to reduce anterior tilt.\n\nKey cues: Posteriorly tilt pelvis; squeeze glute on back leg; do not arch low back.\nGuide: https://youtu.be/_xU-wIiMxpI?si=3gzdQi19tQCYRrIB",
+          "category": "mobility_posture",
+          "muscle_groups": ["hips", "hip_flexors", "glutes"],
+          "equipment": [],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Standing or side-lying quad stretch",
+          "description": "Targets rectus femoris which is often tight in anterior tilt.\n\nKey cues: Keep pelvis lightly tucked; bring heel toward glute; avoid pulling low back into arch.\nGuide: https://youtu.be/_xU-wIiMxpI?si=aUz39djZMQNdG9DX",
+          "category": "mobility_posture",
+          "muscle_groups": ["quads", "hips"],
+          "equipment": [],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Supine hamstring stretch",
+          "description": "Improves hamstring flexibility if they feel tight.\n\nKey cues: Lie on back; keep opposite leg straight on floor; raise leg until stretch not pain.\nGuide: https://www.youtube.com/watch?v=Il1L75v6gq0a",
+          "category": "mobility_posture",
+          "muscle_groups": ["hamstrings"],
+          "equipment": [],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Child's pose with posterior pelvic tilt focus",
+          "description": "Encourages lumbar flexion to counter constant extension.\n\nKey cues: Sit hips toward heels; gently round low back; relax shoulders.\nGuide: https://www.youtube.com/watch?v=_ZX_zTOBgp8",
+          "category": "mobility_posture",
+          "muscle_groups": ["spine", "low_back", "lats"],
+          "equipment": [],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Thread the needle from hands and knees",
+          "description": "Improves thoracic rotation and general upper back mobility.\n\nKey cues: From quadruped slide arm under; rotate upper back; keep movement smooth and pain free.\nGuide: https://www.youtube.com/watch?v=7C8-zj3nRro",
+          "category": "mobility_posture",
+          "muscle_groups": ["thoracic", "shoulders"],
+          "equipment": [],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Foam-roller thoracic extension",
+          "description": "Improves thoracic extension and reduces stiffness.\n\nKey cues: Roller across upper back; support head; gently extend over roller then return.\nGuide: https://www.youtube.com/watch?v=W_6_swxc-cI",
+          "category": "mobility_posture",
+          "muscle_groups": ["thoracic"],
+          "equipment": ["foam_roller"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Doorway pec stretch",
+          "description": "Opens tight chest and front shoulders that pull posture forward.\n\nKey cues: Elbows at about shoulder height; step through door until chest stretch; do not push into shoulder pain.\nGuide: https://www.youtube.com/watch?v=M850sCj9LHQ",
+          "category": "mobility_posture",
+          "muscle_groups": ["chest", "front_delts"],
+          "equipment": ["doorway"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Supine pelvic tilt to neutral",
+          "description": "Trains control of pelvic position and awareness of neutral.\n\nKey cues: Lie on back with knees bent; gently tilt pelvis to flatten low back then arch slightly; find middle neutral.\nGuide: https://www.youtube.com/watch?v=U0dfnyfhpwk",
+          "category": "mobility_posture",
+          "muscle_groups": ["core", "pelvis", "low_back"],
+          "equipment": [],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Wall alignment drill",
+          "description": "Reinforces stacked neutral posture for daily standing.\n\nKey cues: Heels a short distance from wall; butt and mid back on wall; gently draw ribs down and lightly tuck pelvis.\nGuide: https://www.youtube.com/watch?v=hQLU6m7GNwU",
+          "category": "mobility_posture",
+          "muscle_groups": ["posture", "core", "thoracic"],
+          "equipment": ["wall"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Joint circles (neck/shoulders/hips/ankles)",
+          "description": "General joint prep; reduces baseline bracing.\n\nKey cues: Slow circles; stay pain-free; breathe normally.\nGuide: https://www.youtube.com/watch?v=6v7p7s6Kk4Y",
+          "category": "mobility_generic",
+          "muscle_groups": ["neck", "shoulders", "hips", "ankles"],
+          "equipment": [],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "World's greatest stretch (lunge + T-spine reach)",
+          "description": "Full-body opener; high carryover.\n\nKey cues: Long exhale in the bottom; reach rotates from upper back.\nGuide: https://www.youtube.com/watch?v=Fsa3n5g8fYI",
+          "category": "mobility_generic",
+          "muscle_groups": ["hips", "thoracic", "hamstrings", "hip_flexors"],
+          "equipment": [],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "90/90 hip switches (controlled)",
+          "description": "Builds hip IR/ER control, not just stretch.\n\nKey cues: Move slowly; stay tall; don't force knee down.\nGuide: https://www.youtube.com/watch?v=H9m3qTt7n3E",
+          "category": "mobility_generic",
+          "muscle_groups": ["hips"],
+          "equipment": [],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Pigeon pose (or figure-4 on back)",
+          "description": "Glute/hip external rotators.\n\nKey cues: Hips square; ease off if knee pain.\nGuide: https://www.youtube.com/watch?v=2vPqM7q3QXo",
+          "category": "mobility_generic",
+          "muscle_groups": ["glutes", "hips"],
+          "equipment": [],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Supine hamstring floss (band/towel)",
+          "description": "Flossing often transfers better than long static.\n\nKey cues: Alternate gentle extend/bend; no nerve pain.\nGuide: https://www.youtube.com/watch?v=G3Zp6jPp3xM",
+          "category": "mobility_generic",
+          "muscle_groups": ["hamstrings"],
+          "equipment": ["band_or_towel"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Wall calf stretch (gastroc/soleus)",
+          "description": "Supports ankle range for squats/dance.\n\nKey cues: Heel down; don't collapse arch.\nGuide: https://www.youtube.com/watch?v=Yj3bQn9pVxg",
+          "category": "mobility_generic",
+          "muscle_groups": ["calves", "ankles"],
+          "equipment": ["wall"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Open book thoracic rotation",
+          "description": "Reduces upper back stiffness.\n\nKey cues: Exhale as you open; keep knees stacked.\nGuide: https://www.youtube.com/watch?v=0uK4pYq1m1A",
+          "category": "mobility_generic",
+          "muscle_groups": ["thoracic"],
+          "equipment": [],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Wall slides (scap control)",
+          "description": "Shoulder mobility + control (less bracing).\n\nKey cues: Ribs down; forearms stay on wall; slow.\nGuide: https://www.youtube.com/watch?v=Z6Lw9xQw8lI",
+          "category": "mobility_generic",
+          "muscle_groups": ["shoulders", "upper_back"],
+          "equipment": ["wall"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Doorway pec stretch (low + mid angle)",
+          "description": "Two angles improves transfer.\n\nKey cues: No shoulder pain; gentle step-through.\nGuide: https://www.youtube.com/watch?v=SV7l1sfEmO0",
+          "category": "mobility_generic",
+          "muscle_groups": ["chest", "front_delts"],
+          "equipment": ["doorway"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Child's pose with side reach",
+          "description": "Good downshift finisher.\n\nKey cues: Reach long; breathe into side ribs.\nGuide: https://www.youtube.com/watch?v=I8m3l9kV3Wg",
+          "category": "mobility_generic",
+          "muscle_groups": ["spine", "lats"],
+          "equipment": [],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Constructive rest breathing (knees bent)",
+          "description": "Locks in tension reduction / state change.\n\nKey cues: Long exhale; jaw unclenched; shoulders heavy.\nGuide: https://www.youtube.com/watch?v=4pLUleLdwY4",
+          "category": "mobility_generic",
+          "muscle_groups": ["breathing", "recovery"],
+          "equipment": [],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Nasal breathing + jaw unclench check",
+          "description": "Downshifts bracing; sets baseline.\n\nKey cues: Lips gently closed; tongue rests on palate; jaw hangs.\nGuide: https://www.youtube.com/watch?v=RzVvThhjAKw",
+          "category": "face_mobility",
+          "muscle_groups": ["jaw", "breathing"],
+          "equipment": [],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Masseter release (gentle self-massage)",
+          "description": "Targets jaw clenching tension.\n\nKey cues: Light pressure; slow circles; stop if sharp pain.\nGuide: https://www.youtube.com/watch?v=EM18snVgV_c",
+          "category": "face_mobility",
+          "muscle_groups": ["jaw"],
+          "equipment": [],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Controlled jaw open/close (midline)",
+          "description": "Motor control for jaw tracking.\n\nKey cues: Open slowly; keep jaw tracking straight; no clicking.\nGuide: https://www.youtube.com/watch?v=7b73yE0U2t0",
+          "category": "face_mobility",
+          "muscle_groups": ["jaw"],
+          "equipment": [],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Chin tucks (deep neck flexors)",
+          "description": "Reduces forward-head tension that feeds face bracing.\n\nKey cues: Glide head back; keep throat relaxed; breathe.\nGuide: https://www.youtube.com/watch?v=2jvB6K3pGxA",
+          "category": "face_mobility",
+          "muscle_groups": ["neck", "posture"],
+          "equipment": [],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Smile–neutral control reps",
+          "description": "Trains expressiveness without over-control.\n\nKey cues: Slow smile to ~70%; relax fully back to neutral.\nGuide: https://www.youtube.com/watch?v=0TjGQw4h9iI",
+          "category": "face_mobility",
+          "muscle_groups": ["face", "cheeks", "lips"],
+          "equipment": [],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Brow raise + gentle squint combo",
+          "description": "Improves expressive range (upper face).\n\nKey cues: Raise brows then add slight squint; relax fully.\nGuide: https://www.youtube.com/watch?v=6y2ZQp7a5iQ",
+          "category": "face_mobility",
+          "muscle_groups": ["face", "brow", "eyes"],
+          "equipment": [],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Tongue posture drill (light)",
+          "description": "Supports jaw relaxation; do not force.\n\nKey cues: Tongue on palate; jaw relaxed; nasal breathe.\nGuide: https://www.youtube.com/watch?v=3Z_Fp9lGrGY",
+          "category": "face_mobility",
+          "muscle_groups": ["tongue", "jaw", "breathing"],
+          "equipment": [],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Speak one sentence with 3 expressions",
+          "description": "Transfers to real social expression control.\n\nKey cues: Same sentence; change expression only; keep jaw loose.\nGuide: https://www.youtube.com/watch?v=2Hc9Yw6h2u0",
+          "category": "face_mobility",
+          "muscle_groups": ["face", "expression"],
+          "equipment": [],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Lat pulldown",
+          "description": "Guide: (none)\n\nNotes: Or more if you can.",
+          "category": "strength_upper",
+          "muscle_groups": ["lats", "upper_back", "biceps"],
+          "equipment": ["cable"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Incline Bench Press",
+          "description": "Guide: (none)",
+          "category": "strength_upper",
+          "muscle_groups": ["chest_upper", "triceps", "front_delts"],
+          "equipment": ["dumbbell"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Straight Arm Lat Pulldown",
+          "description": "Guide: (none)",
+          "category": "strength_upper",
+          "muscle_groups": ["lats", "shoulders", "upper_back"],
+          "equipment": ["cable"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Seated Shoulder Press",
+          "description": "Guide: (none)",
+          "category": "strength_upper",
+          "muscle_groups": ["shoulders", "triceps"],
+          "equipment": ["machine"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Bench",
+          "description": "Guide: (none)\n\nNotes: Or more; train close to failure.",
+          "category": "strength_upper",
+          "muscle_groups": ["chest", "triceps", "front_delts"],
+          "equipment": ["free_weights"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Leg Press",
+          "description": "Guide: (none)",
+          "category": "strength_lower",
+          "muscle_groups": ["quads", "glutes"],
+          "equipment": ["machine"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Romanian Deadlift",
+          "description": "Guide: (none)",
+          "category": "strength_lower",
+          "muscle_groups": ["hamstrings", "glutes", "low_back"],
+          "equipment": ["barbell"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Leg Extension",
+          "description": "Guide: (none)",
+          "category": "strength_lower",
+          "muscle_groups": ["quads"],
+          "equipment": ["machine"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Seated Calf Raise",
+          "description": "Guide: (none)",
+          "category": "strength_lower",
+          "muscle_groups": ["calves"],
+          "equipment": ["machine"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Cable Crunch",
+          "description": "Guide: (none)",
+          "category": "strength_lower",
+          "muscle_groups": ["abs", "core"],
+          "equipment": ["cable"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Bench Press",
+          "description": "Guide: (none)",
+          "category": "strength_push",
+          "muscle_groups": ["chest", "triceps", "front_delts"],
+          "equipment": ["barbell"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Shoulder Press",
+          "description": "Guide: (none)",
+          "category": "strength_push",
+          "muscle_groups": ["shoulders", "triceps"],
+          "equipment": ["dumbbell"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Low Cable Fly Crossovers",
+          "description": "Guide: (none)",
+          "category": "strength_push",
+          "muscle_groups": ["chest", "front_delts"],
+          "equipment": ["cable"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Triceps Extension",
+          "description": "Guide: (none)",
+          "category": "strength_push",
+          "muscle_groups": ["triceps"],
+          "equipment": ["dumbbell"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Triceps Rope Pushdown",
+          "description": "Guide: (none)",
+          "category": "strength_push",
+          "muscle_groups": ["triceps"],
+          "equipment": ["cable"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Bent Over Row",
+          "description": "Guide: (none)",
+          "category": "strength_pull",
+          "muscle_groups": ["upper_back", "lats", "biceps"],
+          "equipment": ["barbell"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Bicep Curl",
+          "description": "Guide: (none)",
+          "category": "strength_pull",
+          "muscle_groups": ["biceps"],
+          "equipment": ["dumbbell"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Hammer Curl",
+          "description": "Guide: (none)",
+          "category": "strength_pull",
+          "muscle_groups": ["biceps", "forearms"],
+          "equipment": ["dumbbell"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Face Pull",
+          "description": "Guide: (none)",
+          "category": "strength_pull",
+          "muscle_groups": ["rear_delts", "upper_back", "rotator_cuff"],
+          "equipment": ["cable"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Squat",
+          "description": "Guide: (none)",
+          "category": "strength_legs",
+          "muscle_groups": ["quads", "glutes", "core"],
+          "equipment": ["barbell"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Glute Ham Raise",
+          "description": "Guide: (none)",
+          "category": "strength_legs",
+          "muscle_groups": ["hamstrings", "glutes"],
+          "equipment": ["bodyweight_or_machine"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Lunge",
+          "description": "Guide: (none)\n\nNotes: Per side.",
+          "category": "strength_legs",
+          "muscle_groups": ["quads", "glutes", "hamstrings"],
+          "equipment": ["dumbbell"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Lying Leg Curl",
+          "description": "Guide: (none)",
+          "category": "strength_legs",
+          "muscle_groups": ["hamstrings"],
+          "equipment": ["machine"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        },
+        {
+          "name": "Standing Calf Raise",
+          "description": "Guide: (none)",
+          "category": "strength_legs",
+          "muscle_groups": ["calves"],
+          "equipment": ["smith_machine"],
+          "is_builtin": true,
+          "is_custom": false,
+          "user_id": null
+        }
+      ]
+    },
+    "workouts": {
+      "unique_key": "name",
+      "records": [
+        {
+          "name": "Mobility: Posture Reset (APT + Upper Back)",
+          "description": "Mobility routine targeting anterior pelvic tilt patterns and upper back/pec stiffness. Seeded from your posture table.",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "estimated_duration": 15,
+          "is_template": true
+        },
+        {
+          "name": "Mobility: Generic Flexibility + Tension Reduction",
+          "description": "General mobility routine focused on usable range, reduced baseline tension, and breath-linked control (high transfer to movement/social comfort).",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "estimated_duration": 15,
+          "is_template": true
+        },
+        {
+          "name": "Mobility: Face + Expressiveness (Low-Tension Control)",
+          "description": "Face/jaw/neck mobility + expressiveness drills aimed at reducing bracing and improving controlled facial range. Avoid pain/clicking; keep pressure gentle.",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "estimated_duration": 10,
+          "is_template": true
+        },
+        {
+          "name": "Strength: Upper",
+          "description": "Upper body routine seeded from your table.",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "estimated_duration": 60,
+          "is_template": true
+        },
+        {
+          "name": "Strength: Lower",
+          "description": "Lower body routine seeded from your table.",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "estimated_duration": 60,
+          "is_template": true
+        },
+        {
+          "name": "Strength: Push",
+          "description": "Push routine seeded from your table.",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "estimated_duration": 60,
+          "is_template": true
+        },
+        {
+          "name": "Strength: Pull",
+          "description": "Pull routine seeded from your table.",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "estimated_duration": 60,
+          "is_template": true
+        },
+        {
+          "name": "Strength: Legs",
+          "description": "Legs routine seeded from your table.",
+          "user_id": "00000000-0000-0000-0000-000000000000",
+          "estimated_duration": 60,
+          "is_template": true
+        }
+      ]
+    },
+    "workout_sections": {
+      "unique_key": ["workout_name", "name"],
+      "records": [
+        {
+          "workout_name": "Mobility: Posture Reset (APT + Upper Back)",
+          "name": "Warm-up",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Mobility: Posture Reset (APT + Upper Back)",
+          "name": "Anterior pelvic tilt – mobility",
+          "sort_order": 2
+        },
+        {
+          "workout_name": "Mobility: Posture Reset (APT + Upper Back)",
+          "name": "Upper back hump – mobility",
+          "sort_order": 3
+        },
+        {
+          "workout_name": "Mobility: Posture Reset (APT + Upper Back)",
+          "name": "Integration and awareness",
+          "sort_order": 4
+        },
+        {
+          "workout_name": "Mobility: Generic Flexibility + Tension Reduction",
+          "name": "Warm-up",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Mobility: Generic Flexibility + Tension Reduction",
+          "name": "Hips",
+          "sort_order": 2
+        },
+        {
+          "workout_name": "Mobility: Generic Flexibility + Tension Reduction",
+          "name": "Hamstrings",
+          "sort_order": 3
+        },
+        {
+          "workout_name": "Mobility: Generic Flexibility + Tension Reduction",
+          "name": "Calves",
+          "sort_order": 4
+        },
+        {
+          "workout_name": "Mobility: Generic Flexibility + Tension Reduction",
+          "name": "Thoracic",
+          "sort_order": 5
+        },
+        {
+          "workout_name": "Mobility: Generic Flexibility + Tension Reduction",
+          "name": "Shoulders",
+          "sort_order": 6
+        },
+        {
+          "workout_name": "Mobility: Generic Flexibility + Tension Reduction",
+          "name": "Chest",
+          "sort_order": 7
+        },
+        {
+          "workout_name": "Mobility: Generic Flexibility + Tension Reduction",
+          "name": "Spine",
+          "sort_order": 8
+        },
+        {
+          "workout_name": "Mobility: Generic Flexibility + Tension Reduction",
+          "name": "Integration",
+          "sort_order": 9
+        },
+        {
+          "workout_name": "Mobility: Face + Expressiveness (Low-Tension Control)",
+          "name": "Warm-up",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Mobility: Face + Expressiveness (Low-Tension Control)",
+          "name": "Jaw/TMJ",
+          "sort_order": 2
+        },
+        {
+          "workout_name": "Mobility: Face + Expressiveness (Low-Tension Control)",
+          "name": "Neck/Throat",
+          "sort_order": 3
+        },
+        {
+          "workout_name": "Mobility: Face + Expressiveness (Low-Tension Control)",
+          "name": "Lips/Cheeks",
+          "sort_order": 4
+        },
+        {
+          "workout_name": "Mobility: Face + Expressiveness (Low-Tension Control)",
+          "name": "Eyes/Brow",
+          "sort_order": 5
+        },
+        {
+          "workout_name": "Mobility: Face + Expressiveness (Low-Tension Control)",
+          "name": "Tongue",
+          "sort_order": 6
+        },
+        {
+          "workout_name": "Mobility: Face + Expressiveness (Low-Tension Control)",
+          "name": "Integration",
+          "sort_order": 7
+        },
+        {
+          "workout_name": "Strength: Upper",
+          "name": "Main",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Strength: Lower",
+          "name": "Main",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Strength: Push",
+          "name": "Main",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Strength: Pull",
+          "name": "Main",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Strength: Legs",
+          "name": "Main",
+          "sort_order": 1
+        }
+      ]
+    },
+    "workout_exercises": {
+      "unique_key": ["workout_name", "section_name", "exercise_name", "sort_order"],
+      "records": [
+        {
+          "workout_name": "Mobility: Posture Reset (APT + Upper Back)",
+          "section_name": "Warm-up",
+          "exercise_name": "Cat–cow on hands and knees",
+          "sets": 2,
+          "reps": "10 slow cycles",
+          "duration": null,
+          "rest_seconds": 0,
+          "notes": "Core_star=Yes; Sets_raw=1–2; Key cues: Start neutral; gently round then extend; move with slow breathing.",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Mobility: Posture Reset (APT + Upper Back)",
+          "section_name": "Anterior pelvic tilt – mobility",
+          "exercise_name": "Half-kneeling hip-flexor stretch",
+          "sets": 3,
+          "reps": "30–45 sec hold (per side)",
+          "duration": 45,
+          "rest_seconds": 0,
+          "notes": "Core_star=Yes; Sets_raw=2–3 per side; Key cues: Posteriorly tilt pelvis; squeeze glute on back leg; do not arch low back.",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Mobility: Posture Reset (APT + Upper Back)",
+          "section_name": "Anterior pelvic tilt – mobility",
+          "exercise_name": "Standing or side-lying quad stretch",
+          "sets": 2,
+          "reps": "30 sec hold (per side)",
+          "duration": 30,
+          "rest_seconds": 0,
+          "notes": "Core_star=No; Sets_raw=2 per side; Key cues: Keep pelvis lightly tucked; bring heel toward glute; avoid pulling low back into arch.",
+          "sort_order": 2
+        },
+        {
+          "workout_name": "Mobility: Posture Reset (APT + Upper Back)",
+          "section_name": "Anterior pelvic tilt – mobility",
+          "exercise_name": "Supine hamstring stretch",
+          "sets": 2,
+          "reps": "30–45 sec hold (per side)",
+          "duration": 45,
+          "rest_seconds": 0,
+          "notes": "Core_star=No; Sets_raw=2 per side; Key cues: Lie on back; keep opposite leg straight on floor; raise leg until stretch not pain.",
+          "sort_order": 3
+        },
+        {
+          "workout_name": "Mobility: Posture Reset (APT + Upper Back)",
+          "section_name": "Anterior pelvic tilt – mobility",
+          "exercise_name": "Child's pose with posterior pelvic tilt focus",
+          "sets": 3,
+          "reps": "20–30 sec hold",
+          "duration": 30,
+          "rest_seconds": 0,
+          "notes": "Core_star=No; Sets_raw=3; Key cues: Sit hips toward heels; gently round low back; relax shoulders.",
+          "sort_order": 4
+        },
+        {
+          "workout_name": "Mobility: Posture Reset (APT + Upper Back)",
+          "section_name": "Upper back hump – mobility",
+          "exercise_name": "Thread the needle from hands and knees",
+          "sets": 1,
+          "reps": "10 reps (per side)",
+          "duration": null,
+          "rest_seconds": 0,
+          "notes": "Core_star=No; Sets_raw=1 per side; Key cues: Slide arm under; rotate upper back; smooth and pain free.",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Mobility: Posture Reset (APT + Upper Back)",
+          "section_name": "Upper back hump – mobility",
+          "exercise_name": "Foam-roller thoracic extension",
+          "sets": 1,
+          "reps": "10–15 reps",
+          "duration": null,
+          "rest_seconds": 0,
+          "notes": "Core_star=Yes; Sets_raw=1; Key cues: Roller across upper back; support head; gently extend over roller then return.",
+          "sort_order": 2
+        },
+        {
+          "workout_name": "Mobility: Posture Reset (APT + Upper Back)",
+          "section_name": "Upper back hump – mobility",
+          "exercise_name": "Doorway pec stretch",
+          "sets": 3,
+          "reps": "30 sec hold",
+          "duration": 30,
+          "rest_seconds": 0,
+          "notes": "Core_star=Yes; Sets_raw=3; Key cues: Elbows ~shoulder height; step through; avoid shoulder pain.",
+          "sort_order": 3
+        },
+        {
+          "workout_name": "Mobility: Posture Reset (APT + Upper Back)",
+          "section_name": "Integration and awareness",
+          "exercise_name": "Supine pelvic tilt to neutral",
+          "sets": 1,
+          "reps": "15–20 reps",
+          "duration": null,
+          "rest_seconds": 0,
+          "notes": "Core_star=No; Sets_raw=1; Key cues: Flatten low back then arch slightly; find neutral middle.",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Mobility: Posture Reset (APT + Upper Back)",
+          "section_name": "Integration and awareness",
+          "exercise_name": "Wall alignment drill",
+          "sets": 2,
+          "reps": "30–45 sec hold",
+          "duration": 45,
+          "rest_seconds": 0,
+          "notes": "Core_star=No; Sets_raw=2; Key cues: Butt + mid back on wall; ribs down; light posterior pelvic tilt.",
+          "sort_order": 2
+        },
+        {
+          "workout_name": "Mobility: Generic Flexibility + Tension Reduction",
+          "section_name": "Warm-up",
+          "exercise_name": "Joint circles (neck/shoulders/hips/ankles)",
+          "sets": 1,
+          "reps": "60–90 sec total",
+          "duration": 90,
+          "rest_seconds": 0,
+          "notes": "Core_star=Yes; Key cues: Slow circles; pain-free; breathe normally.",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Mobility: Generic Flexibility + Tension Reduction",
+          "section_name": "Warm-up",
+          "exercise_name": "World's greatest stretch (lunge + T-spine reach)",
+          "sets": 2,
+          "reps": "4–6 reps/side",
+          "duration": null,
+          "rest_seconds": 0,
+          "notes": "Core_star=Yes; Sets_raw=1–2 per side; Key cues: Long exhale in bottom; rotate from upper back.",
+          "sort_order": 2
+        },
+        {
+          "workout_name": "Mobility: Generic Flexibility + Tension Reduction",
+          "section_name": "Hips",
+          "exercise_name": "90/90 hip switches (controlled)",
+          "sets": 2,
+          "reps": "6–10 reps",
+          "duration": null,
+          "rest_seconds": 0,
+          "notes": "Core_star=Yes; Key cues: Slow; stay tall; don't force knee down.",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Mobility: Generic Flexibility + Tension Reduction",
+          "section_name": "Hips",
+          "exercise_name": "Pigeon pose (or figure-4 on back)",
+          "sets": 2,
+          "reps": "30–60 sec hold (per side)",
+          "duration": 60,
+          "rest_seconds": 0,
+          "notes": "Core_star=No; Key cues: Hips square; ease off if knee pain.",
+          "sort_order": 2
+        },
+        {
+          "workout_name": "Mobility: Generic Flexibility + Tension Reduction",
+          "section_name": "Hamstrings",
+          "exercise_name": "Supine hamstring floss (band/towel)",
+          "sets": 2,
+          "reps": "10 reps + 20 sec hold (per side)",
+          "duration": 20,
+          "rest_seconds": 0,
+          "notes": "Core_star=Yes; Key cues: Gentle extend/bend; avoid nerve pain.",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Mobility: Generic Flexibility + Tension Reduction",
+          "section_name": "Calves",
+          "exercise_name": "Wall calf stretch (gastroc/soleus)",
+          "sets": 2,
+          "reps": "30 sec straight knee + 30 sec bent knee (per side)",
+          "duration": 60,
+          "rest_seconds": 0,
+          "notes": "Core_star=No; Key cues: Heel down; don't collapse arch.",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Mobility: Generic Flexibility + Tension Reduction",
+          "section_name": "Thoracic",
+          "exercise_name": "Open book thoracic rotation",
+          "sets": 1,
+          "reps": "8–10 reps (per side)",
+          "duration": null,
+          "rest_seconds": 0,
+          "notes": "Core_star=Yes; Key cues: Exhale as you open; knees stacked.",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Mobility: Generic Flexibility + Tension Reduction",
+          "section_name": "Shoulders",
+          "exercise_name": "Wall slides (scap control)",
+          "sets": 2,
+          "reps": "8–12 reps",
+          "duration": null,
+          "rest_seconds": 0,
+          "notes": "Core_star=Yes; Key cues: Ribs down; forearms on wall; slow.",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Mobility: Generic Flexibility + Tension Reduction",
+          "section_name": "Chest",
+          "exercise_name": "Doorway pec stretch (low + mid angle)",
+          "sets": 4,
+          "reps": "30 sec hold (2 angles, 2 per angle)",
+          "duration": 30,
+          "rest_seconds": 0,
+          "notes": "Core_star=No; Key cues: Gentle step-through; avoid shoulder pain.",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Mobility: Generic Flexibility + Tension Reduction",
+          "section_name": "Spine",
+          "exercise_name": "Child's pose with side reach",
+          "sets": 2,
+          "reps": "20–30 sec hold (per side)",
+          "duration": 30,
+          "rest_seconds": 0,
+          "notes": "Core_star=No; Key cues: Reach long; breathe into side ribs.",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Mobility: Generic Flexibility + Tension Reduction",
+          "section_name": "Integration",
+          "exercise_name": "Constructive rest breathing (knees bent)",
+          "sets": 1,
+          "reps": "2–4 minutes",
+          "duration": 240,
+          "rest_seconds": 0,
+          "notes": "Core_star=Yes; Key cues: Long exhale; jaw unclenched; shoulders heavy.",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Mobility: Face + Expressiveness (Low-Tension Control)",
+          "section_name": "Warm-up",
+          "exercise_name": "Nasal breathing + jaw unclench check",
+          "sets": 1,
+          "reps": "60–90 sec",
+          "duration": 90,
+          "rest_seconds": 0,
+          "notes": "Core_star=Yes; Key cues: Lips closed; tongue on palate; jaw hangs.",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Mobility: Face + Expressiveness (Low-Tension Control)",
+          "section_name": "Jaw/TMJ",
+          "exercise_name": "Masseter release (gentle self-massage)",
+          "sets": 2,
+          "reps": "30–60 sec/side",
+          "duration": 60,
+          "rest_seconds": 0,
+          "notes": "Core_star=Yes; Key cues: Light pressure; stop if sharp pain.",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Mobility: Face + Expressiveness (Low-Tension Control)",
+          "section_name": "Jaw/TMJ",
+          "exercise_name": "Controlled jaw open/close (midline)",
+          "sets": 2,
+          "reps": "6–10 reps",
+          "duration": null,
+          "rest_seconds": 0,
+          "notes": "Core_star=Yes; Key cues: Slow; track straight; no clicking.",
+          "sort_order": 2
+        },
+        {
+          "workout_name": "Mobility: Face + Expressiveness (Low-Tension Control)",
+          "section_name": "Neck/Throat",
+          "exercise_name": "Chin tucks (deep neck flexors)",
+          "sets": 2,
+          "reps": "6–10 reps",
+          "duration": null,
+          "rest_seconds": 0,
+          "notes": "Core_star=Yes; Key cues: Glide back; throat relaxed; breathe.",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Mobility: Face + Expressiveness (Low-Tension Control)",
+          "section_name": "Lips/Cheeks",
+          "exercise_name": "Smile–neutral control reps",
+          "sets": 2,
+          "reps": "8–12 reps",
+          "duration": null,
+          "rest_seconds": 0,
+          "notes": "Core_star=Yes; Key cues: Slow smile to ~70%; relax fully to neutral.",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Mobility: Face + Expressiveness (Low-Tension Control)",
+          "section_name": "Eyes/Brow",
+          "exercise_name": "Brow raise + gentle squint combo",
+          "sets": 2,
+          "reps": "6–10 reps",
+          "duration": null,
+          "rest_seconds": 0,
+          "notes": "Core_star=No; Key cues: Raise brows then slight squint; relax fully.",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Mobility: Face + Expressiveness (Low-Tension Control)",
+          "section_name": "Tongue",
+          "exercise_name": "Tongue posture drill (light)",
+          "sets": 1,
+          "reps": "60 sec",
+          "duration": 60,
+          "rest_seconds": 0,
+          "notes": "Core_star=No; Key cues: Tongue on palate; jaw relaxed; nasal breathe; do not force.",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Mobility: Face + Expressiveness (Low-Tension Control)",
+          "section_name": "Integration",
+          "exercise_name": "Speak one sentence with 3 expressions",
+          "sets": 1,
+          "reps": "3 rounds",
+          "duration": null,
+          "rest_seconds": 0,
+          "notes": "Core_star=Yes; Key cues: Same sentence; change expression only; keep jaw loose.",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Strength: Upper",
+          "section_name": "Main",
+          "exercise_name": "Lat pulldown",
+          "sets": 3,
+          "reps": "5-10",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Cable; Or more if you can.",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Strength: Upper",
+          "section_name": "Main",
+          "exercise_name": "Incline Bench Press",
+          "sets": 3,
+          "reps": "8-10",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Dumbbell",
+          "sort_order": 2
+        },
+        {
+          "workout_name": "Strength: Upper",
+          "section_name": "Main",
+          "exercise_name": "Straight Arm Lat Pulldown",
+          "sets": 3,
+          "reps": "10-15",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Cable",
+          "sort_order": 3
+        },
+        {
+          "workout_name": "Strength: Upper",
+          "section_name": "Main",
+          "exercise_name": "Seated Shoulder Press",
+          "sets": 3,
+          "reps": "10-12",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Machine",
+          "sort_order": 4
+        },
+        {
+          "workout_name": "Strength: Upper",
+          "section_name": "Main",
+          "exercise_name": "Bench",
+          "sets": 4,
+          "reps": "10-15",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Free; Or more; train close to failure.",
+          "sort_order": 5
+        },
+        {
+          "workout_name": "Strength: Lower",
+          "section_name": "Main",
+          "exercise_name": "Leg Press",
+          "sets": 3,
+          "reps": "8-12",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Machine",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Strength: Lower",
+          "section_name": "Main",
+          "exercise_name": "Romanian Deadlift",
+          "sets": 3,
+          "reps": "8-10",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Barbell",
+          "sort_order": 2
+        },
+        {
+          "workout_name": "Strength: Lower",
+          "section_name": "Main",
+          "exercise_name": "Leg Extension",
+          "sets": 3,
+          "reps": "12-15",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Machine",
+          "sort_order": 3
+        },
+        {
+          "workout_name": "Strength: Lower",
+          "section_name": "Main",
+          "exercise_name": "Seated Calf Raise",
+          "sets": 4,
+          "reps": "12-20",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Machine",
+          "sort_order": 4
+        },
+        {
+          "workout_name": "Strength: Lower",
+          "section_name": "Main",
+          "exercise_name": "Cable Crunch",
+          "sets": 4,
+          "reps": "12-15",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Cable",
+          "sort_order": 5
+        },
+        {
+          "workout_name": "Strength: Push",
+          "section_name": "Main",
+          "exercise_name": "Bench Press",
+          "sets": 3,
+          "reps": "6-10",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Barbell",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Strength: Push",
+          "section_name": "Main",
+          "exercise_name": "Shoulder Press",
+          "sets": 3,
+          "reps": "10-12",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Dumbbell",
+          "sort_order": 2
+        },
+        {
+          "workout_name": "Strength: Push",
+          "section_name": "Main",
+          "exercise_name": "Low Cable Fly Crossovers",
+          "sets": 3,
+          "reps": "12-15",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Cable",
+          "sort_order": 3
+        },
+        {
+          "workout_name": "Strength: Push",
+          "section_name": "Main",
+          "exercise_name": "Triceps Extension",
+          "sets": 3,
+          "reps": "12-15",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Dumbbell",
+          "sort_order": 4
+        },
+        {
+          "workout_name": "Strength: Push",
+          "section_name": "Main",
+          "exercise_name": "Triceps Rope Pushdown",
+          "sets": 3,
+          "reps": "12-15",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Cable",
+          "sort_order": 5
+        },
+        {
+          "workout_name": "Strength: Pull",
+          "section_name": "Main",
+          "exercise_name": "Bent Over Row",
+          "sets": 3,
+          "reps": "6-10",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Barbell",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Strength: Pull",
+          "section_name": "Main",
+          "exercise_name": "Lat pulldown",
+          "sets": 3,
+          "reps": "8-12",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Cable",
+          "sort_order": 2
+        },
+        {
+          "workout_name": "Strength: Pull",
+          "section_name": "Main",
+          "exercise_name": "Bicep Curl",
+          "sets": 3,
+          "reps": "12-15",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Dumbbell",
+          "sort_order": 3
+        },
+        {
+          "workout_name": "Strength: Pull",
+          "section_name": "Main",
+          "exercise_name": "Hammer Curl",
+          "sets": 3,
+          "reps": "12-15",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Dumbbell",
+          "sort_order": 4
+        },
+        {
+          "workout_name": "Strength: Pull",
+          "section_name": "Main",
+          "exercise_name": "Face Pull",
+          "sets": 3,
+          "reps": "15-25",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Cable",
+          "sort_order": 5
+        },
+        {
+          "workout_name": "Strength: Legs",
+          "section_name": "Main",
+          "exercise_name": "Squat",
+          "sets": 3,
+          "reps": "6-10",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Barbell",
+          "sort_order": 1
+        },
+        {
+          "workout_name": "Strength: Legs",
+          "section_name": "Main",
+          "exercise_name": "Glute Ham Raise",
+          "sets": 3,
+          "reps": "8-12",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Bodyweight/Machine",
+          "sort_order": 2
+        },
+        {
+          "workout_name": "Strength: Legs",
+          "section_name": "Main",
+          "exercise_name": "Lunge",
+          "sets": 3,
+          "reps": "10-15",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Dumbbell; Per side.",
+          "sort_order": 3
+        },
+        {
+          "workout_name": "Strength: Legs",
+          "section_name": "Main",
+          "exercise_name": "Lying Leg Curl",
+          "sets": 3,
+          "reps": "12-15",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Machine",
+          "sort_order": 4
+        },
+        {
+          "workout_name": "Strength: Legs",
+          "section_name": "Main",
+          "exercise_name": "Standing Calf Raise",
+          "sets": 3,
+          "reps": "8-12",
+          "duration": null,
+          "rest_seconds": null,
+          "notes": "Equipment=Smith Machine",
+          "sort_order": 5
+        }
+      ]
     }
   },
   "indexes": {
@@ -8331,6 +9988,14 @@
       {
         "name": "idx_daily_plans_user_date",
         "columns": ["user_id", "date DESC"],
+        "type": "btree",
+        "unique": false
+      }
+    ],
+    "daw_project_chunks": [
+      {
+        "name": "idx_daw_project_chunks_comp",
+        "columns": ["compression", "encryption"],
         "type": "btree",
         "unique": false
       }

@@ -115,6 +115,21 @@ impl StorageClient {
         })
     }
 
+    /// Upload raw bytes to a specific key (used for DAW chunk/manifest storage).
+    pub async fn upload_raw(
+        &self,
+        key: &str,
+        data: &[u8],
+        content_type: &str,
+    ) -> Result<(), AppError> {
+        self.bucket
+            .put_object_with_content_type(key, data, content_type)
+            .await
+            .map_err(|e| AppError::Internal(format!("S3 upload failed: {}", e)))?;
+
+        Ok(())
+    }
+
     /// Get a blob by ID, searching under the user's prefix only (IDOR prevention)
     pub async fn get_blob_by_id(
         &self,

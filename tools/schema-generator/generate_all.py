@@ -645,7 +645,11 @@ class SchemaGenerator:
                 values = []
                 for col in insert_cols:
                     if col == 'id':
-                        values.append('gen_random_uuid()')
+                        if record.get('id') is not None:
+                            field_type = table_fields.get(col, {}).get('type', 'TEXT')
+                            values.append(format_sql_value(record.get('id'), field_type))
+                        else:
+                            values.append('gen_random_uuid()')
                     elif col in ('created_at', 'updated_at'):
                         values.append('NOW()')
                     else:

@@ -48,6 +48,16 @@ impl DawType {
             .map(|ext| format!("**/*{}", ext))
             .collect()
     }
+
+    pub fn content_type_hint(&self) -> &'static str {
+        match self {
+            Self::Ableton => ".als",
+            Self::FlStudio => ".flp",
+            Self::Logic => ".logicx",
+            Self::Cubase => ".cpr",
+            Self::ProTools => ".ptx",
+        }
+    }
 }
 
 /// Sync status of a project

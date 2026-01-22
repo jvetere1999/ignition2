@@ -26,6 +26,7 @@ pub mod books_models;
 pub mod books_repos;
 pub mod crypto_policy_models;
 pub mod crypto_policy_repos;
+pub mod daw_chunk_repos;
 pub mod daw_project_models;
 pub mod daw_project_repos;
 pub mod exercise_models;

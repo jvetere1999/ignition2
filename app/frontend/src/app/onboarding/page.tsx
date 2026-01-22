@@ -18,6 +18,7 @@ export default function OnboardingPage() {
   const [error, setError] = useState<string | null>(null);
   const [hasRead, setHasRead] = useState(false);
   const [isOldEnough, setIsOldEnough] = useState(false);
+  const [canContinue, setCanContinue] = useState(false);
   const [isAccepting, setIsAccepting] = useState(false);
   const [tosError, setTosError] = useState<string | null>(null);
 
@@ -59,6 +60,15 @@ export default function OnboardingPage() {
       isActive = false;
     };
   }, [isAuthLoading, isAuthenticated, router, user]);
+
+  useEffect(() => {
+    if (!hasRead || !isOldEnough) {
+      setCanContinue(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setCanContinue(true), 250);
+    return () => window.clearTimeout(timer);
+  }, [hasRead, isOldEnough]);
 
   const acceptTos = async () => {
     if (!hasRead || !isOldEnough) {
@@ -160,7 +170,7 @@ export default function OnboardingPage() {
               className={styles.tosAction}
               type="button"
               onClick={acceptTos}
-              disabled={isAccepting || !hasRead || !isOldEnough}
+              disabled={isAccepting || !canContinue}
             >
               {isAccepting ? "Continuing..." : "Continue"}
             </button>

@@ -245,6 +245,70 @@ jobs:
             }
           done
           echo "✓ All migrations applied"
+      
+      - name: Seed exercises from resources
+        env:
+          DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        run: |
+          python3 -m pip install --quiet psycopg2-binary
+          python3 - <<'PY'
+          import json
+          import os
+          import sys
+
+          import psycopg2
+          from psycopg2.extras import execute_values
+
+          path = "app/frontend/resources/exercises.json"
+          if not os.path.exists(path):
+            print(f"Exercises file not found: {path}")
+            sys.exit(1)
+
+          with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+          rows = []
+          for item in data:
+            name = item.get("name")
+            if not name:
+              continue
+            category = item.get("category") or "unknown"
+            equipment = item.get("equipment")
+            equipment_list = [equipment] if equipment else None
+            primary = item.get("primaryMuscles") or []
+            secondary = item.get("secondaryMuscles") or []
+            muscle_groups = primary + [m for m in secondary if m not in primary]
+            if not muscle_groups:
+              muscle_groups = None
+            instructions = item.get("instructions") or []
+            instructions_text = "\n".join(instructions) if instructions else None
+            meta = []
+            for key in ("force", "level", "mechanic"):
+              val = item.get(key)
+              if val:
+                meta.append(f"{key}: {val}")
+            description = " | ".join(meta) if meta else None
+            rows.append(
+              (name, description, category, muscle_groups, equipment_list, instructions_text)
+            )
+
+          conn = psycopg2.connect(os.environ["DATABASE_URL"])
+          with conn:
+            with conn.cursor() as cur:
+              cur.execute("TRUNCATE TABLE exercises;")
+              execute_values(
+                cur,
+                """
+                INSERT INTO exercises
+                  (name, description, category, muscle_groups, equipment, instructions, is_custom, is_builtin, user_id)
+                VALUES %s
+                """,
+                rows,
+                template="(%s,%s,%s,%s,%s,%s,false,true,NULL)",
+              )
+          conn.close()
+          print(f"✓ Seeded {len(rows)} exercises")
+          PY
 
       - name: Verify seed data
         env:

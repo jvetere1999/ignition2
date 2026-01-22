@@ -6,9 +6,12 @@
 )]
 
 mod api;
+mod chunking;
+mod compression;
 mod crypto;
 mod file_watcher;
 mod models;
+mod packager;
 mod services;
 mod ui;
 

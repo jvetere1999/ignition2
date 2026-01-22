@@ -1,9 +1,12 @@
 /// Tauri commands for the UI frontend
+use crate::api::ApiClient;
+use crate::file_watcher::ProjectScanner;
 use crate::models::{WatcherSettings, WatchedProject, SyncStatus, SyncStats};
 use crate::services::StateManager;
 use chrono::Utc;
 use uuid::Uuid;
 use std::sync::Mutex;
+use std::path::Path;
 use tauri::State;
 
 /// Global state manager for persistent storage
@@ -115,17 +118,76 @@ pub async fn get_sync_status(state: State<'_, WatcherState>) -> Result<SyncStatu
 
 #[tauri::command]
 pub async fn trigger_sync(state: State<'_, WatcherState>) -> Result<(), String> {
-    // Update stats with new sync attempt
+    let settings = state.settings.lock()
+        .map_err(|e| format!("Failed to acquire lock: {}", e))?
+        .clone();
+
+    if settings.auth_token.is_none() {
+        return Err("Missing auth token. Please sign in before syncing.".to_string());
+    }
+
+    let projects_snapshot = state.projects.lock()
+        .map_err(|e| format!("Failed to acquire lock: {}", e))?
+        .clone();
+
+    let client = ApiClient::new(&settings);
+    let mut updated_projects = Vec::new();
+
     let mut stats = state.stats.lock()
         .map_err(|e| format!("Failed to acquire lock: {}", e))?;
-    
+
     stats.total_syncs += 1;
-    stats.successful_syncs += 1; // TODO: Implement actual sync logic
+    let mut successful = 0u64;
+    let mut failed = 0u64;
+    let mut bytes_synced = 0u64;
+
+    for project in projects_snapshot {
+        let mut updated = project.clone();
+        updated.sync_status = SyncStatus::Syncing;
+
+        let total_size = ProjectScanner::calculate_total_size(&project.path, project.daw_type)
+            .unwrap_or(0);
+
+        let result = client
+            .upload_project(
+                &project.name,
+                project.daw_type.content_type_hint(),
+                Path::new(&project.path),
+            )
+            .await;
+
+        match result {
+            Ok(_) => {
+                updated.sync_status = SyncStatus::Success;
+                updated.last_sync = Some(Utc::now());
+                successful += 1;
+                bytes_synced += total_size;
+            }
+            Err(error) => {
+                updated.sync_status = SyncStatus::Error;
+                failed += 1;
+                tracing::error!("Sync failed for {}: {}", project.name, error);
+            }
+        }
+
+        updated_projects.push(updated);
+    }
+
+    stats.successful_syncs += successful;
+    stats.failed_syncs += failed;
+    stats.total_files_synced += successful;
+    stats.total_bytes_synced += bytes_synced;
     stats.last_sync_time = Some(Utc::now());
-    
+
     let state_manager = state.state_manager.lock()
         .map_err(|e| format!("Failed to acquire lock: {}", e))?;
+
     state_manager.save_stats(&stats)?;
+    state_manager.save_projects(&updated_projects)?;
+
+    let mut projects_guard = state.projects.lock()
+        .map_err(|e| format!("Failed to acquire lock: {}", e))?;
+    *projects_guard = updated_projects;
 
     Ok(())
 }
@@ -159,4 +221,3 @@ pub struct SyncStatusInfo {
     pub total_storage_bytes: u64,
     pub last_sync_time: Option<String>,
 }
-

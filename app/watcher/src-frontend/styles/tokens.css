@@ -1,0 +1,5 @@
+:root {
+  --gradient-onboarding-bg: radial-gradient(120% 80% at 10% 10%, rgba(13, 202, 240, 0.12), transparent 60%),
+    radial-gradient(120% 80% at 90% 10%, rgba(25, 135, 84, 0.12), transparent 60%),
+    #0b0f14;
+}

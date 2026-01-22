@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { safeFetch, API_BASE_URL } from "@/lib/api";
+import { VideoPlayer } from "@/components/exercise/VideoPlayer";
 import styles from "./ExerciseClient.module.css";
 
 // Types
@@ -16,6 +17,7 @@ interface Exercise {
   is_builtin: boolean;
   force?: string;
   level?: string;
+  video_url?: string | null;
 }
 
 interface Workout {
@@ -1070,6 +1072,9 @@ function ExerciseCard({ exercise, onAddToWorkout, showAddButton }: {
       </div>
       {expanded && (
         <div className={styles.exerciseDetails}>
+          {exercise.video_url && (
+            <VideoPlayer videoUrl={exercise.video_url} exerciseName={exercise.name} />
+          )}
           {muscles.length > 0 && (
             <p><strong>Muscles:</strong> {muscles.join(", ")}</p>
           )}

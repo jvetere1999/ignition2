@@ -58,6 +58,12 @@ pub struct InitiateUploadRequest {
     pub content_type: String, // .als, .flp, .logicx, .serum, .wavetable
     pub total_size: i64,      // Total file size in bytes
     pub file_hash: String,    // SHA256 hash for resumability verification
+    #[serde(default)]
+    pub total_chunks: Option<i32>,
+    #[serde(default)]
+    pub compression: Option<String>,
+    #[serde(default)]
+    pub chunking: Option<String>,
 }
 
 /// Response after initiating upload
@@ -90,6 +96,56 @@ pub struct UploadChunkResponse {
 pub struct CompleteUploadRequest {
     pub file_hash: String, // Final file hash verification
     pub change_description: Option<String>,
+    pub manifest: ChunkManifest,
+}
+
+/// Request to check which chunks are missing
+#[derive(Debug, Deserialize)]
+pub struct ChunkCheckRequest {
+    pub chunk_hashes: Vec<String>,
+    pub compression: String,
+    #[serde(default)]
+    pub encryption: Option<String>,
+}
+
+/// Response containing missing chunks
+#[derive(Debug, Serialize)]
+pub struct ChunkCheckResponse {
+    pub missing: Vec<String>,
+}
+
+/// Chunk manifest describing a version upload
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ChunkManifest {
+    pub version: i32,
+    pub total_size: i64,
+    pub file_hash: String,
+    pub compression: CompressionConfig,
+    pub chunking: ChunkingConfig,
+    pub chunks: Vec<ChunkManifestEntry>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CompressionConfig {
+    pub algo: String,
+    pub level: i32,
+    pub rsyncable: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ChunkingConfig {
+    pub algo: String,
+    pub min_size: i64,
+    pub avg_size: i64,
+    pub max_size: i64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ChunkManifestEntry {
+    pub index: i32,
+    pub hash: String,
+    pub size: i64,
+    pub compressed_size: Option<i64>,
 }
 
 /// Response after completing upload

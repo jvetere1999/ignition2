@@ -49,6 +49,76 @@ impl DawProjectsRepo {
         .await
     }
 
+    /// Create a new project and initial version in a single transaction
+    pub async fn create_with_version(
+        pool: &PgPool,
+        project_id: Uuid,
+        version_id: Uuid,
+        user_id: Uuid,
+        project_name: &str,
+        content_type: &str,
+        file_size: i64,
+        file_hash: &str,
+        storage_key: &str,
+        change_description: Option<&str>,
+    ) -> Result<(DawProjectFile, DawProjectVersion), sqlx::Error> {
+        let now = Utc::now();
+        let mut tx = pool.begin().await?;
+
+        let project = sqlx::query_as::<_, DawProjectFile>(
+            r#"
+            INSERT INTO daw_project_files (
+                id, user_id, project_name, file_path, file_size,
+                file_hash, content_type, storage_key, encrypted,
+                current_version_id, version_count, last_modified_at,
+                created_at, updated_at
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+            RETURNING *
+            "#,
+        )
+        .bind(project_id)
+        .bind(user_id)
+        .bind(project_name)
+        .bind(format!("/daw/{}/{}", user_id, project_name))
+        .bind(file_size)
+        .bind(file_hash)
+        .bind(content_type)
+        .bind(storage_key)
+        .bind(true)
+        .bind(version_id)
+        .bind(1)
+        .bind(now)
+        .bind(now)
+        .bind(now)
+        .fetch_one(&mut *tx)
+        .await?;
+
+        let version = sqlx::query_as::<_, DawProjectVersion>(
+            r#"
+            INSERT INTO daw_project_versions (
+                id, project_id, user_id, version_number, file_size,
+                file_hash, storage_key, change_description, created_at
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            RETURNING *
+            "#,
+        )
+        .bind(version_id)
+        .bind(project_id)
+        .bind(user_id)
+        .bind(1)
+        .bind(file_size)
+        .bind(file_hash)
+        .bind(storage_key)
+        .bind(change_description)
+        .bind(now)
+        .fetch_one(&mut *tx)
+        .await?;
+
+        tx.commit().await?;
+
+        Ok((project, version))
+    }
+
     /// Get a DAW project by ID
     pub async fn get_by_id(
         pool: &PgPool,
@@ -87,6 +157,21 @@ impl DawProjectsRepo {
                 .await?;
 
         Ok((projects, count.0))
+    }
+
+    /// Get a project by name for a user
+    pub async fn get_by_name(
+        pool: &PgPool,
+        user_id: Uuid,
+        project_name: &str,
+    ) -> Result<Option<DawProjectFile>, sqlx::Error> {
+        sqlx::query_as::<_, DawProjectFile>(
+            "SELECT * FROM daw_project_files WHERE user_id = $1 AND project_name = $2",
+        )
+        .bind(user_id)
+        .bind(project_name)
+        .fetch_optional(pool)
+        .await
     }
 
     /// Create a new version record
@@ -243,13 +328,19 @@ impl DawProjectsRepo {
         project_id: Uuid,
         version_id: Uuid,
         version_count: i32,
+        file_size: i64,
+        file_hash: &str,
+        storage_key: &str,
     ) -> Result<(), sqlx::Error> {
         let now = Utc::now();
         sqlx::query(
-            "UPDATE daw_project_files SET current_version_id = $1, version_count = $2, last_modified_at = $3, updated_at = $4 WHERE id = $5",
+            "UPDATE daw_project_files SET current_version_id = $1, version_count = $2, file_size = $3, file_hash = $4, storage_key = $5, last_modified_at = $6, updated_at = $7 WHERE id = $8",
         )
         .bind(version_id)
         .bind(version_count)
+        .bind(file_size)
+        .bind(file_hash)
+        .bind(storage_key)
         .bind(now)
         .bind(now)
         .bind(project_id)
@@ -299,7 +390,15 @@ impl DawProjectsRepo {
         .await?;
 
         // Update current version
-        Self::update_current_version(pool, project_id, new_version.id, project.version_count + 1)
+        Self::update_current_version(
+            pool,
+            project_id,
+            new_version.id,
+            project.version_count + 1,
+            new_version.file_size,
+            &new_version.file_hash,
+            &new_version.storage_key,
+        )
             .await?;
 
         Ok(new_version)
