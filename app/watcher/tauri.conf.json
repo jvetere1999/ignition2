@@ -50,7 +50,11 @@
     },
     "bundle": {
       "active": true,
-      "targets": ["app"],
+      "targets": {
+        "macos": ["app"],
+        "windows": ["msi"],
+        "linux": ["deb"]
+      },
       "identifier": "com.ecent.daw-watcher",
       "icon": [
         "icons/32x32.png",

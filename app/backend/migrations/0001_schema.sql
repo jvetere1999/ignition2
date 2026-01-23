@@ -401,7 +401,7 @@ CREATE TABLE workout_exercises (
     section_id UUID,
     exercise_id UUID NOT NULL,
     sets INTEGER,
-    reps INTEGER,
+    reps TEXT,
     weight REAL,
     duration INTEGER,
     rest_seconds INTEGER,

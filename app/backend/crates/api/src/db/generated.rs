@@ -466,7 +466,7 @@ pub struct WorkoutExercises {
     pub section_id: Option<Uuid>,
     pub exercise_id: Uuid,
     pub sets: Option<i32>,
-    pub reps: Option<i32>,
+    pub reps: Option<String>,
     pub weight: Option<f32>,
     pub duration: Option<i32>,
     pub rest_seconds: Option<i32>,
@@ -847,6 +847,63 @@ pub struct CryptoPolicies {
     pub deprecated_date: Option<chrono::DateTime<chrono::Utc>>,
     pub migration_deadline: Option<chrono::DateTime<chrono::Utc>>,
     pub rationale: Option<String>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+}
+
+/// Database model for `daw_audit_log` table
+#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
+pub struct DawAuditLog {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub project_id: Option<Uuid>,
+    pub action: String,
+    pub project_name: Option<String>,
+    pub file_size: Option<i64>,
+    pub details: Option<serde_json::Value>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+}
+
+/// Database model for `daw_project_chunks` table
+#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
+pub struct DawProjectChunks {
+    pub hash: String,
+    pub compression: String,
+    pub encryption: String,
+    pub size_bytes: i64,
+    pub storage_key: String,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+}
+
+/// Database model for `daw_project_files` table
+#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
+pub struct DawProjectFiles {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub project_name: String,
+    pub file_path: String,
+    pub file_size: i64,
+    pub file_hash: String,
+    pub content_type: String,
+    pub storage_key: String,
+    pub encrypted: bool,
+    pub current_version_id: Uuid,
+    pub version_count: i32,
+    pub last_modified_at: chrono::DateTime<chrono::Utc>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub updated_at: chrono::DateTime<chrono::Utc>,
+}
+
+/// Database model for `daw_project_versions` table
+#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
+pub struct DawProjectVersions {
+    pub id: Uuid,
+    pub project_id: Uuid,
+    pub user_id: Uuid,
+    pub version_number: i32,
+    pub file_size: i64,
+    pub file_hash: String,
+    pub storage_key: String,
+    pub change_description: Option<String>,
     pub created_at: chrono::DateTime<chrono::Utc>,
 }
 
@@ -1231,6 +1288,23 @@ pub struct TrainingPrograms {
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }
 
+/// Database model for `upload_sessions` table
+#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
+pub struct UploadSessions {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub project_name: String,
+    pub content_type: String,
+    pub total_size: i64,
+    pub chunks_received: i32,
+    pub total_chunks: i32,
+    pub status: String,
+    pub storage_key: String,
+    pub expires_at: chrono::DateTime<chrono::Utc>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub updated_at: chrono::DateTime<chrono::Utc>,
+}
+
 /// Database model for `user_drill_stats` table
 #[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
 pub struct UserDrillStats {
@@ -1372,6 +1446,17 @@ pub struct UserStreaks {
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }
 
+/// Database model for `vault_lock_events` table
+#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
+pub struct VaultLockEvents {
+    pub id: Uuid,
+    pub vault_id: Uuid,
+    pub locked_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub lock_reason: Option<String>,
+    pub device_id: Option<String>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+}
+
 /// Database model for `vaults` table
 #[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
 pub struct Vaults {
@@ -1430,6 +1515,9 @@ pub type Book = Books;
 pub type CalendarEvent = CalendarEvents;
 pub type CryptoPolicy = CryptoPolicies;
 pub type DailyPlan = DailyPlans;
+pub type DawProjectChunk = DawProjectChunks;
+pub type DawProjectFil = DawProjectFiles;
+pub type DawProjectVersion = DawProjectVersions;
 pub type Entitlement = Entitlements;
 pub type ExerciseSet = ExerciseSets;
 pub type Exercise = Exercises;
@@ -1475,6 +1563,7 @@ pub type TrackAnnotation = TrackAnnotations;
 pub type TrackRegion = TrackRegions;
 pub type TrainingProgram = TrainingPrograms;
 pub type UniversalQuest = UniversalQuests;
+pub type UploadSession = UploadSessions;
 pub type UserAchievement = UserAchievements;
 pub type UserDrillStat = UserDrillStats;
 pub type UserFlashcardReview = UserFlashcardReviews;
@@ -1489,6 +1578,7 @@ pub type UserSetting = UserSettings;
 pub type UserSkill = UserSkills;
 pub type UserStreak = UserStreaks;
 pub type User = Users;
+pub type VaultLockEvent = VaultLockEvents;
 pub type Vault = Vaults;
 pub type VerificationToken = VerificationTokens;
 pub type WorkoutExercise = WorkoutExercises;

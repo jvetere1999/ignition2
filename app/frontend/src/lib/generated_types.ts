@@ -431,7 +431,7 @@ export interface WorkoutExercises {
   section_id?: string;
   exercise_id: string;
   sets?: number;
-  reps?: number;
+  reps?: string;
   weight?: number;
   duration?: number;
   rest_seconds?: number;
@@ -795,6 +795,59 @@ export interface CryptoPolicies {
   created_at: string;
 }
 
+/** Database model for `daw_audit_log` table */
+export interface DawAuditLog {
+  id: string;
+  user_id: string;
+  project_id?: string;
+  action: string;
+  project_name?: string;
+  file_size?: number;
+  details?: Record<string, unknown>;
+  created_at: string;
+}
+
+/** Database model for `daw_project_chunks` table */
+export interface DawProjectChunks {
+  hash: string;
+  compression: string;
+  encryption: string;
+  size_bytes: number;
+  storage_key: string;
+  created_at: string;
+}
+
+/** Database model for `daw_project_files` table */
+export interface DawProjectFiles {
+  id: string;
+  user_id: string;
+  project_name: string;
+  file_path: string;
+  file_size: number;
+  file_hash: string;
+  content_type: string;
+  storage_key: string;
+  encrypted: boolean;
+  current_version_id: string;
+  version_count: number;
+  last_modified_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Database model for `daw_project_versions` table */
+export interface DawProjectVersions {
+  id: string;
+  project_id: string;
+  user_id: string;
+  version_number: number;
+  file_size: number;
+  file_hash: string;
+  storage_key: string;
+  change_description?: string;
+  created_at: string;
+}
+
 /** Database model for `exercise_sets` table */
 export interface ExerciseSets {
   id: string;
@@ -1151,6 +1204,22 @@ export interface TrainingPrograms {
   updated_at: string;
 }
 
+/** Database model for `upload_sessions` table */
+export interface UploadSessions {
+  id: string;
+  user_id: string;
+  project_name: string;
+  content_type: string;
+  total_size: number;
+  chunks_received: number;
+  total_chunks: number;
+  status: string;
+  storage_key: string;
+  expires_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
 /** Database model for `user_drill_stats` table */
 export interface UserDrillStats {
   id: string;
@@ -1282,6 +1351,16 @@ export interface UserStreaks {
   updated_at: string;
 }
 
+/** Database model for `vault_lock_events` table */
+export interface VaultLockEvents {
+  id: string;
+  vault_id: string;
+  locked_at?: string;
+  lock_reason?: string;
+  device_id?: string;
+  created_at: string;
+}
+
 /** Database model for `vaults` table */
 export interface Vaults {
   id: string;
@@ -1337,6 +1416,9 @@ export type Book = Books;
 export type CalendarEvent = CalendarEvents;
 export type CryptoPolicy = CryptoPolicies;
 export type DailyPlan = DailyPlans;
+export type DawProjectChunk = DawProjectChunks;
+export type DawProjectFil = DawProjectFiles;
+export type DawProjectVersion = DawProjectVersions;
 export type Entitlement = Entitlements;
 export type ExerciseSet = ExerciseSets;
 export type Exercise = Exercises;
@@ -1382,6 +1464,7 @@ export type TrackAnnotation = TrackAnnotations;
 export type TrackRegion = TrackRegions;
 export type TrainingProgram = TrainingPrograms;
 export type UniversalQuest = UniversalQuests;
+export type UploadSession = UploadSessions;
 export type UserAchievement = UserAchievements;
 export type UserDrillStat = UserDrillStats;
 export type UserFlashcardReview = UserFlashcardReviews;
@@ -1396,6 +1479,7 @@ export type UserSetting = UserSettings;
 export type UserSkill = UserSkills;
 export type UserStreak = UserStreaks;
 export type User = Users;
+export type VaultLockEvent = VaultLockEvents;
 export type Vault = Vaults;
 export type VerificationToken = VerificationTokens;
 export type WorkoutExercise = WorkoutExercises;

@@ -15,98 +15,101 @@ VALUES
     (gen_random_uuid(), NOW(), NOW(), 'Strength: Lower', 'Lower body routine seeded from your table.', '00000000-0000-0000-0000-000000000000', 60, true),
     (gen_random_uuid(), NOW(), NOW(), 'Strength: Push', 'Push routine seeded from your table.', '00000000-0000-0000-0000-000000000000', 60, true),
     (gen_random_uuid(), NOW(), NOW(), 'Strength: Pull', 'Pull routine seeded from your table.', '00000000-0000-0000-0000-000000000000', 60, true),
-    (gen_random_uuid(), NOW(), NOW(), 'Strength: Legs', 'Legs routine seeded from your table.', '00000000-0000-0000-0000-000000000000', 60, true);
+    (gen_random_uuid(), NOW(), NOW(), 'Strength: Legs', 'Legs routine seeded from your table.', '00000000-0000-0000-0000-000000000000', 60, true)
+;
 
 -- ============================================================
 -- WORKOUT_SECTIONS (25 records)
 -- ============================================================
 INSERT INTO workout_sections (id, workout_id, name, sort_order)
 VALUES
-    (gen_random_uuid(), 'b0574d2c-a0a8-55f1-a40d-f5959b162867', 'Warm-up', 1),
-    (gen_random_uuid(), 'b0574d2c-a0a8-55f1-a40d-f5959b162867', 'Anterior pelvic tilt – mobility', 2),
-    (gen_random_uuid(), 'b0574d2c-a0a8-55f1-a40d-f5959b162867', 'Upper back hump – mobility', 3),
-    (gen_random_uuid(), 'b0574d2c-a0a8-55f1-a40d-f5959b162867', 'Integration and awareness', 4),
-    (gen_random_uuid(), '0b9b7401-741a-5274-9a59-85d3b35066b8', 'Warm-up', 1),
-    (gen_random_uuid(), '0b9b7401-741a-5274-9a59-85d3b35066b8', 'Hips', 2),
-    (gen_random_uuid(), '0b9b7401-741a-5274-9a59-85d3b35066b8', 'Hamstrings', 3),
-    (gen_random_uuid(), '0b9b7401-741a-5274-9a59-85d3b35066b8', 'Calves', 4),
-    (gen_random_uuid(), '0b9b7401-741a-5274-9a59-85d3b35066b8', 'Thoracic', 5),
-    (gen_random_uuid(), '0b9b7401-741a-5274-9a59-85d3b35066b8', 'Shoulders', 6),
-    (gen_random_uuid(), '0b9b7401-741a-5274-9a59-85d3b35066b8', 'Chest', 7),
-    (gen_random_uuid(), '0b9b7401-741a-5274-9a59-85d3b35066b8', 'Spine', 8),
-    (gen_random_uuid(), '0b9b7401-741a-5274-9a59-85d3b35066b8', 'Integration', 9),
-    (gen_random_uuid(), '64a038ec-19cf-568e-8322-8b003405d693', 'Warm-up', 1),
-    (gen_random_uuid(), '64a038ec-19cf-568e-8322-8b003405d693', 'Jaw/TMJ', 2),
-    (gen_random_uuid(), '64a038ec-19cf-568e-8322-8b003405d693', 'Neck/Throat', 3),
-    (gen_random_uuid(), '64a038ec-19cf-568e-8322-8b003405d693', 'Lips/Cheeks', 4),
-    (gen_random_uuid(), '64a038ec-19cf-568e-8322-8b003405d693', 'Eyes/Brow', 5),
-    (gen_random_uuid(), '64a038ec-19cf-568e-8322-8b003405d693', 'Tongue', 6),
-    (gen_random_uuid(), '64a038ec-19cf-568e-8322-8b003405d693', 'Integration', 7),
-    (gen_random_uuid(), '4e11e60e-fd51-5526-bc2a-9e598413f83b', 'Main', 1),
-    (gen_random_uuid(), 'adb82dc0-9749-5a9c-bc67-7d1b1a2f3b70', 'Main', 1),
-    (gen_random_uuid(), 'bab1bb00-1efa-518d-a143-49e16e549d5a', 'Main', 1),
-    (gen_random_uuid(), '721970e3-10b7-5ca3-a616-bcc9e45c4bf5', 'Main', 1),
-    (gen_random_uuid(), 'eb26b639-0b6d-5fec-97dd-a38d2ab88e86', 'Main', 1);
+    (gen_random_uuid(), NULL, 'Warm-up', 1),
+    (gen_random_uuid(), NULL, 'Anterior pelvic tilt – mobility', 2),
+    (gen_random_uuid(), NULL, 'Upper back hump – mobility', 3),
+    (gen_random_uuid(), NULL, 'Integration and awareness', 4),
+    (gen_random_uuid(), NULL, 'Warm-up', 1),
+    (gen_random_uuid(), NULL, 'Hips', 2),
+    (gen_random_uuid(), NULL, 'Hamstrings', 3),
+    (gen_random_uuid(), NULL, 'Calves', 4),
+    (gen_random_uuid(), NULL, 'Thoracic', 5),
+    (gen_random_uuid(), NULL, 'Shoulders', 6),
+    (gen_random_uuid(), NULL, 'Chest', 7),
+    (gen_random_uuid(), NULL, 'Spine', 8),
+    (gen_random_uuid(), NULL, 'Integration', 9),
+    (gen_random_uuid(), NULL, 'Warm-up', 1),
+    (gen_random_uuid(), NULL, 'Jaw/TMJ', 2),
+    (gen_random_uuid(), NULL, 'Neck/Throat', 3),
+    (gen_random_uuid(), NULL, 'Lips/Cheeks', 4),
+    (gen_random_uuid(), NULL, 'Eyes/Brow', 5),
+    (gen_random_uuid(), NULL, 'Tongue', 6),
+    (gen_random_uuid(), NULL, 'Integration', 7),
+    (gen_random_uuid(), NULL, 'Main', 1),
+    (gen_random_uuid(), NULL, 'Main', 1),
+    (gen_random_uuid(), NULL, 'Main', 1),
+    (gen_random_uuid(), NULL, 'Main', 1),
+    (gen_random_uuid(), NULL, 'Main', 1)
+;
 
 -- ============================================================
 -- WORKOUT_EXERCISES (54 records)
 -- ============================================================
 INSERT INTO workout_exercises (id, workout_id, section_id, exercise_id, sets, reps, duration, rest_seconds, notes, sort_order)
 VALUES
-    (gen_random_uuid(), 'b0574d2c-a0a8-55f1-a40d-f5959b162867', '84bc60b3-79b7-56ef-92ab-559c0c38bdee', '8fb09ab5-fd67-51d8-822a-ba4447663fc3', 2, '10 slow cycles', NULL, 0, 'Core_star=Yes; Sets_raw=1–2; Key cues: Start neutral; gently round then extend; move with slow breathing.', 1),
-    (gen_random_uuid(), 'b0574d2c-a0a8-55f1-a40d-f5959b162867', '302fcc1d-7b5e-58b6-9b8b-b938d31f3b1b', 'e49f4035-1a33-5cc8-80df-8197a6dcd71a', 3, '30–45 sec hold (per side)', 45, 0, 'Core_star=Yes; Sets_raw=2–3 per side; Key cues: Posteriorly tilt pelvis; squeeze glute on back leg; do not arch low back.', 1),
-    (gen_random_uuid(), 'b0574d2c-a0a8-55f1-a40d-f5959b162867', '302fcc1d-7b5e-58b6-9b8b-b938d31f3b1b', '1c73cb5e-4b90-5b91-8182-870ef552593a', 2, '30 sec hold (per side)', 30, 0, 'Core_star=No; Sets_raw=2 per side; Key cues: Keep pelvis lightly tucked; bring heel toward glute; avoid pulling low back into arch.', 2),
-    (gen_random_uuid(), 'b0574d2c-a0a8-55f1-a40d-f5959b162867', '302fcc1d-7b5e-58b6-9b8b-b938d31f3b1b', '3abf172b-0a99-5b01-885d-0b310613b295', 2, '30–45 sec hold (per side)', 45, 0, 'Core_star=No; Sets_raw=2 per side; Key cues: Lie on back; keep opposite leg straight on floor; raise leg until stretch not pain.', 3),
-    (gen_random_uuid(), 'b0574d2c-a0a8-55f1-a40d-f5959b162867', '302fcc1d-7b5e-58b6-9b8b-b938d31f3b1b', '80c1edac-ebb7-5dcf-a674-80442f76a31a', 3, '20–30 sec hold', 30, 0, 'Core_star=No; Sets_raw=3; Key cues: Sit hips toward heels; gently round low back; relax shoulders.', 4),
-    (gen_random_uuid(), 'b0574d2c-a0a8-55f1-a40d-f5959b162867', '3f86cf3a-97ae-51d2-aa24-e69d7328feeb', 'cb90f766-5a4d-5619-b06e-525ff6f77fcd', 1, '10 reps (per side)', NULL, 0, 'Core_star=No; Sets_raw=1 per side; Key cues: Slide arm under; rotate upper back; smooth and pain free.', 1),
-    (gen_random_uuid(), 'b0574d2c-a0a8-55f1-a40d-f5959b162867', '3f86cf3a-97ae-51d2-aa24-e69d7328feeb', '9b088e77-c722-541f-b659-858095b407d7', 1, '10–15 reps', NULL, 0, 'Core_star=Yes; Sets_raw=1; Key cues: Roller across upper back; support head; gently extend over roller then return.', 2),
-    (gen_random_uuid(), 'b0574d2c-a0a8-55f1-a40d-f5959b162867', '3f86cf3a-97ae-51d2-aa24-e69d7328feeb', 'e8fea4b5-bf67-58e4-a9be-a183715820b7', 3, '30 sec hold', 30, 0, 'Core_star=Yes; Sets_raw=3; Key cues: Elbows ~shoulder height; step through; avoid shoulder pain.', 3),
-    (gen_random_uuid(), 'b0574d2c-a0a8-55f1-a40d-f5959b162867', '0235a83c-71c2-5843-862d-c286e97dff17', 'ad14636d-2142-5a0f-8288-77c1ef8cfc9d', 1, '15–20 reps', NULL, 0, 'Core_star=No; Sets_raw=1; Key cues: Flatten low back then arch slightly; find neutral middle.', 1),
-    (gen_random_uuid(), 'b0574d2c-a0a8-55f1-a40d-f5959b162867', '0235a83c-71c2-5843-862d-c286e97dff17', 'a04b7dc5-4b64-574e-986f-a929edd6745d', 2, '30–45 sec hold', 45, 0, 'Core_star=No; Sets_raw=2; Key cues: Butt + mid back on wall; ribs down; light posterior pelvic tilt.', 2),
-    (gen_random_uuid(), '0b9b7401-741a-5274-9a59-85d3b35066b8', '84bc60b3-79b7-56ef-92ab-559c0c38bdee', 'd69c6675-2e27-527b-a326-c109c5d29491', 1, '60–90 sec total', 90, 0, 'Core_star=Yes; Key cues: Slow circles; pain-free; breathe normally.', 1),
-    (gen_random_uuid(), '0b9b7401-741a-5274-9a59-85d3b35066b8', '84bc60b3-79b7-56ef-92ab-559c0c38bdee', '760d85b4-ba79-589a-bd92-17b10c0f1ff2', 2, '4–6 reps/side', NULL, 0, 'Core_star=Yes; Sets_raw=1–2 per side; Key cues: Long exhale in bottom; rotate from upper back.', 2),
-    (gen_random_uuid(), '0b9b7401-741a-5274-9a59-85d3b35066b8', '1a4285e5-2fda-5db0-9617-9dde4e47004f', '2489e7d0-8bee-5335-a28f-a4b0b5e2e3a5', 2, '6–10 reps', NULL, 0, 'Core_star=Yes; Key cues: Slow; stay tall; don''t force knee down.', 1),
-    (gen_random_uuid(), '0b9b7401-741a-5274-9a59-85d3b35066b8', '1a4285e5-2fda-5db0-9617-9dde4e47004f', 'e9065e87-96ad-5eed-ba8b-a9df8ae454e9', 2, '30–60 sec hold (per side)', 60, 0, 'Core_star=No; Key cues: Hips square; ease off if knee pain.', 2),
-    (gen_random_uuid(), '0b9b7401-741a-5274-9a59-85d3b35066b8', '33188056-6eeb-5b47-801d-96b87a61e08a', 'cff1ae38-efcb-55bb-a0b7-fd15b667eb9e', 2, '10 reps + 20 sec hold (per side)', 20, 0, 'Core_star=Yes; Key cues: Gentle extend/bend; avoid nerve pain.', 1),
-    (gen_random_uuid(), '0b9b7401-741a-5274-9a59-85d3b35066b8', 'a8bd3814-8a87-5681-927b-f78193f3e2be', '9a6d9a13-6270-5187-b949-4d6239d1ff8e', 2, '30 sec straight knee + 30 sec bent knee (per side)', 60, 0, 'Core_star=No; Key cues: Heel down; don''t collapse arch.', 1),
-    (gen_random_uuid(), '0b9b7401-741a-5274-9a59-85d3b35066b8', '912df89e-03dc-52ed-a9fd-e915777d3804', '70aee225-d593-537e-b4bc-8bef42369550', 1, '8–10 reps (per side)', NULL, 0, 'Core_star=Yes; Key cues: Exhale as you open; knees stacked.', 1),
-    (gen_random_uuid(), '0b9b7401-741a-5274-9a59-85d3b35066b8', 'e6d4b226-d901-57cb-a4fc-6f62b2d251cf', '8e92ea1e-7040-5707-ab98-e9a77ab97cf5', 2, '8–12 reps', NULL, 0, 'Core_star=Yes; Key cues: Ribs down; forearms on wall; slow.', 1),
-    (gen_random_uuid(), '0b9b7401-741a-5274-9a59-85d3b35066b8', '96d2fa9d-02d3-57b2-9291-d4f80c625cec', '94f53fc0-988a-5a4f-8a6a-02e8b5266bcd', 4, '30 sec hold (2 angles, 2 per angle)', 30, 0, 'Core_star=No; Key cues: Gentle step-through; avoid shoulder pain.', 1),
-    (gen_random_uuid(), '0b9b7401-741a-5274-9a59-85d3b35066b8', 'b8bd410d-d13f-5bb5-91fc-c2d6a851ef3d', '63d1402d-bcac-5d37-8cc3-de9d711d0142', 2, '20–30 sec hold (per side)', 30, 0, 'Core_star=No; Key cues: Reach long; breathe into side ribs.', 1),
-    (gen_random_uuid(), '0b9b7401-741a-5274-9a59-85d3b35066b8', 'fe89f29c-4b87-570a-812f-6f699c473a69', '697cf84d-d150-5797-8140-f7187b708290', 1, '2–4 minutes', 240, 0, 'Core_star=Yes; Key cues: Long exhale; jaw unclenched; shoulders heavy.', 1),
-    (gen_random_uuid(), '64a038ec-19cf-568e-8322-8b003405d693', '84bc60b3-79b7-56ef-92ab-559c0c38bdee', 'bc0f7386-bd97-590b-8c18-32dab44ae04e', 1, '60–90 sec', 90, 0, 'Core_star=Yes; Key cues: Lips closed; tongue on palate; jaw hangs.', 1),
-    (gen_random_uuid(), '64a038ec-19cf-568e-8322-8b003405d693', '12fc2609-5caf-53a3-983d-72bc15c7d51c', '15d28647-b0ba-5b48-b07d-36a3601bba1a', 2, '30–60 sec/side', 60, 0, 'Core_star=Yes; Key cues: Light pressure; stop if sharp pain.', 1),
-    (gen_random_uuid(), '64a038ec-19cf-568e-8322-8b003405d693', '12fc2609-5caf-53a3-983d-72bc15c7d51c', '0a2356a1-7a52-5314-8453-88099d225c81', 2, '6–10 reps', NULL, 0, 'Core_star=Yes; Key cues: Slow; track straight; no clicking.', 2),
-    (gen_random_uuid(), '64a038ec-19cf-568e-8322-8b003405d693', '176fd40d-5033-5660-b8c7-bdf353bef4dc', 'c39d757d-6184-5e65-b783-ffad12be6e20', 2, '6–10 reps', NULL, 0, 'Core_star=Yes; Key cues: Glide back; throat relaxed; breathe.', 1),
-    (gen_random_uuid(), '64a038ec-19cf-568e-8322-8b003405d693', '54321f36-e3c3-5b32-9c75-9bdec739be5e', 'd887df1b-f0d3-549b-ac8e-b3e7bca7da73', 2, '8–12 reps', NULL, 0, 'Core_star=Yes; Key cues: Slow smile to ~70%; relax fully to neutral.', 1),
-    (gen_random_uuid(), '64a038ec-19cf-568e-8322-8b003405d693', '43646088-5e1c-50cf-a960-7438e4886763', '3c96b0d1-ba8f-575e-a1d9-67ab9662fa9e', 2, '6–10 reps', NULL, 0, 'Core_star=No; Key cues: Raise brows then slight squint; relax fully.', 1),
-    (gen_random_uuid(), '64a038ec-19cf-568e-8322-8b003405d693', '1962588c-2496-5f75-8f87-6eed65f62e71', '5c996de9-dd4d-5692-95a8-b567176ba57c', 1, '60 sec', 60, 0, 'Core_star=No; Key cues: Tongue on palate; jaw relaxed; nasal breathe; do not force.', 1),
-    (gen_random_uuid(), '64a038ec-19cf-568e-8322-8b003405d693', 'fe89f29c-4b87-570a-812f-6f699c473a69', '59dee733-0cdf-5f13-8b1a-007cffb77e17', 1, '3 rounds', NULL, 0, 'Core_star=Yes; Key cues: Same sentence; change expression only; keep jaw loose.', 1),
-    (gen_random_uuid(), '4e11e60e-fd51-5526-bc2a-9e598413f83b', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', '483863f8-c2e7-5e72-a4b7-670bbc363ca7', 3, '5-10', NULL, NULL, 'Equipment=Cable; Or more if you can.', 1),
-    (gen_random_uuid(), '4e11e60e-fd51-5526-bc2a-9e598413f83b', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', '63e59dde-56c3-53e0-98f3-394f03688fd1', 3, '8-10', NULL, NULL, 'Equipment=Dumbbell', 2),
-    (gen_random_uuid(), '4e11e60e-fd51-5526-bc2a-9e598413f83b', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', '4e49b255-b483-56fc-a786-f3662c4ef157', 3, '10-15', NULL, NULL, 'Equipment=Cable', 3),
-    (gen_random_uuid(), '4e11e60e-fd51-5526-bc2a-9e598413f83b', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', '107a1fe0-bfcb-587e-a59c-0acc8d52a6a4', 3, '10-12', NULL, NULL, 'Equipment=Machine', 4),
-    (gen_random_uuid(), '4e11e60e-fd51-5526-bc2a-9e598413f83b', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', 'c4848a64-2709-5e3f-8d3e-c03892e5b9a6', 4, '10-15', NULL, NULL, 'Equipment=Free; Or more; train close to failure.', 5),
-    (gen_random_uuid(), 'adb82dc0-9749-5a9c-bc67-7d1b1a2f3b70', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', 'e8024b3d-d51d-513a-82cd-739b21afda9a', 3, '8-12', NULL, NULL, 'Equipment=Machine', 1),
-    (gen_random_uuid(), 'adb82dc0-9749-5a9c-bc67-7d1b1a2f3b70', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', '6c9f0474-9d2b-5f69-8cb7-55b166b875f2', 3, '8-10', NULL, NULL, 'Equipment=Barbell', 2),
-    (gen_random_uuid(), 'adb82dc0-9749-5a9c-bc67-7d1b1a2f3b70', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', 'f7424078-d61b-5edc-9421-617a4b92c1d3', 3, '12-15', NULL, NULL, 'Equipment=Machine', 3),
-    (gen_random_uuid(), 'adb82dc0-9749-5a9c-bc67-7d1b1a2f3b70', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', '7d43270c-84e1-5989-bdc0-1baf3a96067e', 4, '12-20', NULL, NULL, 'Equipment=Machine', 4),
-    (gen_random_uuid(), 'adb82dc0-9749-5a9c-bc67-7d1b1a2f3b70', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', 'c0e776e1-497d-5c83-bbf8-d84c42109ae4', 4, '12-15', NULL, NULL, 'Equipment=Cable', 5),
-    (gen_random_uuid(), 'bab1bb00-1efa-518d-a143-49e16e549d5a', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', 'e6047f7e-d006-583c-8998-c64699ae5857', 3, '6-10', NULL, NULL, 'Equipment=Barbell', 1),
-    (gen_random_uuid(), 'bab1bb00-1efa-518d-a143-49e16e549d5a', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', 'e418ca23-453d-5c3b-bc41-6341be06f07a', 3, '10-12', NULL, NULL, 'Equipment=Dumbbell', 2),
-    (gen_random_uuid(), 'bab1bb00-1efa-518d-a143-49e16e549d5a', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', 'c308cb65-a8a2-5b7d-8fd7-30ff300cf81d', 3, '12-15', NULL, NULL, 'Equipment=Cable', 3),
-    (gen_random_uuid(), 'bab1bb00-1efa-518d-a143-49e16e549d5a', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', 'fcfe9969-9126-57d7-9e03-5df9feee523b', 3, '12-15', NULL, NULL, 'Equipment=Dumbbell', 4),
-    (gen_random_uuid(), 'bab1bb00-1efa-518d-a143-49e16e549d5a', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', '6d922f76-b731-5866-9b0b-330126d9d05a', 3, '12-15', NULL, NULL, 'Equipment=Cable', 5),
-    (gen_random_uuid(), '721970e3-10b7-5ca3-a616-bcc9e45c4bf5', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', '066dfb37-10a0-5f4f-917e-b6a0714a566c', 3, '6-10', NULL, NULL, 'Equipment=Barbell', 1),
-    (gen_random_uuid(), '721970e3-10b7-5ca3-a616-bcc9e45c4bf5', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', '483863f8-c2e7-5e72-a4b7-670bbc363ca7', 3, '8-12', NULL, NULL, 'Equipment=Cable', 2),
-    (gen_random_uuid(), '721970e3-10b7-5ca3-a616-bcc9e45c4bf5', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', '1425bc62-6ad4-5e6b-ae4f-81c5d6c93221', 3, '12-15', NULL, NULL, 'Equipment=Dumbbell', 3),
-    (gen_random_uuid(), '721970e3-10b7-5ca3-a616-bcc9e45c4bf5', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', '5650e623-d5e1-549b-be4f-d0d1fa12aa29', 3, '12-15', NULL, NULL, 'Equipment=Dumbbell', 4),
-    (gen_random_uuid(), '721970e3-10b7-5ca3-a616-bcc9e45c4bf5', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', '090d5c55-b3fe-5d5f-9e03-df185e7eba53', 3, '15-25', NULL, NULL, 'Equipment=Cable', 5),
-    (gen_random_uuid(), 'eb26b639-0b6d-5fec-97dd-a38d2ab88e86', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', '874f90e7-341a-5b9a-a7c8-ae7786b023fd', 3, '6-10', NULL, NULL, 'Equipment=Barbell', 1),
-    (gen_random_uuid(), 'eb26b639-0b6d-5fec-97dd-a38d2ab88e86', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', '397afbb3-0921-5ca6-9d4b-26e4cdcdddb1', 3, '8-12', NULL, NULL, 'Equipment=Bodyweight/Machine', 2),
-    (gen_random_uuid(), 'eb26b639-0b6d-5fec-97dd-a38d2ab88e86', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', '021cfde0-e613-5982-a0b8-278657da0a0e', 3, '10-15', NULL, NULL, 'Equipment=Dumbbell; Per side.', 3),
-    (gen_random_uuid(), 'eb26b639-0b6d-5fec-97dd-a38d2ab88e86', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', '80dc4cf1-1d96-5d58-9f66-c8cd723e6f28', 3, '12-15', NULL, NULL, 'Equipment=Machine', 4),
-    (gen_random_uuid(), 'eb26b639-0b6d-5fec-97dd-a38d2ab88e86', 'aef9d5c0-7ebb-5e36-aa7d-123975c0a90f', '651f090f-0d3f-52fd-8929-cd6e014377c9', 3, '8-12', NULL, NULL, 'Equipment=Smith Machine', 5);
+    (gen_random_uuid(), NULL, NULL, '8fb09ab5-fd67-51d8-822a-ba4447663fc3', 2, '10 slow cycles', NULL, 0, 'Core_star=Yes; Sets_raw=1–2; Key cues: Start neutral; gently round then extend; move with slow breathing.', 1),
+    (gen_random_uuid(), NULL, NULL, 'e49f4035-1a33-5cc8-80df-8197a6dcd71a', 3, '30–45 sec hold (per side)', 45, 0, 'Core_star=Yes; Sets_raw=2–3 per side; Key cues: Posteriorly tilt pelvis; squeeze glute on back leg; do not arch low back.', 1),
+    (gen_random_uuid(), NULL, NULL, '1c73cb5e-4b90-5b91-8182-870ef552593a', 2, '30 sec hold (per side)', 30, 0, 'Core_star=No; Sets_raw=2 per side; Key cues: Keep pelvis lightly tucked; bring heel toward glute; avoid pulling low back into arch.', 2),
+    (gen_random_uuid(), NULL, NULL, '3abf172b-0a99-5b01-885d-0b310613b295', 2, '30–45 sec hold (per side)', 45, 0, 'Core_star=No; Sets_raw=2 per side; Key cues: Lie on back; keep opposite leg straight on floor; raise leg until stretch not pain.', 3),
+    (gen_random_uuid(), NULL, NULL, '80c1edac-ebb7-5dcf-a674-80442f76a31a', 3, '20–30 sec hold', 30, 0, 'Core_star=No; Sets_raw=3; Key cues: Sit hips toward heels; gently round low back; relax shoulders.', 4),
+    (gen_random_uuid(), NULL, NULL, 'cb90f766-5a4d-5619-b06e-525ff6f77fcd', 1, '10 reps (per side)', NULL, 0, 'Core_star=No; Sets_raw=1 per side; Key cues: Slide arm under; rotate upper back; smooth and pain free.', 1),
+    (gen_random_uuid(), NULL, NULL, '9b088e77-c722-541f-b659-858095b407d7', 1, '10–15 reps', NULL, 0, 'Core_star=Yes; Sets_raw=1; Key cues: Roller across upper back; support head; gently extend over roller then return.', 2),
+    (gen_random_uuid(), NULL, NULL, 'e8fea4b5-bf67-58e4-a9be-a183715820b7', 3, '30 sec hold', 30, 0, 'Core_star=Yes; Sets_raw=3; Key cues: Elbows ~shoulder height; step through; avoid shoulder pain.', 3),
+    (gen_random_uuid(), NULL, NULL, 'ad14636d-2142-5a0f-8288-77c1ef8cfc9d', 1, '15–20 reps', NULL, 0, 'Core_star=No; Sets_raw=1; Key cues: Flatten low back then arch slightly; find neutral middle.', 1),
+    (gen_random_uuid(), NULL, NULL, 'a04b7dc5-4b64-574e-986f-a929edd6745d', 2, '30–45 sec hold', 45, 0, 'Core_star=No; Sets_raw=2; Key cues: Butt + mid back on wall; ribs down; light posterior pelvic tilt.', 2),
+    (gen_random_uuid(), NULL, NULL, 'd69c6675-2e27-527b-a326-c109c5d29491', 1, '60–90 sec total', 90, 0, 'Core_star=Yes; Key cues: Slow circles; pain-free; breathe normally.', 1),
+    (gen_random_uuid(), NULL, NULL, '760d85b4-ba79-589a-bd92-17b10c0f1ff2', 2, '4–6 reps/side', NULL, 0, 'Core_star=Yes; Sets_raw=1–2 per side; Key cues: Long exhale in bottom; rotate from upper back.', 2),
+    (gen_random_uuid(), NULL, NULL, '2489e7d0-8bee-5335-a28f-a4b0b5e2e3a5', 2, '6–10 reps', NULL, 0, 'Core_star=Yes; Key cues: Slow; stay tall; don''t force knee down.', 1),
+    (gen_random_uuid(), NULL, NULL, 'e9065e87-96ad-5eed-ba8b-a9df8ae454e9', 2, '30–60 sec hold (per side)', 60, 0, 'Core_star=No; Key cues: Hips square; ease off if knee pain.', 2),
+    (gen_random_uuid(), NULL, NULL, 'cff1ae38-efcb-55bb-a0b7-fd15b667eb9e', 2, '10 reps + 20 sec hold (per side)', 20, 0, 'Core_star=Yes; Key cues: Gentle extend/bend; avoid nerve pain.', 1),
+    (gen_random_uuid(), NULL, NULL, '9a6d9a13-6270-5187-b949-4d6239d1ff8e', 2, '30 sec straight knee + 30 sec bent knee (per side)', 60, 0, 'Core_star=No; Key cues: Heel down; don''t collapse arch.', 1),
+    (gen_random_uuid(), NULL, NULL, '70aee225-d593-537e-b4bc-8bef42369550', 1, '8–10 reps (per side)', NULL, 0, 'Core_star=Yes; Key cues: Exhale as you open; knees stacked.', 1),
+    (gen_random_uuid(), NULL, NULL, '8e92ea1e-7040-5707-ab98-e9a77ab97cf5', 2, '8–12 reps', NULL, 0, 'Core_star=Yes; Key cues: Ribs down; forearms on wall; slow.', 1),
+    (gen_random_uuid(), NULL, NULL, '94f53fc0-988a-5a4f-8a6a-02e8b5266bcd', 4, '30 sec hold (2 angles, 2 per angle)', 30, 0, 'Core_star=No; Key cues: Gentle step-through; avoid shoulder pain.', 1),
+    (gen_random_uuid(), NULL, NULL, '63d1402d-bcac-5d37-8cc3-de9d711d0142', 2, '20–30 sec hold (per side)', 30, 0, 'Core_star=No; Key cues: Reach long; breathe into side ribs.', 1),
+    (gen_random_uuid(), NULL, NULL, '697cf84d-d150-5797-8140-f7187b708290', 1, '2–4 minutes', 240, 0, 'Core_star=Yes; Key cues: Long exhale; jaw unclenched; shoulders heavy.', 1),
+    (gen_random_uuid(), NULL, NULL, 'bc0f7386-bd97-590b-8c18-32dab44ae04e', 1, '60–90 sec', 90, 0, 'Core_star=Yes; Key cues: Lips closed; tongue on palate; jaw hangs.', 1),
+    (gen_random_uuid(), NULL, NULL, '15d28647-b0ba-5b48-b07d-36a3601bba1a', 2, '30–60 sec/side', 60, 0, 'Core_star=Yes; Key cues: Light pressure; stop if sharp pain.', 1),
+    (gen_random_uuid(), NULL, NULL, '0a2356a1-7a52-5314-8453-88099d225c81', 2, '6–10 reps', NULL, 0, 'Core_star=Yes; Key cues: Slow; track straight; no clicking.', 2),
+    (gen_random_uuid(), NULL, NULL, 'c39d757d-6184-5e65-b783-ffad12be6e20', 2, '6–10 reps', NULL, 0, 'Core_star=Yes; Key cues: Glide back; throat relaxed; breathe.', 1),
+    (gen_random_uuid(), NULL, NULL, 'd887df1b-f0d3-549b-ac8e-b3e7bca7da73', 2, '8–12 reps', NULL, 0, 'Core_star=Yes; Key cues: Slow smile to ~70%; relax fully to neutral.', 1),
+    (gen_random_uuid(), NULL, NULL, '3c96b0d1-ba8f-575e-a1d9-67ab9662fa9e', 2, '6–10 reps', NULL, 0, 'Core_star=No; Key cues: Raise brows then slight squint; relax fully.', 1),
+    (gen_random_uuid(), NULL, NULL, '5c996de9-dd4d-5692-95a8-b567176ba57c', 1, '60 sec', 60, 0, 'Core_star=No; Key cues: Tongue on palate; jaw relaxed; nasal breathe; do not force.', 1),
+    (gen_random_uuid(), NULL, NULL, '59dee733-0cdf-5f13-8b1a-007cffb77e17', 1, '3 rounds', NULL, 0, 'Core_star=Yes; Key cues: Same sentence; change expression only; keep jaw loose.', 1),
+    (gen_random_uuid(), NULL, NULL, '483863f8-c2e7-5e72-a4b7-670bbc363ca7', 3, '5-10', NULL, NULL, 'Equipment=Cable; Or more if you can.', 1),
+    (gen_random_uuid(), NULL, NULL, '63e59dde-56c3-53e0-98f3-394f03688fd1', 3, '8-10', NULL, NULL, 'Equipment=Dumbbell', 2),
+    (gen_random_uuid(), NULL, NULL, '4e49b255-b483-56fc-a786-f3662c4ef157', 3, '10-15', NULL, NULL, 'Equipment=Cable', 3),
+    (gen_random_uuid(), NULL, NULL, '107a1fe0-bfcb-587e-a59c-0acc8d52a6a4', 3, '10-12', NULL, NULL, 'Equipment=Machine', 4),
+    (gen_random_uuid(), NULL, NULL, 'c4848a64-2709-5e3f-8d3e-c03892e5b9a6', 4, '10-15', NULL, NULL, 'Equipment=Free; Or more; train close to failure.', 5),
+    (gen_random_uuid(), NULL, NULL, 'e8024b3d-d51d-513a-82cd-739b21afda9a', 3, '8-12', NULL, NULL, 'Equipment=Machine', 1),
+    (gen_random_uuid(), NULL, NULL, '6c9f0474-9d2b-5f69-8cb7-55b166b875f2', 3, '8-10', NULL, NULL, 'Equipment=Barbell', 2),
+    (gen_random_uuid(), NULL, NULL, 'f7424078-d61b-5edc-9421-617a4b92c1d3', 3, '12-15', NULL, NULL, 'Equipment=Machine', 3),
+    (gen_random_uuid(), NULL, NULL, '7d43270c-84e1-5989-bdc0-1baf3a96067e', 4, '12-20', NULL, NULL, 'Equipment=Machine', 4),
+    (gen_random_uuid(), NULL, NULL, 'c0e776e1-497d-5c83-bbf8-d84c42109ae4', 4, '12-15', NULL, NULL, 'Equipment=Cable', 5),
+    (gen_random_uuid(), NULL, NULL, 'e6047f7e-d006-583c-8998-c64699ae5857', 3, '6-10', NULL, NULL, 'Equipment=Barbell', 1),
+    (gen_random_uuid(), NULL, NULL, 'e418ca23-453d-5c3b-bc41-6341be06f07a', 3, '10-12', NULL, NULL, 'Equipment=Dumbbell', 2),
+    (gen_random_uuid(), NULL, NULL, 'c308cb65-a8a2-5b7d-8fd7-30ff300cf81d', 3, '12-15', NULL, NULL, 'Equipment=Cable', 3),
+    (gen_random_uuid(), NULL, NULL, 'fcfe9969-9126-57d7-9e03-5df9feee523b', 3, '12-15', NULL, NULL, 'Equipment=Dumbbell', 4),
+    (gen_random_uuid(), NULL, NULL, '6d922f76-b731-5866-9b0b-330126d9d05a', 3, '12-15', NULL, NULL, 'Equipment=Cable', 5),
+    (gen_random_uuid(), NULL, NULL, '066dfb37-10a0-5f4f-917e-b6a0714a566c', 3, '6-10', NULL, NULL, 'Equipment=Barbell', 1),
+    (gen_random_uuid(), NULL, NULL, '483863f8-c2e7-5e72-a4b7-670bbc363ca7', 3, '8-12', NULL, NULL, 'Equipment=Cable', 2),
+    (gen_random_uuid(), NULL, NULL, '1425bc62-6ad4-5e6b-ae4f-81c5d6c93221', 3, '12-15', NULL, NULL, 'Equipment=Dumbbell', 3),
+    (gen_random_uuid(), NULL, NULL, '5650e623-d5e1-549b-be4f-d0d1fa12aa29', 3, '12-15', NULL, NULL, 'Equipment=Dumbbell', 4),
+    (gen_random_uuid(), NULL, NULL, '090d5c55-b3fe-5d5f-9e03-df185e7eba53', 3, '15-25', NULL, NULL, 'Equipment=Cable', 5),
+    (gen_random_uuid(), NULL, NULL, '874f90e7-341a-5b9a-a7c8-ae7786b023fd', 3, '6-10', NULL, NULL, 'Equipment=Barbell', 1),
+    (gen_random_uuid(), NULL, NULL, '397afbb3-0921-5ca6-9d4b-26e4cdcdddb1', 3, '8-12', NULL, NULL, 'Equipment=Bodyweight/Machine', 2),
+    (gen_random_uuid(), NULL, NULL, '021cfde0-e613-5982-a0b8-278657da0a0e', 3, '10-15', NULL, NULL, 'Equipment=Dumbbell; Per side.', 3),
+    (gen_random_uuid(), NULL, NULL, '80dc4cf1-1d96-5d58-9f66-c8cd723e6f28', 3, '12-15', NULL, NULL, 'Equipment=Machine', 4),
+    (gen_random_uuid(), NULL, NULL, '651f090f-0d3f-52fd-8929-cd6e014377c9', 3, '8-12', NULL, NULL, 'Equipment=Smith Machine', 5)
+;
 
 -- ============================================================
 -- SKILL_DEFINITIONS (6 records)
@@ -200,7 +203,8 @@ VALUES
     (gen_random_uuid(), NOW(), NOW(), 'Workout Week', 'Complete 3 workouts this week', 'weekly', 175, 40, 3, 'workouts_completed', NULL, 'strength', true, 12),
     (gen_random_uuid(), NOW(), NOW(), 'Bookworm', 'Read for 60 minutes this week', 'weekly', 100, 25, 60, 'reading_minutes', NULL, 'knowledge', true, 13),
     (gen_random_uuid(), NOW(), NOW(), 'Marathon Focus', 'Complete 20 hours of focused work this month', 'monthly', 500, 150, 1200, 'focus_minutes', NULL, 'focus', true, 20),
-    (gen_random_uuid(), NOW(), NOW(), 'Perfect Month', 'Maintain a 30-day streak', 'monthly', 750, 200, 30, 'streak_days', NULL, 'discipline', true, 21);
+    (gen_random_uuid(), NOW(), NOW(), 'Perfect Month', 'Maintain a 30-day streak', 'monthly', 750, 200, 30, 'streak_days', NULL, 'discipline', true, 21)
+;
 
 -- ============================================================
 -- LEARN_TOPICS (5 records)
@@ -491,7 +495,8 @@ Notes: Or more; train close to failure.', 'strength_upper', '['chest', 'triceps'
 
 Notes: Per side.', 'strength_legs', '['quads', 'glutes', 'hamstrings']', '['dumbbell']', true, false, NULL),
     (gen_random_uuid(), NOW(), 'Lying Leg Curl', 'Guide: (none)', 'strength_legs', '['hamstrings']', '['machine']', true, false, NULL),
-    (gen_random_uuid(), NOW(), 'Standing Calf Raise', 'Guide: (none)', 'strength_legs', '['calves']', '['smith_machine']', true, false, NULL);
+    (gen_random_uuid(), NOW(), 'Standing Calf Raise', 'Guide: (none)', 'strength_legs', '['calves']', '['smith_machine']', true, false, NULL)
+ON CONFLICT (name) DO NOTHING;
 
 -- Summary
 DO $$
