@@ -24,23 +24,56 @@ export default function OnboardingPage() {
 
   const needsTos = !!user && !user.tosAccepted;
 
+  console.log('[onboarding/page] Render cycle', {
+    isAuthLoading,
+    isAuthenticated,
+    user: user ? { id: user.id, tosAccepted: user.tosAccepted } : null,
+    needsTos,
+    onboarding: onboarding ? { id: onboarding.current_step?.id, status: onboarding.state?.status } : null,
+  });
+
   useEffect(() => {
+    console.log('[onboarding/page] Effect running', {
+      isAuthLoading,
+      isAuthenticated,
+      user: user ? { id: user.id, tosAccepted: user.tosAccepted } : null,
+      needsTos,
+    });
+
     // Always wait for auth loading to complete before proceeding
-    if (isAuthLoading) return;
+    if (isAuthLoading) {
+      console.log('[onboarding/page] Auth still loading, returning');
+      return;
+    }
     
-    // Redirect unauthenticated users to signin
-    if (!isAuthenticated || !user) return;
+    // Redirect unauthenticated users is handled by OnboardingGate,
+    // so if we reach here, user must be authenticated
+    if (!user) {
+      console.log('[onboarding/page] No user object (authentication issue), returning');
+      return;
+    }
     
     // If TOS not accepted, don't load onboarding yet - TOS modal will show
-    if (!user.tosAccepted) return;
+    if (!user.tosAccepted) {
+      console.log('[onboarding/page] TOS not accepted, returning to show TOS modal');
+      return;
+    }
 
+    console.log('[onboarding/page] Ready to load onboarding');
     let isActive = true;
 
     const loadOnboarding = async () => {
       setIsLoading(true);
       setError(null);
       try {
+        console.log('[onboarding/page] loadOnboarding called, fetching state');
         let data = await getOnboardingState();
+        console.log('[onboarding/page] Got onboarding state:', {
+          has_flow: !!data.flow,
+          flow_steps: data.flow?.total_steps,
+          has_current_step: !!data.current_step,
+          needs_onboarding: data.needs_onboarding,
+        });
         if (!isActive) return;
         
         // If we have a flow but no current step, initialize the onboarding
@@ -83,7 +116,7 @@ export default function OnboardingPage() {
     return () => {
       isActive = false;
     };
-  }, [isAuthLoading, isAuthenticated, user?.tosAccepted, user?.id, router]);
+  }, [isAuthLoading, user?.tosAccepted, user?.id, router]);
 
   useEffect(() => {
     if (!hasRead || !isOldEnough) {
@@ -119,7 +152,9 @@ export default function OnboardingPage() {
       }
       console.log('[onboarding/page] TOS accepted, refreshing session...');
       await refresh();
-      console.log('[onboarding/page] Session refreshed, tosAccepted should be true');
+      console.log('[onboarding/page] Session refreshed', {
+        user: user ? { id: user.id, tosAccepted: user.tosAccepted } : null,
+      });
     } catch (acceptError) {
       const message = acceptError instanceof Error ? acceptError.message : "Failed to accept Terms of Service.";
       console.error('[onboarding/page] TOS acceptance error:', message);

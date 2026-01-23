@@ -103,7 +103,12 @@ interface ResetWrapper {
  * Get the current onboarding state
  */
 export async function getOnboardingState(): Promise<OnboardingResponse> {
+  console.log('[api/onboarding] Calling GET /api/onboarding');
   const response = await apiGet<OnboardingWrapper>('/api/onboarding');
+  console.log('[api/onboarding] Response received:', {
+    has_flow: !!response.data.flow,
+    needs_onboarding: response.data.needs_onboarding,
+  });
   return response.data;
 }
 
