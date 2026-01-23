@@ -9193,7 +9193,7 @@
       ]
     },
     "workouts": {
-      "unique_key": null,
+      "unique_key": "name",
       "records": [
         {
           "name": "Mobility: Posture Reset (APT + Upper Back)",
