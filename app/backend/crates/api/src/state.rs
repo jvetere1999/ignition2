@@ -127,6 +127,17 @@ impl AppState {
             "Database ready - migrations pre-applied by deployment pipeline"
         );
 
+        // Initialize default onboarding flow if it doesn't exist
+        if let Err(e) = Self::ensure_onboarding_flow_exists(&db).await {
+            tracing::warn!(
+                error.type = "onboarding",
+                error.message = %e,
+                operation = "startup",
+                component = "onboarding",
+                "Failed to ensure onboarding flow exists"
+            );
+        }
+
         // Create storage client if configured
         let storage = if config.storage.endpoint.is_some() {
             match StorageClient::new(&config.storage).await {
@@ -202,5 +213,94 @@ impl AppState {
         .await
         .ok()
         .flatten()
+    }
+
+    /// Ensure the default onboarding flow exists in the database
+    /// If not present, creates it with standard onboarding steps
+    async fn ensure_onboarding_flow_exists(db: &PgPool) -> anyhow::Result<()> {
+        use uuid::Uuid;
+        use chrono::Utc;
+
+        // Check if an active flow already exists
+        let existing_flow: Option<Uuid> = sqlx::query_scalar(
+            "SELECT id FROM onboarding_flows WHERE is_active = true LIMIT 1"
+        )
+        .fetch_optional(db)
+        .await?;
+
+        if existing_flow.is_some() {
+            tracing::debug!(
+                operation = "startup",
+                component = "onboarding",
+                "Active onboarding flow already exists"
+            );
+            return Ok(());
+        }
+
+        // Create default onboarding flow
+        let flow_id = Uuid::new_v4();
+        let now = Utc::now();
+
+        tracing::info!(
+            operation = "startup",
+            component = "onboarding",
+            flow_id = %flow_id,
+            "Creating default onboarding flow"
+        );
+
+        sqlx::query(
+            r#"
+            INSERT INTO onboarding_flows (id, name, description, is_active, total_steps, created_at, updated_at)
+            VALUES ($1, $2, $3, true, 5, $4, $4)
+            ON CONFLICT (name) DO NOTHING
+            "#
+        )
+        .bind(flow_id)
+        .bind("flow_main_v1")
+        .bind("Main onboarding flow for new users")
+        .bind(now)
+        .execute(db)
+        .await?;
+
+        // Define standard onboarding steps
+        let steps = vec![
+            ("Welcome", "Get started with Ignition", "welcome", 1),
+            ("Setup Passkey", "Create your secure authentication method", "action", 2),
+            ("Choose Interests", "Select topics that matter to you", "multi_select", 3),
+            ("Personalize", "Configure your workspace preferences", "input", 4),
+            ("You're Ready", "Your Ignition workspace is all set!", "completion", 5),
+        ];
+
+        // Insert steps
+        for (title, description, step_type, order) in steps {
+            let step_id = Uuid::new_v4();
+            sqlx::query(
+                r#"
+                INSERT INTO onboarding_steps 
+                (id, flow_id, step_order, step_type, title, description, required, created_at, updated_at)
+                VALUES ($1, $2, $3, $4, $5, $6, true, $7, $7)
+                ON CONFLICT (flow_id, step_order) DO NOTHING
+                "#
+            )
+            .bind(step_id)
+            .bind(flow_id)
+            .bind(order)
+            .bind(step_type)
+            .bind(title)
+            .bind(description)
+            .bind(now)
+            .execute(db)
+            .await?;
+        }
+
+        tracing::info!(
+            operation = "startup",
+            component = "onboarding",
+            flow_id = %flow_id,
+            step_count = 5,
+            "Default onboarding flow created successfully"
+        );
+
+        Ok(())
     }
 }
